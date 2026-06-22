@@ -1,0 +1,42 @@
+name: Staging CI
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Project
+        env:
+          VITE_APP_BACKEND_BASE_URL: ${{ vars.STAGING_API_BASE_URL }}
+          VITE_APP_IMAGEKIT_URL: ${{secrets.IMAGEKIT_URL}}
+          VITE_APP_IMAGEKIT_PUBLIC_KEY: ${{secrets.IMAGEKIT_PUBLIC_KEY}}
+        run: |
+          npm run build
+
+      - name: Deploy to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "./"
+          target: "/var/www/staging-admin/"

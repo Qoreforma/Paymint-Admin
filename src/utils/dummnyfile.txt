@@ -1,0 +1,265 @@
+        <SimpleBar
+          className={`nk-add-product toggle-slide toggle-slide-right toggle-screen-any ${
+            view.add ? "content-active" : ""
+          }`}
+        >
+          <BlockHead>
+            <BlockHeadContent>
+              <BlockTitle tag="h5">Add Product</BlockTitle>
+              <BlockDes>
+                <p>Add information or update product.</p>
+              </BlockDes>
+            </BlockHeadContent>
+          </BlockHead>
+          <Block>
+            <form onSubmit={handleSubmit(onFormSubmit)}>
+              <Row className="g-3">
+                <Col size="12">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="product-title">
+                      Product Title
+                    </label>
+                    <div className="form-control-wrap">
+                      <input
+                        type="text"
+                        className="form-control"
+                        {...register("name", {
+                          required: "This field is required",
+                        })}
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      />
+                      {errors.name && <span className="invalid">{errors.name.message}</span>}
+                    </div>
+                  </div>
+                </Col>
+                <Col md="6">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="regular-price">
+                      Regular Price
+                    </label>
+                    <div className="form-control-wrap">
+                      <input
+                        type="number"
+                        {...register("price", { required: "This is required" })}
+                        className="form-control"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      />
+                      {errors.price && <span className="invalid">{errors.price.message}</span>}
+                    </div>
+                  </div>
+                </Col>
+                <Col md="6">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="sale-price">
+                      Sale Price
+                    </label>
+                    <div className="form-control-wrap">
+                      <input
+                        type="number"
+                        className="form-control"
+                        {...register("salePrice")}
+                        value={formData.salePrice}
+                        onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
+                      />
+                      {errors.salePrice && <span className="invalid">{errors.salePrice.message}</span>}
+                    </div>
+                  </div>
+                </Col>
+                <Col md="6">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="stock">
+                      Stock
+                    </label>
+                    <div className="form-control-wrap">
+                      <input
+                        type="number"
+                        className="form-control"
+                        {...register("stock", { required: "This is required" })}
+                        value={formData.stock}
+                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                      />
+                      {errors.stock && <span className="invalid">{errors.stock.message}</span>}
+                    </div>
+                  </div>
+                </Col>
+                <Col md="6">
+                  <div className="form-group">
+                    {/* <label className="form-label" htmlFor="SKU">
+                      SKU
+                    </label> */}
+                    <div className="form-control-wrap">
+                      <input
+                        type="text"
+                        className="form-control"
+                        {...register("sku", { required: "This is required" })}
+                        // value={formData.sku}
+                        onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                      />
+                      {/* {errors.sku && <span className="invalid">{errors.sku.message}</span>} */}
+                    </div>
+                  </div>
+                </Col>
+                <Col size="12">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="category">
+                      Category
+                    </label>
+                    <div className="form-control-wrap">
+                      <RSelect
+                        name="category"
+                        isMulti
+                        options={categoryOptions}
+                        onChange={(value) => setFormData({ ...formData, category: value })}
+                        value={formData.category}
+                        //ref={register({ required: "This is required" })}
+                      />
+                      {errors.category && <span className="invalid">{errors.category.message}</span>}
+                    </div>
+                  </div>
+                </Col>
+                <Col size="12">
+                  <Dropzone onDrop={(acceptedFiles) => handleDropChange(acceptedFiles)}>
+                    {({ getRootProps, getInputProps }) => (
+                      <section>
+                        <div {...getRootProps()} className="dropzone upload-zone small bg-lighter my-2 dz-clickable">
+                          <input {...getInputProps()} />
+                          {files.length === 0 && <p>Drag 'n' drop some files here, or click to select files</p>}
+                          {files.map((file) => (
+                            <div
+                              key={file.name}
+                              className="dz-preview dz-processing dz-image-preview dz-error dz-complete"
+                            >
+                              <div className="dz-image">
+                                <img src={file.preview} alt="preview" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                  </Dropzone>
+                </Col>
+
+                <Col size="12">
+                  <Button color="primary" type="submit">
+                    <Icon className="plus"></Icon>
+                    <span>Add Product</span>
+                  </Button>
+                </Col>
+              </Row>
+            </form>
+          </Block>
+        </SimpleBar>
+
+Card widget
+import React, { useState } from "react";
+import Icon from "../../../icon/Icon";
+import { UncontrolledDropdown, CardTitle, DropdownMenu, DropdownItem, DropdownToggle } from "reactstrap";
+import { DoubleBar } from "../../charts/default/Charts";
+import { Row, Col } from "../../../grid/Grid";
+import { Link } from "react-router-dom";
+
+const OrderOverview = () => {
+  const [orderOverview, setOverview] = useState("");
+  return (
+    <React.Fragment>
+      <div className="card-title-group align-start mb-3">
+        <CardTitle className="card-title">
+          <h6 className="title">Orders Overview</h6>
+          <p>
+            In last {orderOverview === "set2" ? "30" : "15"} days buy and sells overview.{" "}
+            <Link to={{import.meta.env.PUBLIC_URL}/invoice-list} className="link link-sm">
+              Detailed Stats
+            </Link>
+          </p>
+        </CardTitle>
+        <div className="card-tools mt-n1 me-n1">
+          <UncontrolledDropdown>
+            <DropdownToggle tag="a" className="dropdown-toggle btn btn-icon btn-trigger">
+              <Icon name="more-h"></Icon>
+            </DropdownToggle>
+            <DropdownMenu end>
+              <ul className="link-list-opt no-bdr">
+                <li className={orderOverview === "" ? "active" : ""}>
+                  <DropdownItem
+                    tag="a"
+                    href="#dropdownitem"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setOverview("");
+                    }}
+                  >
+                    <span>15 Days</span>
+                  </DropdownItem>
+                </li>
+                <li className={orderOverview === "set2" ? "active" : ""}>
+                  <DropdownItem
+                    tag="a"
+                    href="#dropdownitem"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setOverview("set2");
+                    }}
+                  >
+                    <span>30 Days</span>
+                  </DropdownItem>
+                </li>
+              </ul>
+            </DropdownMenu>
+          </UncontrolledDropdown>
+        </div>
+      </div>
+      <div className="nk-order-ovwg">
+        <Row className="g-4 align-end">
+          <Col xxl="8">
+            <div className="nk-order-ovwg-ck">
+              <DoubleBar state={orderOverview} />
+            </div>
+          </Col>
+          <Col xxl="4">
+            <Row className="g-4">
+              <Col xxl="12" sm="6">
+                <div className="nk-order-ovwg-data buy">
+                  <div className="amount">
+                    {orderOverview === "set2" ? "12,495" : "8,051"} <small className="currenct currency-usd">USD</small>
+                  </div>
+                  <div className="info">
+                    Last {orderOverview === "set2" ? "30" : "15"} days{" "}
+                    <strong>
+                      {orderOverview === "set2" ? "39,000" : "14,050"}{" "}
+                      <span className="currenct currency-usd">USD</span>
+                    </strong>
+                  </div>
+                  <div className="title">
+                    <Icon name="arrow-down-left"></Icon> Buy Orders
+                  </div>
+                </div>
+              </Col>
+              <Col xxl="12" sm="6">
+                <div className="nk-order-ovwg-data sell">
+                  <div className="amount">
+                    {orderOverview === "set2" ? "18,920" : "10,820"}{" "}
+                    <small className="currenct currency-usd">USD</small>
+                  </div>
+                  <div className="info">
+                    Last {orderOverview === "set2" ? "30" : "15"} days{" "}
+                    <strong>
+                      {orderOverview === "set2" ? "39,258" : "18,365"}{" "}
+                      <span className="currenct currency-usd">USD</span>
+                    </strong>
+                  </div>
+                  <div className="title">
+                    <Icon name="arrow-up-left"></Icon> Sell Orders
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </div>
+    </React.Fragment>
+  );
+};
+export default OrderOverview;

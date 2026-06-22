@@ -1,0 +1,269 @@
+/* ============================================================
+   CUSTOM THEME OVERRIDES
+   PRIMARY:   #0f3dac
+   SECONDARY: #1E40AF
+   ============================================================ */
+
+:root {
+  --primary:        #0f3dac;
+  --primary-light:  #1e4fc2;
+  --primary-dark:   #0a2d82;
+  --secondary:      #1E40AF;
+  --primary-dim:    rgba(15, 61, 172, 0.10);
+  --primary-dim-hover: rgba(15, 61, 172, 0.18);
+}
+
+/* ---- ACCENT / PRIMARY OVERRIDES ---- */
+.text-primary,
+a.link-primary,
+.link.link-primary { color: #0f3dac !important; }
+
+.bg-primary          { background-color: #0f3dac !important; }
+.bg-primary-dim      { background-color: var(--primary-dim) !important; }
+.btn-primary         { background-color: #0f3dac !important; border-color: #0f3dac !important; }
+.btn-primary:hover   { background-color: #0a2d82 !important; border-color: #0a2d82 !important; }
+.btn-outline-primary { border-color: #0f3dac !important; color: #0f3dac !important; }
+.btn-outline-primary:hover { background-color: #0f3dac !important; color: #fff !important; }
+
+/* Nav active/focus states */
+.nk-menu-link:hover .nk-menu-icon,
+.nk-menu-item.active > .nk-menu-link .nk-menu-icon { color: #0f3dac !important; }
+.nk-menu-item.active > .nk-menu-link { color: #0f3dac !important; }
+
+/* Sidebar theme strip */
+.nk-sidebar.is-theme {
+  background: linear-gradient(160deg, #0a2d82 0%, #1E40AF 100%) !important;
+}
+
+/* ---- HEADER — white with a blue left-border accent ---- */
+.nk-header {
+  border-bottom: 3px solid #0f3dac;
+  box-shadow: 0 2px 12px rgba(15, 61, 172, 0.08);
+}
+
+/* ---- CARDS — polished, elevated ---- */
+.card {
+  border-radius: 12px !important;
+  border: 1px solid #e8ecf4 !important;
+  box-shadow: 0 2px 12px rgba(15, 61, 172, 0.06) !important;
+  transition: box-shadow 0.2s ease, transform 0.15s ease !important;
+}
+.card:hover {
+  box-shadow: 0 6px 24px rgba(15, 61, 172, 0.12) !important;
+  transform: translateY(-1px) !important;
+}
+.card-inner { padding: 1.5rem !important; }
+
+/* ---- STAT CARDS ---- */
+.nk-stats-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8ecf4;
+  box-shadow: 0 2px 12px rgba(15, 61, 172, 0.06);
+  padding: 1.5rem;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  height: 100%;
+}
+.nk-stats-card:hover {
+  box-shadow: 0 6px 24px rgba(15, 61, 172, 0.13);
+  transform: translateY(-2px);
+}
+.nk-stats-card .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.nk-stats-card .stat-icon.primary   { background: rgba(15, 61, 172, 0.10); color: #0f3dac; }
+.nk-stats-card .stat-icon.success   { background: rgba(30, 224, 172, 0.12); color: #1ee0ac; }
+.nk-stats-card .stat-icon.warning   { background: rgba(244, 189, 14, 0.12); color: #c49900; }
+.nk-stats-card .stat-icon.danger    { background: rgba(232, 83, 71, 0.12);  color: #e85347; }
+.nk-stats-card .stat-icon.info      { background: rgba(9, 194, 222, 0.12);  color: #09c2de; }
+.nk-stats-card .stat-icon.secondary { background: rgba(80, 110, 180, 0.10); color: #506eb4; }
+
+.nk-stats-card .stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8094ae;
+  margin-bottom: 4px;
+}
+.nk-stats-card .stat-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #364a63;
+  line-height: 1.2;
+}
+.nk-stats-card .stat-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ---- SECTION HEADINGS ---- */
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+.section-heading h5 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #364a63;
+  margin: 0;
+}
+.section-heading .section-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(15,61,172,0.15), transparent);
+  border-radius: 2px;
+}
+
+/* ---- nk-tranx-statistics items ---- */
+.nk-tranx-statistics .item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid #f0f3f9;
+}
+.nk-tranx-statistics .item:last-child { border-bottom: none; }
+.nk-tranx-statistics .item .icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.nk-tranx-statistics .item .info .title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8094ae;
+  margin-bottom: 2px;
+}
+.nk-tranx-statistics .item .info .count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #364a63;
+}
+
+/* ---- nk-store-statistics items ---- */
+.nk-store-statistics .item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #f0f3f9;
+}
+.nk-store-statistics .item:last-child { border-bottom: none; }
+.nk-store-statistics .item .info .title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8094ae;
+  margin-bottom: 2px;
+}
+.nk-store-statistics .item .info .count {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #364a63;
+}
+.nk-store-statistics .item .icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- CARD TITLE GROUP ---- */
+.card-title-group .card-title .title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #364a63;
+}
+
+/* ---- TABLES ---- */
+.table > :not(caption) > * > * { padding: 0.9rem 1rem !important; }
+.table thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8094ae;
+  border-bottom: 2px solid #e8ecf4 !important;
+  background: #f9fafc;
+}
+.table tbody tr:hover > td { background: #f5f8ff !important; }
+
+/* ---- FORMS ---- */
+.form-control, .form-select {
+  border-radius: 8px !important;
+  border-color: #dde4f0 !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+.form-control:focus, .form-select:focus {
+  border-color: #0f3dac !important;
+  box-shadow: 0 0 0 3px rgba(15, 61, 172, 0.10) !important;
+}
+
+/* ---- BUTTONS ---- */
+.btn { border-radius: 8px !important; font-weight: 600 !important; }
+.btn-sm { border-radius: 6px !important; }
+
+/* ---- BADGES ---- */
+.badge { border-radius: 6px !important; font-weight: 600 !important; letter-spacing: 0.03em !important; }
+
+/* ---- LOGIN PAGE ---- */
+.nk-auth-body .card {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 40px rgba(15, 61, 172, 0.12) !important;
+}
+.nk-auth-body .brand-logo { margin-bottom: 0.5rem; }
+
+/* ---- PAGINATION ---- */
+.page-item.active .page-link {
+  background-color: #0f3dac !important;
+  border-color: #0f3dac !important;
+}
+.page-link { color: #0f3dac !important; border-radius: 6px !important; }
+.page-link:hover { background: var(--primary-dim) !important; }
+
+/* ---- DROPDOWNS ---- */
+.dropdown-menu {
+  border-radius: 10px !important;
+  border: 1px solid #e4e9f4 !important;
+  box-shadow: 0 8px 30px rgba(15, 61, 172, 0.12) !important;
+}
+.dropdown-item:hover, .dropdown-item:focus {
+  background-color: var(--primary-dim) !important;
+  color: #0f3dac !important;
+}
+
+/* ---- MODALS ---- */
+.modal-content {
+  border-radius: 14px !important;
+  border: none !important;
+  box-shadow: 0 12px 50px rgba(15, 61, 172, 0.16) !important;
+}
+.modal-header { border-bottom: 1px solid #eef1f8 !important; }
+.modal-footer { border-top: 1px solid #eef1f8 !important; }
+
+/* ---- BLOCK HEAD ---- */
+.nk-block-head-content .nk-block-title.page-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1c2b46;
+}
