@@ -1,115 +1,135 @@
-import { Col, Icon, Row } from "../../../../components/Component";
+import React from "react";
+import { Icon } from "../../../../components/Component";
 import { formatter } from "../../../../utils/Utils";
-import { WalletAmountStatsCard } from "../giftcards/stats-card";
+import { DashStatCard, WalletAmountStatsCard } from "../giftcards/stats-card";
 import { ServicesStatsCard } from "../transactions/stats-card";
 import { WalletStatsCard } from "../wallet/stats-card";
 
+/* ── Wallet Transaction Section ─────────────────────────── */
 export function WalletStatsSection({ data }) {
   return (
-    <Row className="g-gs">
-      <Col lg={5}>
-        <WalletAmountStatsCard data={data?.all?.total?.amount || 0} successful={data?.all?.successful?.amount || 0} />
-      </Col>
-      <Col lg={7}>
+    <div className="row g-3 align-items-stretch">
+      {/* Amount cards */}
+      <div className="col-12 col-lg-5">
+        <WalletAmountStatsCard
+          data={data?.all?.total?.amount || 0}
+          successful={data?.all?.successful?.amount || 0}
+        />
+      </div>
+      {/* Count cards */}
+      <div className="col-12 col-lg-7">
         <WalletStatsCard data={data?.all} />
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 }
 
-export function WalletBalances({ data }) {
-  return (
-    <Row className="g-3">
-      <Col sm={6}>
-        <div className="nk-stats-card">
-          <div className="d-flex align-items-start gap-3">
-            <div className="stat-icon primary">
-              <Icon name="sign-kobo" />
-            </div>
-            <div className="flex-fill">
-              <div className="stat-label">Wallet Balances</div>
-              <div className="stat-value">{formatter("NGN").format(data?.amount || 0)}</div>
-            </div>
-          </div>
-        </div>
-      </Col>
-      <Col sm={6}>
-        <div className="nk-stats-card">
-          <div className="d-flex align-items-start gap-3">
-            <div className="stat-icon info">
-              <Icon name="users" />
-            </div>
-            <div className="flex-fill">
-              <div className="stat-label">Total Users</div>
-              <div className="stat-value">{(data?.users || 0).toLocaleString()}</div>
-            </div>
-          </div>
-        </div>
-      </Col>
-    </Row>
-  );
-}
-
+/* ── Services Transaction Section ───────────────────────── */
 export function ServicesStatsSection({ data }) {
   return (
-    <Row className="g-gs">
-      <Col lg={5}>
-        <WalletAmountStatsCard data={data?.all?.total?.amount || 0} successful={data?.all?.successful?.amount || 0} />
-      </Col>
-      <Col lg={7}>
-        <ServicesStatsCard data={data?.all ? data?.all : null} />
-      </Col>
-    </Row>
+    <div className="row g-3 align-items-stretch">
+      <div className="col-12 col-lg-5">
+        <WalletAmountStatsCard
+          data={data?.all?.total?.amount || 0}
+          successful={data?.all?.successful?.amount || 0}
+        />
+      </div>
+      <div className="col-12 col-lg-7">
+        <ServicesStatsCard data={data?.all ?? null} />
+      </div>
+    </div>
   );
 }
 
-const ServiceRow = ({ icon, iconClass, label, amount, count }) => (
-  <div className="d-flex align-items-center gap-3 py-2" style={{ borderBottom: "1px solid #f0f3f9" }}>
-    <div className={`stat-icon ${iconClass}`} style={{ width: 38, height: 38, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+/* ── Wallet Balances ─────────────────────────────────────── */
+export function WalletBalances({ data }) {
+  return (
+    <div className="row g-3">
+      <div className="col-12 col-sm-6">
+        <DashStatCard icon="sign-kobo" color="primary"
+          label="Wallet Balances"
+          value={formatter("NGN").format(data?.amount || 0)} />
+      </div>
+      <div className="col-12 col-sm-6">
+        <DashStatCard icon="users" color="info"
+          label="Total Users"
+          value={(data?.users || 0).toLocaleString()} />
+      </div>
+    </div>
+  );
+}
+
+/* ── All Services Statistics ────────────────────────────── */
+const SVC_LIST_1 = [
+  { icon: "mobile",      color: "c-primary",   label: "Airtime Sold",    key: "airtime" },
+  { icon: "wifi",        color: "c-info",      label: "Data Sold",       key: "data" },
+  { icon: "opt-dot",    color: "c-secondary", label: "Betting Top-up",  key: "betting" },
+];
+const SVC_LIST_2 = [
+  { icon: "monitor",    color: "c-warning",  label: "Cable TV Sold",    key: "tv" },
+  { icon: "spark-fill", color: "c-danger",   label: "Electricity Sold", key: "electricity" },
+  { icon: "book-read",  color: "c-success",  label: "Education Sold",   key: "education" },
+];
+
+const SvcRow = ({ icon, color, label, amount, count }) => (
+  <div className="svc-stat-row">
+    <div className={`svc-icon ${color}`} style={{
+      background: color === "c-primary" ? "rgba(15,61,172,0.10)" :
+                  color === "c-info"    ? "rgba(9,194,222,0.11)" :
+                  color === "c-secondary" ? "rgba(80,110,180,0.10)" :
+                  color === "c-warning" ? "rgba(244,189,14,0.13)" :
+                  color === "c-danger"  ? "rgba(232,83,71,0.11)" :
+                                          "rgba(30,224,172,0.12)",
+      color: color === "c-primary" ? "#0f3dac" :
+             color === "c-info"    ? "#07a5bc" :
+             color === "c-secondary" ? "#4a5e9e" :
+             color === "c-warning" ? "#b08a00" :
+             color === "c-danger"  ? "#d63d32" :
+                                     "#17b38a",
+    }}>
       <Icon name={icon} />
     </div>
-    <div className="flex-fill">
-      <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "#8094ae", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
-      <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "#364a63" }}>
-        {formatter("NGN").format(amount ?? 0)}{" "}
-        <span style={{ fontWeight: 500, color: "#8094ae", fontSize: "0.82rem" }}>({(count ?? 0).toLocaleString()})</span>
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="svc-label">{label}</div>
+      <div className="svc-value">
+        {formatter("NGN").format(amount ?? 0)}
+        <span className="svc-count ms-1">({(count ?? 0).toLocaleString()})</span>
       </div>
     </div>
   </div>
 );
 
-export function AllServicesStats({ data, crypto, giftcard }) {
+export function AllServicesStats({ data }) {
   return (
-    <Row className="g-gs">
-      <Col lg={6}>
+    <div className="row g-3">
+      <div className="col-12 col-lg-6">
         <div className="card h-100">
           <div className="card-inner">
-            <div className="card-title-group mb-3">
-              <div className="card-title">
-                <h6 className="title">Services Overview — Part 1</h6>
-              </div>
-            </div>
-            <ServiceRow icon="bag"    iconClass="primary"  label="Airtime Sold"    amount={data?.airtime?.successful?.amount}   count={data?.airtime?.successful?.count} />
-            <ServiceRow icon="box"    iconClass="info"     label="Data Sold"       amount={data?.data?.successful?.amount}     count={data?.data?.successful?.count} />
-            <ServiceRow icon="server" iconClass="secondary" label="Betting Topup"  amount={data?.betting?.successful?.amount}  count={data?.betting?.successful?.count} />
+            <h6 style={{ fontSize: "0.8rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: "#8094ae", marginBottom: "0.75rem" }}>
+              Services — Group 1
+            </h6>
+            {SVC_LIST_1.map(({ icon, color, label, key }) => (
+              <SvcRow key={key} icon={icon} color={color} label={label}
+                amount={data?.[key]?.successful?.amount}
+                count={data?.[key]?.successful?.count} />
+            ))}
           </div>
         </div>
-      </Col>
-
-      <Col lg={6}>
+      </div>
+      <div className="col-12 col-lg-6">
         <div className="card h-100">
           <div className="card-inner">
-            <div className="card-title-group mb-3">
-              <div className="card-title">
-                <h6 className="title">Services Overview — Part 2</h6>
-              </div>
-            </div>
-            <ServiceRow icon="monitor"  iconClass="warning"  label="Cable TV Sold"       amount={data?.tv?.successful?.amount}          count={data?.tv?.successful?.count} />
-            <ServiceRow icon="spark-fill" iconClass="danger"  label="Electricity Sold"   amount={data?.electricity?.successful?.amount} count={data?.electricity?.successful?.count} />
-            <ServiceRow icon="book-read" iconClass="success" label="Education Sold"      amount={data?.education?.successful?.amount}   count={data?.education?.successful?.count} />
+            <h6 style={{ fontSize: "0.8rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: "#8094ae", marginBottom: "0.75rem" }}>
+              Services — Group 2
+            </h6>
+            {SVC_LIST_2.map(({ icon, color, label, key }) => (
+              <SvcRow key={key} icon={icon} color={color} label={label}
+                amount={data?.[key]?.successful?.amount}
+                count={data?.[key]?.successful?.count} />
+            ))}
           </div>
         </div>
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 }

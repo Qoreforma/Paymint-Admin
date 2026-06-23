@@ -14,7 +14,7 @@ export function useThemeUpdate() {
 const ThemeProvider = ({ ...props }) => {
   const defaultTheme = {
     main: "default", //other value can be passed "bordered"
-    sidebar: "theme", //other value can be passed "light,dark,white"
+    sidebar: "white", //other value can be passed "light,dark,theme"
     sidebarCompact: false,
     sidebarVisibility: false,
     sidebarMobile: false,

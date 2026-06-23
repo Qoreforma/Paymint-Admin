@@ -1,23 +1,33 @@
 import React from "react";
-import { Block, BlockBetween, BlockHead, BlockHeadContent, BlockTitle, Col, Row } from "../../../components/Component";
+import {
+  Block,
+  BlockBetween,
+  BlockHead,
+  BlockHeadContent,
+  BlockTitle,
+} from "../../../components/Component";
 import Content from "../../../layout/content/Content";
 import Head from "../../../layout/head/Head";
-import { AllServicesStats, ServicesStatsSection, WalletBalances, WalletStatsSection } from "./dashboard-stats";
+import {
+  AllServicesStats,
+  ServicesStatsSection,
+  WalletBalances,
+  WalletStatsSection,
+} from "./dashboard-stats";
 import { useGetDashboardStats } from "../../../api/dashboard";
 
-const SectionHeading = ({ title }) => (
-  <div className="section-heading">
+const SectionHead = ({ title }) => (
+  <div className="dash-section-head">
     <h5>{title}</h5>
-    <div className="section-line"></div>
   </div>
 );
 
 const Dashboard = () => {
-  const { data, isLoading } = useGetDashboardStats();
+  const { data } = useGetDashboardStats();
 
   return (
     <React.Fragment>
-      <Head title="Dashboard"></Head>
+      <Head title="Dashboard" />
       <Content>
         <BlockHead size="sm">
           <BlockBetween>
@@ -28,28 +38,31 @@ const Dashboard = () => {
         </BlockHead>
 
         <Block>
-          <Row className="g-gs">
-            <Col size="12">
-              <SectionHeading title="Total Wallet Transactions" />
+          <div className="row g-4">
+            {/* Wallet Transactions */}
+            <div className="col-12">
+              <SectionHead title="Wallet Transactions" />
               <WalletStatsSection data={data?.wallet_transaction} />
-            </Col>
-            <Col size="12">
-              <SectionHeading title="Total Services Transactions" />
+            </div>
+
+            {/* Services Transactions */}
+            <div className="col-12">
+              <SectionHead title="Services Transactions" />
               <ServicesStatsSection data={data?.services_transaction} />
-            </Col>
-            <Col size="12">
-              <SectionHeading title="Wallet Statistics" />
+            </div>
+
+            {/* Wallet Statistics */}
+            <div className="col-12">
+              <SectionHead title="Wallet Statistics" />
               <WalletBalances data={data?.wallet_balance} />
-            </Col>
-            <Col size="12">
-              <SectionHeading title="All Services Statistics" />
-              <AllServicesStats
-                data={data?.services_transaction}
-                crypto={data?.crypto_transaction}
-                giftcard={data?.giftcard_transaction}
-              />
-            </Col>
-          </Row>
+            </div>
+
+            {/* All Services */}
+            <div className="col-12">
+              <SectionHead title="All Services Statistics" />
+              <AllServicesStats data={data?.services_transaction} />
+            </div>
+          </div>
         </Block>
       </Content>
     </React.Fragment>
