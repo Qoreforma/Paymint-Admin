@@ -95,7 +95,7 @@ const CashbacksMasterPage = () => {
             {cashbacks?.data?.length > 0 ? (
               cashbacks.data.map((item) => {
                 let targetText = "Global (All)";
-                if (item.serviceId) targetText = `Service: ${item.serviceId.name}`;
+                if (item.serviceTypeId) targetText = `Service Type: ${item.serviceTypeId.name}`;
                 
                 return (
                   <DataTableItem key={item._id}>

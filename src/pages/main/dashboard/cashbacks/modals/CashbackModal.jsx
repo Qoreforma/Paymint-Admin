@@ -1,15 +1,14 @@
 import React, { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Form, Modal, ModalBody } from "reactstrap";
-import { useCreateCashback, useUpdateCashback, useGetProviders } from "../../../../../api/service-providers";
-import { useGetServices } from "../../../../../api/services";
+import { useCreateCashback, useUpdateCashback, useGetServiceTypes } from "../../../../../api/service-providers";
 import { Button, Col, Icon, RSelect } from "../../../../../components/Component";
 
 const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
   const { mutate: createCashback, isSuccess: created } = useCreateCashback();
   const { mutate: updateCashback, isSuccess: updated } = useUpdateCashback();
 
-  const { data: services } = useGetServices(1, 200);
+  const { data: serviceTypes } = useGetServiceTypes(1, 200);
 
   const {
     reset,
@@ -19,7 +18,7 @@ const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      serviceId: null,
+      serviceTypeId: null,
       type: { label: "Flat", value: "flat" },
       value: "",
     },
@@ -28,13 +27,13 @@ const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
   useEffect(() => {
     if (isEdit && formData) {
       reset({
-        serviceId: formData.serviceId ? { label: formData.serviceId.name || formData.serviceId, value: formData.serviceId._id || formData.serviceId } : null,
+        serviceTypeId: formData.serviceTypeId ? { label: formData.serviceTypeId.name || formData.serviceTypeId, value: formData.serviceTypeId._id || formData.serviceTypeId } : null,
         type: formData.type ? { label: formData.type === "percentage" ? "Percentage" : "Flat", value: formData.type } : { label: "Flat", value: "flat" },
         value: formData.value || "",
       });
     } else {
       reset({
-        serviceId: null,
+        serviceTypeId: null,
         type: { label: "Flat", value: "flat" },
         value: "",
       });
@@ -50,12 +49,12 @@ const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
 
 
 
-  const services_options = useMemo(() => {
-    if (services) {
-      return services.data?.map((item) => ({ label: item.name, value: item._id || item.id }));
+  const serviceTypes_options = useMemo(() => {
+    if (serviceTypes) {
+      return serviceTypes.data?.map((item) => ({ label: item.name, value: item._id || item.id }));
     }
     return [];
-  }, [services]);
+  }, [serviceTypes]);
 
 
 
@@ -69,7 +68,7 @@ const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
       type: data.type.value,
       value: Number(data.value),
     };
-    if (data.serviceId?.value) payload.serviceId = data.serviceId.value;
+    if (data.serviceTypeId?.value) payload.serviceTypeId = data.serviceTypeId.value;
 
     if (isEdit) {
       updateCashback({ id: formData._id, values: payload });
@@ -98,16 +97,16 @@ const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
 
               <Col md="12">
                 <div className="form-group">
-                  <label className="form-label">Service</label>
+                  <label className="form-label">Service Type</label>
                   <Controller
                     control={control}
-                    name="serviceId"
+                    name="serviceTypeId"
                     render={({ field: { onChange, value } }) => (
                       <RSelect
-                        options={services_options}
+                        options={serviceTypes_options}
                         value={value}
                         onChange={onChange}
-                        placeholder="Select Service..."
+                        placeholder="Select Service Type..."
                         isClearable
                       />
                     )}
