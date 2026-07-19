@@ -1,0 +1,52 @@
+import React from "react";
+import { useSearchParams } from "react-router-dom";
+import { useGetAssetsTransactions } from "../../../../api/assets";
+import { BlockBetween, BlockHead, BlockHeadContent, BlockTitle, Col, Row } from "../../../../components/Component";
+import Content from "../../../../layout/content/Content";
+import Head from "../../../../layout/head/Head";
+import { StatsCard, StatsDetailsCard } from "./stats-card";
+import AssetsTable from "./table";
+
+const AssetListPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const itemsPerPage = searchParams.get("limit") ?? 100;
+  const currentPage = searchParams.get("page") ?? 1;
+  const search = searchParams.get("search") ?? "";
+  const channel = searchParams.get("channel") ?? "";
+  const status = searchParams.get("status") ?? "";
+  const startDate = searchParams.get("startDate") ?? "";
+  const endDate = searchParams.get("endDate") ?? "";
+  const type = "buy";
+
+  const { isLoading, data, error } = useGetAssetsTransactions(
+    currentPage,
+    itemsPerPage,
+    status,
+    search,
+    channel,
+    startDate,
+    endDate,
+    "",
+    "",
+    type,
+  );
+  return (
+    <React.Fragment>
+      <Head title="Assets"></Head>
+      <Content>
+        <BlockHead size="sm">
+          <BlockBetween>
+            <BlockHeadContent>
+              <BlockTitle>Assets</BlockTitle>
+            </BlockHeadContent>
+          </BlockBetween>
+        </BlockHead>
+
+        <AssetsTable showStats data={data} tradeType="buy" isLoading={isLoading} />
+      </Content>
+    </React.Fragment>
+  );
+};
+
+export default AssetListPage;
