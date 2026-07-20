@@ -118,14 +118,14 @@ const CashbacksMasterPage = () => {
                           type="checkbox"
                           className="custom-control-input"
                           id={item._id}
-                          checked={item.isActive}
+                          checked={item.active}
                           onChange={() => {
-                            toggleCashback({ id: item._id, data: { isActive: !item.isActive } });
+                            toggleCashback({ id: item._id, data: { active: !item.active } });
                           }}
                         />
                         <label className="custom-control-label" htmlFor={item._id}>
-                          <span className={`ccap fw-medium d-none d-md-inline ${item.isActive ? "text-success" : "text-muted"}`}>
-                            {item.isActive ? "active" : "inactive"}
+                          <span className={`ccap fw-medium d-none d-md-inline ${item.active ? "text-success" : "text-muted"}`}>
+                            {item.active ? "active" : "inactive"}
                           </span>
                         </label>
                       </div>
