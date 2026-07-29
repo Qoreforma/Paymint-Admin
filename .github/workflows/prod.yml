@@ -3,7 +3,7 @@ name: Prod CI
 on:
   push:
     branches:
-      - main
+      - main5
 
 jobs:
   deploy:

@@ -276,9 +276,9 @@ const WalletTxnTable = ({ type, data, isLoading, showStats, hideFilter = false }
                   walletTxnsOverview?.data?.overview?.typeBreakdown?.find((stat) => stat?._id === type)
                     ?.successAmount ?? walletTxnsOverview?.data?.overview?.totals?.successAmount
                 }
-                pending={
-                  walletTxnsOverview?.data?.overview?.typeBreakdown?.find((stat) => stat?._id === type)
-                    ?.pendingAmount ?? walletTxnsOverview?.data?.overview?.totals?.pendingAmount
+                profit={
+                  walletTxnsOverview?.data?.overview?.typeBreakdown?.find((stat) => stat?._id === type)?.totalProfit ??
+                  walletTxnsOverview?.data?.overview?.totals?.totalProfit
                 }
               />
             </Col>

@@ -105,6 +105,8 @@ import AirtimeEpinTransactionsPage from "../pages/main/dashboard/transactions/ai
 import DataEpinTransactionsPage from "../pages/main/dashboard/transactions/data-epin";
 import ServiceProvidersApiDiscounts from "../pages/main/dashboard/service-providers/provider-api-discouts";
 import ServicesApiDiscounts from "../pages/main/dashboard/services/services-api-discounts";
+import DeviceAndIpPage from "../pages/main/dashboard/settings/DeviceAndIp";
+import EmailBannersPage from "../pages/main/dashboard/settings/EmailBanners";
 
 const routes = (
   <Route>
@@ -208,7 +210,9 @@ const routes = (
             <Route path="general-rates" element={<GeneralRatesPage />} />
             <Route path="phone-prefix" element={<PhonePrefixPage />} />
             <Route path="app-update" element={<AppUpdatePage />} />
+            <Route path="manage-device" element={<DeviceAndIpPage />} />
             <Route path="system-bank-accounts" element={<SystemAccountPage />} />
+            <Route path="email-banners" element={<EmailBannersPage />} />
             <Route path="support" element={<SupportPage />} />
             <Route path="referral-bonus" element={<ReferralBonusPage />} />
             <Route path="trade-bonus" element={<TradeBonusPage />} />

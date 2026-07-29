@@ -39,7 +39,7 @@ const TransactionsPage = () => {
           </BlockBetween>
         </BlockHead>
 
-        <ServiceTransactionTable purpose={"all"} showStats={true} data={data?.data} isLoading={isLoading} />
+        <ServiceTransactionTable purpose={"all"} showStats={true} data={data?.data} isLoading={isLoading} showType />
       </Content>
     </React.Fragment>
   );

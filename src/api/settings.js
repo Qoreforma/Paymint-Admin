@@ -582,3 +582,180 @@ export const useDeleteTradeBonus = () => {
     }
   );
 };
+
+// **************** DEVICE & IP TRUST *************************
+
+// Get Pending Requests
+export const useGetPendingRequests = () => {
+  return useQuery(
+    ["pendingDeviceRequests"],
+    async () => {
+      const response = await instance
+        .get(BACKEND_URLS.deviceTrust + "/pending-requests")
+        .then((res) => res?.data)
+        .catch((err) => {
+          throw err;
+        });
+      return response;
+    },
+    {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      retryDelay: 3000,
+    }
+  );
+};
+
+// Approve Request
+export const useApproveRequest = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (requestId) =>
+      toast.promise(
+        instance
+          .post(BACKEND_URLS.deviceTrust + `/requests/${requestId}/approve`)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err;
+          }),
+        {
+          success: "Device request approved successfully",
+          loading: "Approving request...",
+          error: (error) => error?.response?.data?.message || "Something happened",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["pendingDeviceRequests"]);
+        queryClient.invalidateQueries(["adminGroups"]);
+      },
+    }
+  );
+};
+
+// Deny Request
+export const useDenyRequest = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    ({ requestId, data }) =>
+      toast.promise(
+        instance
+          .post(BACKEND_URLS.deviceTrust + `/requests/${requestId}/deny`, data)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err;
+          }),
+        {
+          success: "Device request denied successfully",
+          loading: "Denying request...",
+          error: (error) => error?.response?.data?.message || "Something happened",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["pendingDeviceRequests"]);
+        queryClient.invalidateQueries(["blockedIPs"]);
+      },
+    }
+  );
+};
+
+// Get Blocked IPs
+export const useGetBlockedIPs = (page = 1, limit = 10) => {
+  return useQuery(
+    ["blockedIPs", page, limit],
+    async () => {
+      const response = await instance
+        .get(BACKEND_URLS.deviceTrust + `/blocked-ips?page=${page}&limit=${limit}`)
+        .then((res) => res?.data)
+        .catch((err) => {
+          throw err;
+        });
+      return response;
+    },
+    {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      retryDelay: 3000,
+    }
+  );
+};
+
+// Add IP to Blocklist
+export const useAddBlockedIP = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (data) =>
+      toast.promise(
+        instance
+          .post(BACKEND_URLS.deviceTrust + "/blocked-ips", data)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err;
+          }),
+        {
+          success: "IP added to blocklist successfully",
+          loading: "Adding IP to blocklist...",
+          error: (error) => error?.response?.data?.message || "Something happened",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["blockedIPs"]);
+        queryClient.invalidateQueries(["trustedDevices"]);
+      },
+    }
+  );
+};
+
+// Remove IP from Blocklist
+export const useRemoveBlockedIP = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (cidr) =>
+      toast.promise(
+        instance
+          .delete(BACKEND_URLS.deviceTrust + `/blocked-ips/${encodeURIComponent(cidr)}`)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err;
+          }),
+        {
+          success: "IP removed from blocklist successfully",
+          loading: "Removing IP from blocklist...",
+          error: (error) => error?.response?.data?.message || "Something happened",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["blockedIPs"]);
+        queryClient.invalidateQueries(["trustedDevices"]);
+      },
+    }
+  );
+};
+
+export const useGetTrustedDevices = (page = 1, limit = 10) => {
+  return useQuery(
+    ["trustedDevices", page, limit],
+    async () => {
+      const response = await instance
+        .get(BACKEND_URLS.deviceTrust + `/all-trusted-devices?page=${page}&limit=${limit}`)
+        .then((res) => res?.data)
+        .catch((err) => {
+          throw err;
+        });
+      return response;
+    },
+    {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      retryDelay: 3000,
+    }
+  );
+};
+

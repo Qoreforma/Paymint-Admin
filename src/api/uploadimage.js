@@ -8,7 +8,12 @@ export const useUploadImages = (uploadCallback) => {
   return useMutation(
     (formData) =>
       instance
-        .post(`${import.meta.env.VITE_APP_IMAGEKIT_URL}`, formData)
+        .post(`${import.meta.env.VITE_APP_IMAGEKIT_URL}`, formData, {
+          withCredentials: false,
+          headers: {
+            "Content-Type": "multipart/form-data", // ImageKit usually needs this
+          },
+        })
         .then((res) => res.data)
         .catch((err) => {
           throw err?.response?.data;

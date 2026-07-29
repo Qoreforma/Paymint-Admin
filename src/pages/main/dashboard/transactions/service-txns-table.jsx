@@ -49,7 +49,15 @@ import { usePermission } from "../../../../utils/usePermission";
 import { WalletAmountStatsCard } from "../wallet/stats-card";
 import DateRangeFilter from "../tables/date-range-filter";
 
-export const ServiceTransactionTable = ({ type, purpose, data, isLoading, showStats, hideFilter = false }) => {
+export const ServiceTransactionTable = ({
+  type,
+  purpose,
+  data,
+  isLoading,
+  showStats,
+  hideFilter = false,
+  showType = false,
+}) => {
   const { hasPermission } = usePermission();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -309,9 +317,9 @@ export const ServiceTransactionTable = ({ type, purpose, data, isLoading, showSt
                   serviceTxnsOverview?.data?.overview?.typeBreakdown?.find((stat) => stat?._id === type)
                     ?.successAmount ?? serviceTxnsOverview?.data?.overview?.totals?.successAmount
                 }
-                pending={
-                  serviceTxnsOverview?.data?.overview?.typeBreakdown?.find((stat) => stat?._id === type)
-                    ?.pendingAmount ?? serviceTxnsOverview?.data?.overview?.totals?.pendingAmount
+                profit={
+                  serviceTxnsOverview?.data?.overview?.typeBreakdown?.find((stat) => stat?._id === type)?.totalProfit ??
+                  serviceTxnsOverview?.data?.overview?.totals?.totalProfit
                 }
               />
             </Col>
@@ -425,9 +433,11 @@ export const ServiceTransactionTable = ({ type, purpose, data, isLoading, showSt
                       <DataTableRow size="md">
                         <span className="tb-tnx-head bg-white text-secondary">Provider</span>
                       </DataTableRow>
-                      <DataTableRow size="md">
-                        <span className="tb-tnx-head bg-white text-secondary">Type</span>
-                      </DataTableRow>
+                      {showType && (
+                        <DataTableRow size="md">
+                          <span className="tb-tnx-head bg-white text-secondary">Type</span>
+                        </DataTableRow>
+                      )}
                       <DataTableRow size="md">
                         <span className="tb-tnx-head bg-white text-secondary">Channel</span>
                       </DataTableRow>
@@ -495,9 +505,18 @@ export const ServiceTransactionTable = ({ type, purpose, data, isLoading, showSt
                           <DataTableRow size="md">
                             <span className="text-capitalize"> {item?.provider}</span>
                           </DataTableRow>
-                          <DataTableRow size="md">
-                            <span className="text-capitalize"> {item?.type?.replaceAll("_", " ")}</span>
-                          </DataTableRow>
+                          {showType && (
+                            <DataTableRow size="md">
+                              <span className="text-capitalize">
+                                {" "}
+                                {item?.type === "internationalairtime"
+                                  ? "Int.Airtime"
+                                  : item?.type === "internationaldata"
+                                    ? "Int.Data"
+                                    : item?.type?.replaceAll("_", " ")}
+                              </span>
+                            </DataTableRow>
+                          )}
                           <DataTableRow size="md">
                             <span className="text-capitalize"> {item?.channel}</span>
                           </DataTableRow>

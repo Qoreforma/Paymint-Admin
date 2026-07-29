@@ -91,6 +91,26 @@ const UserProfileAside = ({ updateSm, sm }) => {
               <span>Security Settings</span>
             </Link>
           </li>
+          {/* <li onClick={() => updateSm(false)}>
+            <Link
+              to="/settings/manage-device"
+              className={location.pathname === `/settings/manage-device` ? "active" : ""}
+            >
+              <Icon name="shield-check"></Icon>
+              <span>Device & IP trust</span>
+            </Link>
+          </li> */}
+          {hasPermission("email_banners.view") && (
+            <li onClick={() => updateSm(false)}>
+              <Link
+                to="/settings/email-banners"
+                className={location.pathname === `/settings/email-banners` ? "active" : ""}
+              >
+                <Icon name="mail"></Icon>
+                <span>Email Banners</span>
+              </Link>
+            </li>
+          )}
           {hasPermission("system_bank_accounts.view") && (
             <li onClick={() => updateSm(false)}>
               <Link

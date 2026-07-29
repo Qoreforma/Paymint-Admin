@@ -21,6 +21,7 @@ export const configOptions = () => {
     return {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        withCredentials: true,
       },
     };
   }
@@ -31,13 +32,14 @@ export const configOptions = () => {
 
 export const instance = axios.create({
   baseURL: BACKEND_URLS.baseURL,
+  withCredentials: true,
 });
 
 //Request interceptors for APIs calls
 instance.interceptors.request.use(
   async (config) => {
     const access_token = Cookies.get("access_token");
-    // console.log(access_token);
+
     if (config?.auth?.includes("auth")) {
       return config;
     }
