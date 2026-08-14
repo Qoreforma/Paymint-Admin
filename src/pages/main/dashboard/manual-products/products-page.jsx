@@ -17,6 +17,7 @@ import {
   useToggleProvidersProducts,
   useUpdateProviderProduct,
 } from "../../../../api/service-providers";
+import { useToggleProductHot } from "../../../../api/product/products";
 import {
   Block,
   BlockBetween,
@@ -41,6 +42,45 @@ import { formatDateWithTime, formatter } from "../../../../utils/Utils";
 import LoadingSpinner from "../../../components/spinner";
 import Search from "../tables/Search";
 import AddProductModal from "./modals/add-product";
+
+const HotToggleCell = ({ productId, isHot }) => {
+  const { mutate: toggleHot, isLoading } = useToggleProductHot(productId);
+  return (
+    <div
+      style={{ display: "flex", alignItems: "center", gap: 6, cursor: isLoading ? "wait" : "pointer" }}
+      onClick={() => !isLoading && toggleHot(!isHot)}
+      title={isHot ? "Remove from Hot Products" : "Mark as Hot Product"}
+    >
+      <div
+        style={{
+          width: 36,
+          height: 20,
+          borderRadius: 10,
+          background: isHot ? "linear-gradient(135deg,#ff6b35,#f7c59f)" : "#e5e7eb",
+          position: "relative",
+          transition: "background 0.2s",
+          flexShrink: 0,
+          boxShadow: isHot ? "0 0 6px 1px rgba(255,107,53,0.35)" : "none",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 2,
+            left: isHot ? 18 : 2,
+            width: 16,
+            height: 16,
+            borderRadius: "50%",
+            background: "#fff",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
+            transition: "left 0.2s",
+          }}
+        />
+      </div>
+      {isHot && <span style={{ fontSize: 14 }}>🔥</span>}
+    </div>
+  );
+};
 
 const ManualProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -263,6 +303,10 @@ const ManualProductsPage = () => {
                           <span className="tb-tnx-head bg-white text-secondary">Status</span>
                         </DataTableRow>
 
+                        <DataTableRow>
+                          <span className="tb-tnx-head bg-white text-secondary">🔥 Hot</span>
+                        </DataTableRow>
+
                         <DataTableRow className="nk-tb-col-tools">
                           <ul className="nk-tb-actions gx-1 my-n1">
                             <li className="me-n1">
@@ -330,6 +374,9 @@ const ManualProductsPage = () => {
                                   </span>
                                 </label>
                               </div>
+                            </DataTableRow>
+                            <DataTableRow>
+                              <HotToggleCell productId={item._id || item.id} isHot={!!item.isHot} />
                             </DataTableRow>
                             <DataTableRow className="nk-tb-col-tools">
                               <ul className="nk-tb-actions gx-1 my-n1">

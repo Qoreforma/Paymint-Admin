@@ -104,7 +104,7 @@ export const StatsDetailsCard = ({ data }) => {
   );
 };
 
-export const WalletAmountStatsCard = ({ data, successful }) => {
+export const WalletAmountStatsCard = ({ data, successful, profit }) => {
   return (
     <Card>
       <div className="card-inner">
@@ -113,7 +113,7 @@ export const WalletAmountStatsCard = ({ data, successful }) => {
             <Icon name="sign-kobo" className="bg-primary-dim"></Icon>
             <div className="info">
               <div className="title">Total</div>
-              <div className="count">{formatter("NGN").format(data)}</div>
+              <div className="count">{formatter("NGN").format(data || 0)}</div>
             </div>
           </li>
 
@@ -124,6 +124,22 @@ export const WalletAmountStatsCard = ({ data, successful }) => {
               <div className="count">{formatter("NGN").format(successful || 0)}</div>
             </div>
           </li>
+
+          {profit !== undefined && (
+            <li className="item">
+              <Icon name="growth" className="bg-info-dim text-info"></Icon>
+              <div className="info">
+                <div className="title">Total Profit</div>
+                <div
+                  className="count fw-bold"
+                  style={{ color: (profit || 0) >= 0 ? "#10b981" : "#ef4444" }}
+                >
+                  {(profit || 0) > 0 ? "+" : ""}
+                  {formatter("NGN").format(profit || 0)}
+                </div>
+              </div>
+            </li>
+          )}
         </ul>
       </div>
     </Card>

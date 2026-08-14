@@ -325,6 +325,12 @@ const menu = [
     link: "/settings/cashbacks",
     permission: "system.manage_services",
   },
+  {
+    icon: "bag",
+    text: "Products",
+    link: "/products",
+    permission: "system.manage_products",
+  },
   // {
   //   icon: "bag",
   //   text: "Manual Products",

@@ -90,18 +90,20 @@ export const WalletStatsCard = ({ tradeTypeData, data }) => {
   );
 };
 
-export const WalletAmountStatsCard = ({ data, successful, pending }) => {
+export const WalletAmountStatsCard = ({ data, successful, pending, profit }) => {
   return (
     <Card>
       <div className="card-inner">
         <ul className="nk-tranx-statistics">
-          {/* <li className="item">
-            <Icon name="sign-kobo" className="bg-primary-dim"></Icon>
-            <div className="info">
-              <div className="title">Total</div>
-              <div className="count">{formatter("NGN").format(data)}</div>
-            </div>
-          </li> */}
+          {data !== undefined && (
+            <li className="item">
+              <Icon name="sign-kobo" className="bg-primary-dim"></Icon>
+              <div className="info">
+                <div className="title">Total</div>
+                <div className="count">{formatter("NGN").format(data || 0)}</div>
+              </div>
+            </li>
+          )}
 
           <li className="item">
             <Icon name="sign-kobo" className="bg-success-dim"></Icon>
@@ -111,13 +113,31 @@ export const WalletAmountStatsCard = ({ data, successful, pending }) => {
             </div>
           </li>
 
-          <li className="item">
-            <Icon name="sign-kobo" className="bg-warning-dim"></Icon>
-            <div className="info">
-              <div className="title">Total Pending</div>
-              <div className="count">{formatter("NGN").format(pending || 0)}</div>
-            </div>
-          </li>
+          {pending !== undefined && (
+            <li className="item">
+              <Icon name="sign-kobo" className="bg-warning-dim"></Icon>
+              <div className="info">
+                <div className="title">Total Pending</div>
+                <div className="count">{formatter("NGN").format(pending || 0)}</div>
+              </div>
+            </li>
+          )}
+
+          {profit !== undefined && (
+            <li className="item">
+              <Icon name="growth" className="bg-info-dim text-info"></Icon>
+              <div className="info">
+                <div className="title">Total Profit</div>
+                <div
+                  className="count fw-bold"
+                  style={{ color: (profit || 0) >= 0 ? "#10b981" : "#ef4444" }}
+                >
+                  {(profit || 0) > 0 ? "+" : ""}
+                  {formatter("NGN").format(profit || 0)}
+                </div>
+              </div>
+            </li>
+          )}
         </ul>
       </div>
     </Card>

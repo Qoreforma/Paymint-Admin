@@ -3,7 +3,7 @@ import { Block, BlockBetween, BlockHead, BlockHeadContent, BlockTitle } from "..
 import Content from "../../../../layout/content/Content";
 import Head from "../../../../layout/head/Head";
 import CatelogTable from "./CatelogTable";
-import { useGetProductTypes } from "../../../../api/product/products";
+import { useGetProductTypes } from "../../../../api/generics";
 
 const ProductTypePage = () => {
   const { isLoading, data: productTypes } = useGetProductTypes();

@@ -111,17 +111,24 @@ export const useGetTotalSaleStats = (startDate, endDate) => {
   );
 };
 
-export const useGetDashboardStats = () => {
+export const useGetDashboardStats = (period = "all", startDate = "", endDate = "") => {
+  const queryParams = new URLSearchParams();
+  if (period && period !== "all") queryParams.set("period", period);
+  if (startDate) queryParams.set("startDate", startDate);
+  if (endDate) queryParams.set("endDate", endDate);
+  const queryStr = queryParams.toString() ? `?${queryParams.toString()}` : "";
+
   return useQuery(
-    ["dashboard-stats"],
+    ["dashboard-stats", period, startDate, endDate],
     async () => {
-      const response = await instance.get(`/dashboard/stats`);
+      const response = await instance.get(`/dashboard/stats${queryStr}`);
       return response.data?.data;
     },
     {
       retry: 1,
       refetchOnWindowFocus: false,
       retryDelay: 3000,
+      keepPreviousData: true,
     }
   );
 };

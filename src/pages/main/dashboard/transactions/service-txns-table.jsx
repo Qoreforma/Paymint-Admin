@@ -280,26 +280,75 @@ export const ServiceTransactionTable = ({
 
   return (
     <>
-      {/* Date Range Filter Section */}
+      {/* Date Range & Period Filter Section */}
       {showStats && (
         <div className="mb-4">
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
-            {hasDateFilter && (
-              <Button onClick={resetDateFilter}>
-                <Icon name="refresh" />
-                Reset All Filters
-              </Button>
-            )}
-            <div style={{ marginLeft: "auto" }} className="d-flex flex-wrap align-items-center gap-3 mb-4">
+            {/* Quick Period Buttons */}
+            <div
+              className="btn-group bg-white p-1 rounded border shadow-sm"
+              role="group"
+              style={{ gap: 2 }}
+            >
+              {[
+                { label: "All Time", value: "all" },
+                { label: "Today", value: "today" },
+                { label: "7 Days", value: "7d" },
+                { label: "30 Days", value: "1m" },
+              ].map((opt) => {
+                const isSelected =
+                  (!period || period === "all" || period === "custom") && opt.value === "all" && !hasDateFilter
+                    ? true
+                    : period === opt.value && !hasDateFilter;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`btn btn-xs rounded ${
+                      isSelected
+                        ? "btn-primary shadow-sm"
+                        : "btn-outline-light text-dark border-0"
+                    }`}
+                    style={{ fontSize: 12, padding: "5px 12px", fontWeight: 500 }}
+                    onClick={() => {
+                      setSearchParams((prev) => {
+                        const next = new URLSearchParams(prev);
+                        if (opt.value === "all") {
+                          next.delete("period");
+                        } else {
+                          next.set("period", opt.value);
+                        }
+                        next.delete("startDate");
+                        next.delete("endDate");
+                        next.set("page", "1");
+                        return next;
+                      });
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="d-flex flex-wrap align-items-center gap-2">
               {hasDateFilter && (
-                <div className="d-flex align-items-center fw-medium px-3 py-2">
+                <div className="d-flex align-items-center fw-medium px-3 py-1 bg-white rounded border text-primary small">
                   <Icon name="calendar" className="me-1" />
                   <span>
                     {formatDateDisplay(startDate)} - {formatDateDisplay(endDate)}
                   </span>
                 </div>
               )}
-              <DateRangeFilter />
+              {hasDateFilter && (
+                <Button size="xs" color="light" outline onClick={resetDateFilter}>
+                  <Icon name="cross-sm" />
+                  Reset Date
+                </Button>
+              )}
+              <div className="bg-white rounded border shadow-sm">
+                <DateRangeFilter />
+              </div>
             </div>
           </div>
         </div>
@@ -496,7 +545,16 @@ export const ServiceTransactionTable = ({
                             <span>{formatter("NGN").format(item?.amount)}</span>
                           </DataTableRow>
                           <DataTableRow size="md">
-                            <span>{formatter("NGN").format(item?.profit ?? 0)}</span>
+                            <span
+                              className="fw-bold"
+                              style={{
+                                color: (item?.profit ?? 0) > 0 ? "#16a34a" : (item?.profit ?? 0) < 0 ? "#dc2626" : "#64748b",
+                                fontSize: 12,
+                              }}
+                            >
+                              {(item?.profit ?? 0) > 0 ? "+" : ""}
+                              {formatter("NGN").format(item?.profit ?? 0)}
+                            </span>
                           </DataTableRow>
 
                           <DataTableRow size="md">
@@ -726,7 +784,15 @@ export const ServiceTransactionTable = ({
               </Col>
               <Col size={4}>
                 <span className="sub-text">Profit/Loss</span>
-                <span className="caption-text">{formatter("NGN").format(formData?.profit || 0)}</span>
+                <span
+                  className="caption-text fw-bold"
+                  style={{
+                    color: (formData?.profit || 0) > 0 ? "#16a34a" : (formData?.profit || 0) < 0 ? "#dc2626" : "#64748b",
+                  }}
+                >
+                  {(formData?.profit || 0) > 0 ? "+" : ""}
+                  {formatter("NGN").format(formData?.profit || 0)}
+                </span>
               </Col>
               <Col lg={4}>
                 <span className="sub-text">Type</span>
