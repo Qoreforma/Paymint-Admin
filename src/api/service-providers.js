@@ -624,6 +624,31 @@ export const useDeleteCashback = () => {
   );
 };
 
+export const useBulkUpdateCashback = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (values) => {
+      try {
+        const response = toast.promise(instance.put(BACKEND_URLS.cashbacks + `/bulk-update`, values), {
+          success: (data) => data.message || "Bulk update successful",
+          loading: "Please wait...",
+          error: (error) => error?.response?.data?.message || "Failed. Something happened.",
+        });
+        return response;
+      } catch (error) {
+        console.error(error);
+        Promise.reject(error);
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["Cashbacks"]);
+      },
+    },
+  );
+};
+
 // *****************************API Discounts*************************//
 
 export const useGetApiDiscounts = ({ currentPage, size, providerId, serviceId }) => {

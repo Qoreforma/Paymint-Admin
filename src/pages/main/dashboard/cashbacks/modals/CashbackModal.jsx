@@ -5,8 +5,8 @@ import { useCreateCashback, useUpdateCashback, useGetServiceTypes } from "../../
 import { Button, Col, Icon, RSelect } from "../../../../../components/Component";
 
 const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
-  const { mutate: createCashback, isSuccess: created } = useCreateCashback();
-  const { mutate: updateCashback, isSuccess: updated } = useUpdateCashback();
+  const { mutate: createCashback, isLoading: isCreating } = useCreateCashback();
+  const { mutate: updateCashback, isLoading: isUpdating } = useUpdateCashback();
 
   const { data: serviceTypes } = useGetServiceTypes(1, 200);
 
@@ -27,9 +27,16 @@ const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
   useEffect(() => {
     if (isEdit && formData) {
       reset({
-        serviceTypeId: formData.serviceTypeId ? { label: formData.serviceTypeId.name || formData.serviceTypeId, value: formData.serviceTypeId._id || formData.serviceTypeId } : null,
-        type: formData.type ? { label: formData.type === "percentage" ? "Percentage" : "Flat", value: formData.type } : { label: "Flat", value: "flat" },
-        value: formData.value || "",
+        serviceTypeId: formData.serviceTypeId
+          ? {
+              label: formData.serviceTypeId.name || formData.serviceTypeId,
+              value: formData.serviceTypeId._id || formData.serviceTypeId,
+            }
+          : null,
+        type: formData.type
+          ? { label: formData.type === "percentage" ? "Percentage" : "Flat", value: formData.type }
+          : { label: "Flat", value: "flat" },
+        value: formData.value !== undefined && formData.value !== null ? formData.value : "",
       });
     } else {
       reset({
@@ -38,16 +45,7 @@ const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
         value: "",
       });
     }
-  }, [formData, isEdit, reset]);
-
-  useEffect(() => {
-    if (created || updated) {
-      closeModal();
-      reset();
-    }
-  }, [created, updated, closeModal, reset]);
-
-
+  }, [formData, isEdit, modal, reset]);
 
   const serviceTypes_options = useMemo(() => {
     if (serviceTypes) {
@@ -55,8 +53,6 @@ const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
     }
     return [];
   }, [serviceTypes]);
-
-
 
   const type_options = [
     { label: "Flat", value: "flat" },
@@ -71,9 +67,22 @@ const CashbackModal = ({ modal, closeModal, formData, isEdit }) => {
     if (data.serviceTypeId?.value) payload.serviceTypeId = data.serviceTypeId.value;
 
     if (isEdit) {
-      updateCashback({ id: formData._id, values: payload });
+      updateCashback(
+        { id: formData._id, values: payload },
+        {
+          onSuccess: () => {
+            closeModal();
+            reset();
+          },
+        }
+      );
     } else {
-      createCashback(payload);
+      createCashback(payload, {
+        onSuccess: () => {
+          closeModal();
+          reset();
+        },
+      });
     }
   };
 

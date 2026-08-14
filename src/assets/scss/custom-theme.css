@@ -235,19 +235,54 @@
 }
 
 /* ── PAGINATION ──────────────────────────────────────────── */
-.page-item.active .page-link { background-color: var(--brand-primary) !important; border-color: var(--brand-primary) !important; }
-.page-link { color: var(--brand-primary) !important; border-radius: 5px !important; }
-.page-link:hover { background: var(--brand-dim) !important; }
+.page-link {
+  color: var(--brand-primary) !important;
+  border-radius: 6px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px !important;
+  font-size: 13px !important;
+}
+.page-link:hover {
+  background: var(--brand-dim) !important;
+  color: var(--brand-primary) !important;
+}
+.page-item.active .page-link {
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 6px rgba(15, 61, 172, 0.35) !important;
+}
+.page-item.disabled .page-link {
+  color: #94a3b8 !important;
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
 
 /* ── DROPDOWNS ───────────────────────────────────────────── */
 .dropdown-menu {
   border-radius: 10px !important;
   border: 1px solid #e2e8f4 !important;
-  box-shadow: 0 6px 24px rgba(15,61,172,0.11) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15) !important;
+  z-index: 1060 !important;
 }
 .dropdown-item:hover, .dropdown-item:focus {
   background-color: var(--brand-dim) !important;
   color: var(--brand-primary) !important;
+}
+
+/* ── FILTER PANEL CARD ──────────────────────────────────── */
+.filter-panel-card {
+  position: relative !important;
+  z-index: 25 !important;
+  overflow: visible !important;
+}
+.filter-panel-card .card-body {
+  overflow: visible !important;
 }
 
 /* ── MODALS ──────────────────────────────────────────────── */
@@ -288,8 +323,39 @@
   background: var(--brand-dim) !important;
   border-radius: 8px;
 }
+
+/* ── SELECTED TABLE ROW FEEDBACK ────────────────────────── */
+.nk-tb-item.product-row-selected,
+.nk-tb-item.product-row-selected > .nk-tb-col,
+.product-row-selected,
+.product-row-selected td,
+.product-row-selected .nk-tb-col {
+  background-color: #eff6ff !important;
+}
+
+.nk-tb-item.product-row-selected > .nk-tb-col:first-child {
+  border-left: 4px solid #2563eb !important;
+}
+
+.nk-tb-item.product-row-selected:hover > .nk-tb-col,
+.product-row-selected:hover {
+  background-color: #dbeafe !important;
+}
 .nk-sidebar.is-white .nk-menu-link:hover .nk-menu-text,
 .nk-sidebar.is-white .nk-menu-link:hover .nk-menu-icon,
 .nk-sidebar.is-white .nk-menu-link:hover .nk-menu-icon .icon {
   color: var(--brand-primary) !important;
+}
+
+/* ── PRODUCTS TABLE EDGE PADDING ────────────────────────── */
+.products-table-card .nk-tb-col:first-child,
+.products-table-card th:first-child,
+.products-table-card td:first-child {
+  padding-left: 24px !important;
+}
+
+.products-table-card .nk-tb-col:last-child,
+.products-table-card th:last-child,
+.products-table-card td:last-child {
+  padding-right: 24px !important;
 }

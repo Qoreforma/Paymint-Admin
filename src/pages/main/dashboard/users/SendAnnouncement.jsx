@@ -13,6 +13,7 @@ import { formatDateToISO } from "../../../../utils/Utils";
 import toast from "react-hot-toast";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { TRANSACTION_TYPE_OPTIONS } from "../../../../utils/constants";
 
 const channelOption = [
   { label: "Push", value: "push" },
@@ -36,6 +37,7 @@ const SendAnnouncementModal = ({ selectedUsers, modal, closeModal, createFunctio
       title: "",
       body: "",
       channels: [],
+      type: null,
       schedule: true,
       dispatchDate: null,
     },
@@ -52,12 +54,15 @@ const SendAnnouncementModal = ({ selectedUsers, modal, closeModal, createFunctio
 
     let submittedData;
     const channels = data.channels.map((item) => item.value);
+    const hasPushSelected = channels.includes("push");
+    const pushType = hasPushSelected && data.type ? (data.type.value ? data.type.value : data.type) : undefined;
 
     submittedData = {
       title: data.title,
       body: data.body,
       target: "specific",
       channels,
+      ...(pushType && { type: pushType }),
       ...(data.schedule && {
         dispatchTime: data.dispatchDate instanceof Date ? formatDateToISO(data.dispatchDate) : data.dispatchDate,
       }),
@@ -80,6 +85,7 @@ const SendAnnouncementModal = ({ selectedUsers, modal, closeModal, createFunctio
   // Check if SMS is selected
   const hasSMS = channels.some((channel) => channel.value === "sms");
   const hasEmail = channels.some((channel) => channel.value === "email");
+  const hasPush = channels.some((channel) => channel.value === "push");
 
   // Handle channel change to enforce Email alone rule
   const handleChannelChange = (selectedOptions) => {
@@ -219,7 +225,7 @@ const SendAnnouncementModal = ({ selectedUsers, modal, closeModal, createFunctio
                   </div>
                 </div>
               </Col>
-              <Col md="12">
+              <Col md={hasPush ? "6" : "12"}>
                 <div className="form-group">
                   <label className="form-label">Select Channel</label>
                   <div className="form-control-wrap">
@@ -244,6 +250,32 @@ const SendAnnouncementModal = ({ selectedUsers, modal, closeModal, createFunctio
                   <small className="text-muted">Note: Email can only be selected alone</small>
                 </div>
               </Col>
+              {hasPush && (
+                <Col md="6">
+                  <div className="form-group">
+                    <label className="form-label">Notification Type (Push)</label>
+                    <div className="form-control-wrap">
+                      <Controller
+                        control={control}
+                        name="type"
+                        render={({ field: { onChange, value }, fieldState }) => (
+                          <>
+                            <RSelect
+                              options={TRANSACTION_TYPE_OPTIONS}
+                              value={value}
+                              onChange={onChange}
+                              placeholder="Select transaction type..."
+                              isClearable
+                            />
+                            {fieldState.error && <span className="invalid">{fieldState.error.message}</span>}
+                          </>
+                        )}
+                      />
+                    </div>
+                    <small className="text-muted">Transaction type included in push data payload</small>
+                  </div>
+                </Col>
+              )}
 
               <Col md="6">
                 <div className="form-group">

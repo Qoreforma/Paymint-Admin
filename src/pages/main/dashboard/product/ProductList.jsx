@@ -35,6 +35,9 @@ import {
   useGetAllProducts,
   useToggleProductHot,
   useToggleProductStatus,
+  useUpdateProduct,
+  useBulkToggleProductStatus,
+  useBulkToggleProductHot,
 } from "../../../../api/product/products";
 import { useGetProviders, useGetServiceTypes } from "../../../../api/service-providers";
 import { useGetServices } from "../../../../api/services";
@@ -56,35 +59,41 @@ const VALIDITY_OPTIONS = [
 
 // ─── Stat Card ─────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, color, icon }) => (
-  <div className="col-6 col-lg-3">
+  <div className="col-12 col-sm-6 col-xl-3">
     <div
       className="card h-100"
       style={{
-        borderRadius: "12px",
+        borderRadius: 16,
         border: "none",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+        boxShadow: "0 2px 14px rgba(0,0,0,0.05)",
         overflow: "hidden",
       }}
     >
-      <div className="card-body d-flex align-items-center gap-3 p-3">
+      <div className="card-body d-flex align-items-center gap-3 p-4 p-xl-4" style={{ minHeight: 120 }}>
         <div
           style={{
-            width: 46,
-            height: 46,
-            borderRadius: 12,
+            width: 60,
+            height: 60,
+            borderRadius: 16,
             background: color,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            fontSize: 20,
+            fontSize: 28,
           }}
         >
           {icon}
         </div>
         <div>
-          <div className="fw-bold fs-4 lh-1">{value ?? "—"}</div>
-          <div className="text-muted small mt-1">{label}</div>
+          <div className="fw-bold fs-3 lh-1 text-dark" style={{ letterSpacing: "-0.5px" }}>
+            {value !== undefined && value !== null && value !== "—"
+              ? typeof value === "number"
+                ? value.toLocaleString()
+                : value
+              : "—"}
+          </div>
+          <div className="text-muted small mt-2 fw-medium">{label}</div>
         </div>
       </div>
     </div>
@@ -94,19 +103,33 @@ const StatCard = ({ label, value, color, icon }) => (
 // ─── Filter Pill ────────────────────────────────────────────────────────────
 const FilterPill = ({ label, onClear }) => (
   <span
-    className="badge d-inline-flex align-items-center gap-1 me-1 mb-1"
+    className="badge d-inline-flex align-items-center gap-2"
     style={{
-      background: "#eef2ff",
-      color: "#4f46e5",
-      borderRadius: 20,
-      padding: "4px 10px",
-      fontWeight: 500,
-      fontSize: 12,
+      background: "#dbeafe",
+      color: "#1e40af",
+      borderRadius: 8,
+      padding: "10px 16px",
+      fontWeight: 600,
+      fontSize: 13,
+      border: "1px solid #bfdbfe",
+      display: "inline-flex",
+      alignItems: "center",
+      whiteSpace: "nowrap",
     }}
   >
     {label}
     <span
-      style={{ cursor: "pointer", fontWeight: 700, fontSize: 14, lineHeight: 1 }}
+      style={{
+        cursor: "pointer",
+        fontWeight: 800,
+        fontSize: 16,
+        lineHeight: 1,
+        marginLeft: 4,
+        opacity: 0.7,
+        transition: "opacity 0.2s",
+      }}
+      onMouseEnter={(e) => (e.target.style.opacity = "1")}
+      onMouseLeave={(e) => (e.target.style.opacity = "0.7")}
       onClick={onClear}
     >
       ×
@@ -120,7 +143,7 @@ const HotToggle = ({ productId, isHot }) => {
 
   return (
     <div
-      style={{ display: "flex", alignItems: "center", gap: 6, cursor: isLoading ? "wait" : "pointer" }}
+      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, cursor: isLoading ? "wait" : "pointer" }}
       onClick={() => !isLoading && toggleHot(!isHot)}
       title={isHot ? "Remove from Hot Products" : "Mark as Hot Product"}
     >
@@ -180,6 +203,448 @@ const StatusToggle = ({ productId, isActive }) => {
   );
 };
 
+// ─── Product Detail Modal ───────────────────────────────────────────────────
+const ProductDetailModal = ({ isOpen, toggle, product, onEdit }) => {
+  if (!product) return null;
+  const service = product.serviceId;
+  const serviceType = service?.serviceTypeId;
+  const provider = product.providerId;
+  const margin = (product.amount || 0) - (product.providerAmount || 0);
+
+  return (
+    <Modal isOpen={isOpen} toggle={toggle} size="lg" centered>
+      <div className="modal-header border-bottom py-3 px-4">
+        <div className="d-flex align-items-center gap-3">
+          <img
+            src={product.logo || service?.logo || NoIcon}
+            alt={product.name}
+            style={{ width: 44, height: 44, borderRadius: 10, objectFit: "contain" }}
+          />
+          <div>
+            <h5 className="modal-title mb-0 fw-bold">{product.name}</h5>
+            <span className="text-muted small">{product.code}</span>
+          </div>
+        </div>
+        <button type="button" className="btn-close" onClick={toggle} aria-label="Close"></button>
+      </div>
+
+      <ModalBody className="p-4">
+        {/* Top Badges & Status */}
+        <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
+          <span className={`badge ${product.isActive ? "bg-success" : "bg-danger"}`}>
+            {product.isActive ? "Active" : "Inactive"}
+          </span>
+          {product.isHot && (
+            <span className="badge bg-warning text-dark">🔥 Hot Product</span>
+          )}
+          {service?.name && (
+            <span className="badge bg-light text-dark border">
+              Service: {service.name}
+            </span>
+          )}
+          {serviceType?.name && (
+            <span className="badge" style={{ background: "#ede9fe", color: "#7c3aed" }}>
+              {serviceType.name}
+            </span>
+          )}
+          {provider?.name && (
+            <span className="badge bg-info text-white">
+              Provider: {provider.name}
+            </span>
+          )}
+        </div>
+
+        {/* Pricing Cards */}
+        <div className="row g-3 mb-4">
+          <div className="col-md-4">
+            <div className="p-3 bg-light rounded-3 border">
+              <span className="text-muted small d-block">Customer Price</span>
+              <span className="fs-5 fw-bold text-dark">
+                {formatter("NGN").format(product.amount || 0)}
+              </span>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="p-3 bg-light rounded-3 border">
+              <span className="text-muted small d-block">Provider Cost</span>
+              <span className="fs-5 fw-bold text-dark">
+                {formatter("NGN").format(product.providerAmount || 0)}
+              </span>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div
+              className="p-3 rounded-3 border"
+              style={{ background: margin > 0 ? "#ecfdf5" : "#f8fafc" }}
+            >
+              <span className="text-muted small d-block">Profit Margin</span>
+              <span
+                className="fs-5 fw-bold"
+                style={{ color: margin > 0 ? "#059669" : "#64748b" }}
+              >
+                {margin > 0 ? "+" : ""}{formatter("NGN").format(margin)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Product Details Grid */}
+        <h6 className="fw-bold mb-3">Product Attributes</h6>
+        <div className="row g-3">
+          {product.dataSizeDisplay && (
+            <div className="col-sm-6">
+              <div className="border-bottom pb-2">
+                <span className="text-muted small d-block">Data Size</span>
+                <span className="fw-medium text-dark">{product.dataSizeDisplay}</span>
+              </div>
+            </div>
+          )}
+
+          {(product.validity || product.attributes?.validityPeriod) && (
+            <div className="col-sm-6">
+              <div className="border-bottom pb-2">
+                <span className="text-muted small d-block">Validity Duration</span>
+                <span className="fw-medium text-dark">
+                  {product.validity || product.attributes?.validityPeriod}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {product.attributes?.dataType && (
+            <div className="col-sm-6">
+              <div className="border-bottom pb-2">
+                <span className="text-muted small d-block">Data Type</span>
+                <span className="fw-medium text-dark">{product.attributes.dataType}</span>
+              </div>
+            </div>
+          )}
+
+          {product.productType && (
+            <div className="col-sm-6">
+              <div className="border-bottom pb-2">
+                <span className="text-muted small d-block">Category / Product Type</span>
+                <span className="fw-medium text-dark">{product.productType}</span>
+              </div>
+            </div>
+          )}
+
+          {product.description && (
+            <div className="col-12">
+              <div className="border-bottom pb-2">
+                <span className="text-muted small d-block">Description</span>
+                <span className="text-dark">{product.description}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </ModalBody>
+
+      <div className="modal-footer border-top px-4 py-3">
+        <button
+          type="button"
+          className="btn btn-outline-secondary"
+          onClick={toggle}
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            toggle();
+            onEdit(product);
+          }}
+        >
+          <Icon name="edit" className="me-1" /> Edit Product
+        </button>
+      </div>
+    </Modal>
+  );
+};
+
+// ─── Adaptive Product Edit Modal ────────────────────────────────────────────
+const ProductEditModal = ({ isOpen, toggle, product }) => {
+  const { mutate: updateProduct, isLoading } = useUpdateProduct(product?._id);
+
+  const isDataProduct = useMemo(() => {
+    if (!product) return false;
+    const typeCode = product.serviceId?.serviceTypeId?.code?.toLowerCase();
+    const serviceCode = product.serviceId?.code?.toLowerCase();
+    const name = product.name?.toLowerCase();
+    return (
+      typeCode === "data" ||
+      serviceCode?.includes("data") ||
+      name?.includes("data") ||
+      !!product.attributes?.dataType ||
+      !!product.dataSizeDisplay
+    );
+  }, [product]);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    code: "",
+    amount: "",
+    providerAmount: "",
+    description: "",
+    dataSizeDisplay: "",
+    dataType: "",
+    validity: "",
+    isHot: false,
+    isActive: true,
+  });
+
+  // Sync state when product opens
+  React.useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name || "",
+        code: product.code || "",
+        amount: product.amount || "",
+        providerAmount: product.providerAmount || "",
+        description: product.description || "",
+        dataSizeDisplay: product.dataSizeDisplay || "",
+        dataType: product.attributes?.dataType || "",
+        validity: product.validity || product.attributes?.validityPeriod || "",
+        isHot: !!product.isHot,
+        isActive: product.isActive !== false,
+      });
+    }
+  }, [product]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!product) return;
+
+    const payload = {
+      name: formData.name,
+      code: formData.code,
+      amount: Number(formData.amount),
+      providerAmount: Number(formData.providerAmount),
+      description: formData.description,
+      isHot: formData.isHot,
+      isActive: formData.isActive,
+    };
+
+    if (isDataProduct) {
+      payload.dataSizeDisplay = formData.dataSizeDisplay;
+      payload.validity = formData.validity;
+      payload.attributes = {
+        ...product.attributes,
+        dataType: formData.dataType,
+        validityPeriod: formData.validity,
+      };
+    }
+
+    updateProduct(payload, {
+      onSuccess: () => {
+        toggle();
+      },
+    });
+  };
+
+  if (!product) return null;
+
+  return (
+    <Modal isOpen={isOpen} toggle={toggle} size="lg" centered>
+      <form onSubmit={handleSubmit}>
+        <div className="modal-header border-bottom py-3 px-4">
+          <div>
+            <h5 className="modal-title fw-bold mb-0">Edit Product</h5>
+            <span className="text-muted small">
+              {product.name} ({product.serviceId?.name || "VAS Product"})
+            </span>
+          </div>
+          <button type="button" className="btn-close" onClick={toggle} aria-label="Close"></button>
+        </div>
+
+        <ModalBody className="p-4">
+          <div className="row g-3">
+            {/* Name */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold small">Product Name *</label>
+              <input
+                type="text"
+                name="name"
+                className="form-control"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Code */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold small">Product Code *</label>
+              <input
+                type="text"
+                name="code"
+                className="form-control"
+                value={formData.code}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Selling Amount */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold small">Selling Amount (₦) *</label>
+              <input
+                type="number"
+                name="amount"
+                className="form-control"
+                value={formData.amount}
+                onChange={handleChange}
+                required
+                min="0"
+                step="any"
+              />
+            </div>
+
+            {/* Provider Amount */}
+            <div className="col-md-6">
+              <label className="form-label fw-bold small">Provider Amount / Cost (₦) *</label>
+              <input
+                type="number"
+                name="providerAmount"
+                className="form-control"
+                value={formData.providerAmount}
+                onChange={handleChange}
+                required
+                min="0"
+                step="any"
+              />
+            </div>
+
+            {/* Data-Specific Fields */}
+            {isDataProduct && (
+              <>
+                <div className="col-md-4">
+                  <label className="form-label fw-bold small">Data Size (e.g. 1GB, 2.5GB)</label>
+                  <input
+                    type="text"
+                    name="dataSizeDisplay"
+                    className="form-control"
+                    placeholder="e.g. 1GB"
+                    value={formData.dataSizeDisplay}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-bold small">Data Type</label>
+                  <select
+                    name="dataType"
+                    className="form-select"
+                    value={formData.dataType}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select Data Type</option>
+                    {DATA_TYPES.map((dt) => (
+                      <option key={dt} value={dt}>
+                        {dt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label fw-bold small">Validity Duration</label>
+                  <select
+                    name="validity"
+                    className="form-select"
+                    value={formData.validity}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select Validity</option>
+                    {VALIDITY_OPTIONS.map((v) => (
+                      <option key={v.value} value={v.label}>
+                        {v.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
+
+            {/* Description */}
+            <div className="col-12">
+              <label className="form-label fw-bold small">Description</label>
+              <textarea
+                name="description"
+                className="form-control"
+                rows="2"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Product description (optional)"
+              />
+            </div>
+
+            {/* Switches: Hot & Active */}
+            <div className="col-md-6">
+              <div className="custom-control custom-switch mt-2">
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id="edit-is-hot"
+                  name="isHot"
+                  checked={formData.isHot}
+                  onChange={handleChange}
+                />
+                <label className="custom-control-label fw-bold text-dark" htmlFor="edit-is-hot">
+                  🔥 Mark as Hot Product
+                </label>
+              </div>
+            </div>
+
+            <div className="col-md-6">
+              <div className="custom-control custom-switch mt-2">
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id="edit-is-active"
+                  name="isActive"
+                  checked={formData.isActive}
+                  onChange={handleChange}
+                />
+                <label className="custom-control-label fw-bold text-dark" htmlFor="edit-is-active">
+                  Product Active Status
+                </label>
+              </div>
+            </div>
+          </div>
+        </ModalBody>
+
+        <div className="modal-footer border-top px-4 py-3">
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={toggle}
+            disabled={isLoading}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -200,6 +665,15 @@ const ProductList = () => {
   });
   const [pendingSearch, setPendingSearch] = useState("");
 
+  // ── Selection & Modals ──
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [detailProduct, setDetailProduct] = useState(null);
+  const [editProduct, setEditProduct] = useState(null);
+
+  // ── Bulk mutations ──
+  const { mutate: bulkToggleStatus, isLoading: isBulkingStatus } = useBulkToggleProductStatus();
+  const { mutate: bulkToggleHot, isLoading: isBulkingHot } = useBulkToggleProductHot();
+
   // ── Data fetching ──
   const { isLoading, data } = useGetAllProducts(page, limit, {
     search: filters.search,
@@ -218,12 +692,15 @@ const ProductList = () => {
 
   const products = data?.data?.products ?? [];
   const pagination = data?.data?.pagination ?? {};
+  const stats = data?.data?.stats;
 
   // ── Dropdown options ──
-  const providerOptions = useMemo(
-    () => providersData?.data?.map((p) => ({ label: p.name, value: p._id })) ?? [],
-    [providersData]
-  );
+  const providerOptions = useMemo(() => {
+    const all = providersData?.data ?? [];
+    const syncProviders = all.filter((p) => p.hasSync === true);
+    const list = syncProviders.length > 0 ? syncProviders : all;
+    return list.map((p) => ({ label: p.name, value: p._id }));
+  }, [providersData]);
   const serviceTypeOptions = useMemo(
     () => serviceTypesData?.data?.map((st) => ({ label: st.name, value: st._id })) ?? [],
     [serviceTypesData]
@@ -243,6 +720,7 @@ const ProductList = () => {
       if (key === "serviceTypeId") next.serviceId = "";
       return next;
     });
+    setSelectedIds([]);
     setSearchParams((sp) => { sp.set("page", 1); return sp; });
   };
 
@@ -252,506 +730,801 @@ const ProductList = () => {
 
   const handleSearch = () => setFilter("search", pendingSearch);
 
+  // ── Selection Handlers ──
+  const isAllSelected = products.length > 0 && products.every((p) => selectedIds.includes(p._id));
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const allCurrentIds = products.map((p) => p._id);
+      setSelectedIds((prev) => [...new Set([...prev, ...allCurrentIds])]);
+    } else {
+      const currentIdsSet = new Set(products.map((p) => p._id));
+      setSelectedIds((prev) => prev.filter((id) => !currentIdsSet.has(id)));
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  // ── Bulk Actions ──
+  const handleBulkStatus = (isActive) => {
+    if (!selectedIds.length) return;
+    bulkToggleStatus(
+      { productIds: selectedIds, isActive },
+      { onSuccess: () => setSelectedIds([]) }
+    );
+  };
+
+  const handleBulkHot = (isHot) => {
+    if (!selectedIds.length) return;
+    bulkToggleHot(
+      { productIds: selectedIds, isHot },
+      { onSuccess: () => setSelectedIds([]) }
+    );
+  };
+
   // ── Stats ──
-  const totalCount = pagination.total ?? 0;
+  const totalCount = stats?.total ?? pagination.total ?? products.length;
+  const activeCount = stats?.active;
+  const inactiveCount = stats?.inactive;
+  const hotCount = stats?.hot;
 
   return (
     <React.Fragment>
       <Head title="Products Management" />
-      <Content>
-        <BlockHead size="sm">
-          <BlockBetween>
-            <BlockHeadContent>
-              <BlockTitle page>Products Management</BlockTitle>
-              <p className="text-muted small mt-1">
-                Manage all VAS products — toggle hot status, activate/deactivate, and filter by any dimension.
-              </p>
-            </BlockHeadContent>
-          </BlockBetween>
-        </BlockHead>
+      <Content className="px-4 px-xl-5 py-4">
+        <div className="container-fluid px-0">
+          <BlockHead size="sm" className="mb-4">
+            <BlockBetween>
+              <BlockHeadContent>
+                <BlockTitle page>Products Management</BlockTitle>
+                <p className="text-muted small mt-1">
+                  Manage all VAS products — toggle hot status, activate/deactivate, and filter by any dimension.
+                </p>
+              </BlockHeadContent>
+            </BlockBetween>
+          </BlockHead>
 
-        {/* ── Stat Cards ── */}
-        <Block>
-          <div className="row g-3 mb-4">
-            <StatCard
-              label="Total Products"
-              value={totalCount.toLocaleString()}
-              color="linear-gradient(135deg,#e0e7ff,#c7d2fe)"
-              icon="📦"
-            />
-            <StatCard
-              label="Active Products"
-              value="—"
-              color="linear-gradient(135deg,#d1fae5,#a7f3d0)"
-              icon="✅"
-            />
-            <StatCard
-              label="Inactive Products"
-              value="—"
-              color="linear-gradient(135deg,#fee2e2,#fecaca)"
-              icon="⛔"
-            />
-            <StatCard
-              label="Hot Products 🔥"
-              value="—"
-              color="linear-gradient(135deg,#fff7ed,#fed7aa)"
-              icon="🔥"
-            />
-          </div>
+          {/* ── Stat Cards (Enhanced padding, larger icons, bigger gaps) ── */}
+          <Block>
+            <div className="row g-4 mb-4">
+              <StatCard
+                label="Total Products"
+                value={totalCount}
+                color="linear-gradient(135deg,#e0e7ff,#c7d2fe)"
+                icon="📦"
+              />
+              <StatCard
+                label="Active Products"
+                value={activeCount}
+                color="linear-gradient(135deg,#d1fae5,#a7f3d0)"
+                icon="✅"
+              />
+              <StatCard
+                label="Inactive Products"
+                value={inactiveCount}
+                color="linear-gradient(135deg,#fee2e2,#fecaca)"
+                icon="⛔"
+              />
+              <StatCard
+                label="Hot Products 🔥"
+                value={hotCount}
+                color="linear-gradient(135deg,#fff7ed,#fed7aa)"
+                icon="🔥"
+              />
+            </div>
 
-          {/* ── Filter Panel ── */}
-          <Card style={{ borderRadius: 12, border: "none", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", marginBottom: 16 }}>
-            <div className="card-body p-3">
-              {/* Search Row */}
-              <div className="d-flex gap-2 flex-wrap mb-3">
-                <div className="input-group" style={{ maxWidth: 340 }}>
-                  <input
-                    type="text"
-                    className="form-control form-control-sm"
-                    placeholder="Search by name, code, description…"
-                    value={pendingSearch}
-                    onChange={(e) => setPendingSearch(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                    id="products-search"
-                  />
-                  <button className="btn btn-sm btn-primary" onClick={handleSearch} id="products-search-btn">
-                    <Icon name="search" />
-                  </button>
+            {/* ── Filter Panel Card (Spacious internal padding, distinct chip rows) ── */}
+            <Card
+              className="filter-panel-card mb-4"
+              style={{
+                borderRadius: 16,
+                border: "none",
+                boxShadow: "0 2px 14px rgba(0,0,0,0.05)",
+                position: "relative",
+                zIndex: 30,
+                overflow: "visible",
+              }}
+            >
+              <div className="card-body p-4 p-xl-5" style={{ overflow: "visible" }}>
+                {/* Top Row: Search & Quick Selects */}
+                <div className="row g-3 align-items-center mb-3">
+                  <div className="col-12 col-md-6 col-lg-5">
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search by name, code, description…"
+                        value={pendingSearch}
+                        onChange={(e) => setPendingSearch(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                        id="products-search"
+                        style={{ fontSize: 13, height: 44, paddingLeft: 16 }}
+                      />
+                      <button className="btn btn-primary px-3" onClick={handleSearch} id="products-search-btn">
+                        <Icon name="search" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="col-6 col-md-3 col-lg-3">
+                    <select
+                      className="form-select"
+                      value={filters.isHot}
+                      onChange={(e) => setFilter("isHot", e.target.value)}
+                      id="filter-hot"
+                      style={{ fontSize: 13, height: 44 }}
+                    >
+                      <option value="all">🔥 All (Hot & Regular)</option>
+                      <option value="true">🔥 Hot Products Only</option>
+                      <option value="false">Regular Products Only</option>
+                    </select>
+                  </div>
+
+                  <div className="col-6 col-md-3 col-lg-4 d-flex align-items-center gap-2">
+                    <select
+                      className="form-select flex-grow-1"
+                      value={filters.status}
+                      onChange={(e) => setFilter("status", e.target.value)}
+                      id="filter-status"
+                      style={{ fontSize: 13, height: 44 }}
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="true">Active Only</option>
+                      <option value="false">Inactive Only</option>
+                    </select>
+                  </div>
                 </div>
 
-                {/* Hot filter */}
-                <select
-                  className="form-select form-select-sm"
-                  style={{ width: "auto" }}
-                  value={filters.isHot}
-                  onChange={(e) => setFilter("isHot", e.target.value)}
-                  id="filter-hot"
-                >
-                  <option value="all">🔥 All Products</option>
-                  <option value="true">🔥 Hot Only</option>
-                  <option value="false">Regular Only</option>
-                </select>
+                {/* Second Row: Dimension Dropdown Chips & Reset Button */}
+                <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 pt-4 mt-2">
+                  <div className="d-flex flex-wrap align-items-center" style={{ gap: 12 }}>
+                    {/* Provider */}
+                    <UncontrolledDropdown>
+                      <DropdownToggle
+                        tag="button"
+                        className={`btn btn-sm ${filters.providerId ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                        id="filter-provider-toggle"
+                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      >
+                        <Icon name="rss" className="me-1" />
+                        {filters.providerId
+                          ? providerOptions.find((p) => p.value === filters.providerId)?.label ?? "Provider"
+                          : "Provider"}
+                        <Icon name="chevron-down" className="ms-1" />
+                      </DropdownToggle>
+                      <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
+                        <DropdownItem onClick={() => setFilter("providerId", "")} className={!filters.providerId ? "fw-bold" : ""}>
+                          All Providers
+                        </DropdownItem>
+                        <DropdownItem divider />
+                        {providerOptions.map((p) => (
+                          <DropdownItem key={p.value} onClick={() => setFilter("providerId", p.value)} className={filters.providerId === p.value ? "fw-bold text-primary" : ""}>
+                            {p.label}
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
 
-                {/* Status filter */}
-                <select
-                  className="form-select form-select-sm"
-                  style={{ width: "auto" }}
-                  value={filters.status}
-                  onChange={(e) => setFilter("status", e.target.value)}
-                  id="filter-status"
-                >
-                  <option value="all">All Statuses</option>
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
-                </select>
+                    {/* Service Type */}
+                    <UncontrolledDropdown>
+                      <DropdownToggle
+                        tag="button"
+                        className={`btn btn-sm ${filters.serviceTypeId ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                        id="filter-service-type-toggle"
+                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      >
+                        <Icon name="shield-star-fill" className="me-1" />
+                        {filters.serviceTypeId
+                          ? serviceTypeOptions.find((st) => st.value === filters.serviceTypeId)?.label ?? "Service Type"
+                          : "Service Type"}
+                        <Icon name="chevron-down" className="ms-1" />
+                      </DropdownToggle>
+                      <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
+                        <DropdownItem onClick={() => setFilter("serviceTypeId", "")} className={!filters.serviceTypeId ? "fw-bold" : ""}>
+                          All Service Types
+                        </DropdownItem>
+                        <DropdownItem divider />
+                        {serviceTypeOptions.map((st) => (
+                          <DropdownItem key={st.value} onClick={() => setFilter("serviceTypeId", st.value)} className={filters.serviceTypeId === st.value ? "fw-bold text-primary" : ""}>
+                            {st.label}
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
 
+                    {/* Service */}
+                    <UncontrolledDropdown>
+                      <DropdownToggle
+                        tag="button"
+                        className={`btn btn-sm ${filters.serviceId ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                        id="filter-service-toggle"
+                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      >
+                        <Icon name="network" className="me-1" />
+                        {filters.serviceId
+                          ? serviceOptions.find((s) => s.value === filters.serviceId)?.label ?? "Service"
+                          : "Service"}
+                        <Icon name="chevron-down" className="ms-1" />
+                      </DropdownToggle>
+                      <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
+                        <DropdownItem onClick={() => setFilter("serviceId", "")} className={!filters.serviceId ? "fw-bold" : ""}>
+                          All Services
+                        </DropdownItem>
+                        <DropdownItem divider />
+                        {serviceOptions.map((s) => (
+                          <DropdownItem key={s.value} onClick={() => setFilter("serviceId", s.value)} className={filters.serviceId === s.value ? "fw-bold text-primary" : ""}>
+                            {s.label}
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
+
+                    {/* Data Type */}
+                    <UncontrolledDropdown>
+                      <DropdownToggle
+                        tag="button"
+                        className={`btn btn-sm ${filters.dataType ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                        id="filter-datatype-toggle"
+                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      >
+                        <Icon name="signal" className="me-1" />
+                        {filters.dataType || "Data Type"}
+                        <Icon name="chevron-down" className="ms-1" />
+                      </DropdownToggle>
+                      <DropdownMenu style={{ zIndex: 1060 }}>
+                        <DropdownItem onClick={() => setFilter("dataType", "")} className={!filters.dataType ? "fw-bold" : ""}>
+                          All Data Types
+                        </DropdownItem>
+                        <DropdownItem divider />
+                        {DATA_TYPES.map((dt) => (
+                          <DropdownItem key={dt} onClick={() => setFilter("dataType", dt)} className={filters.dataType === dt ? "fw-bold text-primary" : ""}>
+                            {dt}
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
+
+                    {/* Validity */}
+                    <UncontrolledDropdown>
+                      <DropdownToggle
+                        tag="button"
+                        className={`btn btn-sm ${filters.validity ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                        id="filter-validity-toggle"
+                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      >
+                        <Icon name="clock" className="me-1" />
+                        {filters.validity
+                          ? VALIDITY_OPTIONS.find((v) => v.value === filters.validity)?.label ?? filters.validity
+                          : "Validity"}
+                        <Icon name="chevron-down" className="ms-1" />
+                      </DropdownToggle>
+                      <DropdownMenu style={{ zIndex: 1060 }}>
+                        <DropdownItem onClick={() => setFilter("validity", "")} className={!filters.validity ? "fw-bold" : ""}>
+                          All Durations
+                        </DropdownItem>
+                        <DropdownItem divider />
+                        {VALIDITY_OPTIONS.map((v) => (
+                          <DropdownItem key={v.value} onClick={() => setFilter("validity", v.value)} className={filters.validity === v.value ? "fw-bold text-primary" : ""}>
+                            {v.label}
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
+                  </div>
+
+                  {activeFilters.length > 0 && (
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      onClick={() => {
+                        setFilters({ search: "", providerId: "", serviceTypeId: "", serviceId: "", dataType: "", validity: "", isHot: "all", status: "all" });
+                        setPendingSearch("");
+                        setSearchParams((sp) => { sp.set("page", 1); return sp; });
+                      }}
+                    >
+                      <Icon name="cross" className="me-1" />
+                      Reset All Filters
+                    </button>
+                  )}
+                </div>
+
+                {/* Active Filter Pills – Spacious Display */}
                 {activeFilters.length > 0 && (
-                  <button
-                    className="btn btn-sm btn-outline-secondary"
-                    onClick={() => {
-                      setFilters({ search: "", providerId: "", serviceTypeId: "", serviceId: "", dataType: "", validity: "", isHot: "all", status: "all" });
-                      setPendingSearch("");
-                      setSearchParams((sp) => { sp.set("page", 1); return sp; });
+                  <div className="mt-4 pt-4">
+                    <div className="d-flex align-items-center mb-3">
+                      <span className="text-dark fw-bold" style={{ fontSize: 14, marginRight: 16 }}>
+                        Active filters:
+                      </span>
+                    </div>
+                    <div className="d-flex flex-wrap align-items-center" style={{ gap: 12 }}>
+                      {activeFilters.map(([key, val]) => {
+                        let label = `${key}: ${val}`;
+                        if (key === "providerId") label = `Provider: ${providerOptions.find((p) => p.value === val)?.label ?? val}`;
+                        if (key === "serviceTypeId") label = `Type: ${serviceTypeOptions.find((st) => st.value === val)?.label ?? val}`;
+                        if (key === "serviceId") label = `Service: ${serviceOptions.find((s) => s.value === val)?.label ?? val}`;
+                        if (key === "dataType") label = `Data: ${val}`;
+                        if (key === "validity") label = `Validity: ${VALIDITY_OPTIONS.find((v) => v.value === val)?.label ?? val}`;
+                        if (key === "isHot") label = val === "true" ? "🔥 Hot Only" : "Regular Only";
+                        if (key === "status") label = val === "true" ? "✅ Active" : "⛔ Inactive";
+                        if (key === "search") label = `Search: "${val}"`;
+                        return <FilterPill key={key} label={label} onClear={() => clearFilter(key)} />;
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* ── Bulk Actions Floating Toolbar (Generous padding, bold badge, distinct action groups) ── */}
+            {selectedIds.length > 0 && (
+              <div
+                className="p-4 mb-4 rounded-3 d-flex flex-wrap align-items-center justify-content-between gap-3 shadow-lg"
+                style={{
+                  background: "#0f172a",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  borderRadius: 16,
+                  boxShadow: "0 12px 36px rgba(15, 23, 42, 0.45)",
+                  minHeight: 72,
+                }}
+              >
+                {/* Left: Bold Enclosed Counter Badge */}
+                <div className="d-flex align-items-center gap-3">
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+                      color: "#ffffff",
+                      fontWeight: 900,
+                      fontSize: 18,
+                      minWidth: 46,
+                      height: 46,
+                      borderRadius: "50%",
+                      boxShadow: "0 0 20px rgba(59, 130, 246, 0.75)",
                     }}
                   >
-                    Clear All
-                  </button>
-                )}
-              </div>
-
-              {/* Grouped Filter Dropdowns */}
-              <div className="d-flex flex-wrap gap-2 align-items-center">
-                {/* Provider */}
-                <UncontrolledDropdown>
-                  <DropdownToggle
-                    tag="button"
-                    className={`btn btn-sm ${filters.providerId ? "btn-primary" : "btn-outline-secondary"}`}
-                    id="filter-provider-toggle"
-                  >
-                    <Icon name="rss" className="me-1" />
-                    {filters.providerId
-                      ? providerOptions.find((p) => p.value === filters.providerId)?.label ?? "Provider"
-                      : "Provider"}
-                    <Icon name="chevron-down" className="ms-1" />
-                  </DropdownToggle>
-                  <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", minWidth: 200 }}>
-                    <DropdownItem onClick={() => setFilter("providerId", "")} className={!filters.providerId ? "fw-bold" : ""}>
-                      All Providers
-                    </DropdownItem>
-                    <DropdownItem divider />
-                    {providerOptions.map((p) => (
-                      <DropdownItem key={p.value} onClick={() => setFilter("providerId", p.value)} className={filters.providerId === p.value ? "fw-bold text-primary" : ""}>
-                        {p.label}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </UncontrolledDropdown>
-
-                {/* Service Type */}
-                <UncontrolledDropdown>
-                  <DropdownToggle
-                    tag="button"
-                    className={`btn btn-sm ${filters.serviceTypeId ? "btn-primary" : "btn-outline-secondary"}`}
-                    id="filter-service-type-toggle"
-                  >
-                    <Icon name="shield-star-fill" className="me-1" />
-                    {filters.serviceTypeId
-                      ? serviceTypeOptions.find((st) => st.value === filters.serviceTypeId)?.label ?? "Service Type"
-                      : "Service Type"}
-                    <Icon name="chevron-down" className="ms-1" />
-                  </DropdownToggle>
-                  <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", minWidth: 200 }}>
-                    <DropdownItem onClick={() => setFilter("serviceTypeId", "")} className={!filters.serviceTypeId ? "fw-bold" : ""}>
-                      All Service Types
-                    </DropdownItem>
-                    <DropdownItem divider />
-                    {serviceTypeOptions.map((st) => (
-                      <DropdownItem key={st.value} onClick={() => setFilter("serviceTypeId", st.value)} className={filters.serviceTypeId === st.value ? "fw-bold text-primary" : ""}>
-                        {st.label}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </UncontrolledDropdown>
-
-                {/* Service */}
-                <UncontrolledDropdown>
-                  <DropdownToggle
-                    tag="button"
-                    className={`btn btn-sm ${filters.serviceId ? "btn-primary" : "btn-outline-secondary"}`}
-                    id="filter-service-toggle"
-                  >
-                    <Icon name="network" className="me-1" />
-                    {filters.serviceId
-                      ? serviceOptions.find((s) => s.value === filters.serviceId)?.label ?? "Service"
-                      : "Service"}
-                    <Icon name="chevron-down" className="ms-1" />
-                  </DropdownToggle>
-                  <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", minWidth: 200 }}>
-                    <DropdownItem onClick={() => setFilter("serviceId", "")} className={!filters.serviceId ? "fw-bold" : ""}>
-                      All Services
-                    </DropdownItem>
-                    <DropdownItem divider />
-                    {serviceOptions.map((s) => (
-                      <DropdownItem key={s.value} onClick={() => setFilter("serviceId", s.value)} className={filters.serviceId === s.value ? "fw-bold text-primary" : ""}>
-                        {s.label}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </UncontrolledDropdown>
-
-                {/* Data Type */}
-                <UncontrolledDropdown>
-                  <DropdownToggle
-                    tag="button"
-                    className={`btn btn-sm ${filters.dataType ? "btn-primary" : "btn-outline-secondary"}`}
-                    id="filter-datatype-toggle"
-                  >
-                    <Icon name="signal" className="me-1" />
-                    {filters.dataType || "Data Type"}
-                    <Icon name="chevron-down" className="ms-1" />
-                  </DropdownToggle>
-                  <DropdownMenu>
-                    <DropdownItem onClick={() => setFilter("dataType", "")} className={!filters.dataType ? "fw-bold" : ""}>
-                      All Data Types
-                    </DropdownItem>
-                    <DropdownItem divider />
-                    {DATA_TYPES.map((dt) => (
-                      <DropdownItem key={dt} onClick={() => setFilter("dataType", dt)} className={filters.dataType === dt ? "fw-bold text-primary" : ""}>
-                        {dt}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </UncontrolledDropdown>
-
-                {/* Validity */}
-                <UncontrolledDropdown>
-                  <DropdownToggle
-                    tag="button"
-                    className={`btn btn-sm ${filters.validity ? "btn-primary" : "btn-outline-secondary"}`}
-                    id="filter-validity-toggle"
-                  >
-                    <Icon name="clock" className="me-1" />
-                    {filters.validity
-                      ? VALIDITY_OPTIONS.find((v) => v.value === filters.validity)?.label ?? filters.validity
-                      : "Validity"}
-                    <Icon name="chevron-down" className="ms-1" />
-                  </DropdownToggle>
-                  <DropdownMenu>
-                    <DropdownItem onClick={() => setFilter("validity", "")} className={!filters.validity ? "fw-bold" : ""}>
-                      All Durations
-                    </DropdownItem>
-                    <DropdownItem divider />
-                    {VALIDITY_OPTIONS.map((v) => (
-                      <DropdownItem key={v.value} onClick={() => setFilter("validity", v.value)} className={filters.validity === v.value ? "fw-bold text-primary" : ""}>
-                        {v.label}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </UncontrolledDropdown>
-              </div>
-
-              {/* Active Filter Pills */}
-              {activeFilters.length > 0 && (
-                <div className="mt-2 d-flex flex-wrap align-items-center">
-                  <span className="text-muted small me-2">Active filters:</span>
-                  {activeFilters.map(([key, val]) => {
-                    let label = `${key}: ${val}`;
-                    if (key === "providerId") label = `Provider: ${providerOptions.find((p) => p.value === val)?.label ?? val}`;
-                    if (key === "serviceTypeId") label = `Type: ${serviceTypeOptions.find((st) => st.value === val)?.label ?? val}`;
-                    if (key === "serviceId") label = `Service: ${serviceOptions.find((s) => s.value === val)?.label ?? val}`;
-                    if (key === "dataType") label = `Data: ${val}`;
-                    if (key === "validity") label = `Validity: ${VALIDITY_OPTIONS.find((v) => v.value === val)?.label ?? val}`;
-                    if (key === "isHot") label = val === "true" ? "🔥 Hot Only" : "Regular Only";
-                    if (key === "status") label = val === "true" ? "✅ Active" : "⛔ Inactive";
-                    if (key === "search") label = `Search: "${val}"`;
-                    return <FilterPill key={key} label={label} onClear={() => clearFilter(key)} />;
-                  })}
+                    {selectedIds.length}
+                  </span>
+                  <span style={{ color: "#f8fafc", fontWeight: 800, fontSize: 16, letterSpacing: "-0.2px" }}>
+                    {selectedIds.length === 1 ? "Product Selected" : "Products Selected"}
+                  </span>
                 </div>
-              )}
-            </div>
-          </Card>
 
-          {/* ── Products Table ── */}
-          <Card style={{ borderRadius: 12, border: "none", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-            <div className="card-inner border-bottom d-flex align-items-center justify-content-between py-3">
-              <h6 className="title mb-0">
-                All Products
-                {totalCount > 0 && (
-                  <Badge color="light" className="ms-2 text-muted">
-                    {totalCount.toLocaleString()}
-                  </Badge>
-                )}
-              </h6>
-            </div>
+                {/* Right: Grouped Action Buttons with 14px gaps and dividers */}
+                <div className="d-flex flex-wrap align-items-center" style={{ gap: 16 }}>
+                  {/* Group 1: Hot Actions */}
+                  <div className="d-flex align-items-center" style={{ gap: 12 }}>
+                    <button
+                      type="button"
+                      className="btn d-inline-flex align-items-center justify-content-center gap-1"
+                      style={{
+                        background: "linear-gradient(135deg, #f97316, #ea580c)",
+                        color: "#ffffff",
+                        border: "none",
+                        fontWeight: 600,
+                        padding: "9px 20px",
+                        borderRadius: 9,
+                        fontSize: 13,
+                        boxShadow: "0 2px 10px rgba(249, 115, 22, 0.45)",
+                        lineHeight: 1.4,
+                      }}
+                      onClick={() => handleBulkHot(true)}
+                      disabled={isBulkingHot}
+                    >
+                      🔥 Mark as Hot
+                    </button>
 
-            <div className="card-inner p-0">
-              {isLoading ? (
-                <LoadingSpinner />
-              ) : products.length > 0 ? (
-                <>
-                  <DataTableBody className="is-compact">
-                    <DataTableHead className="tb-tnx-head bg-white fw-bold text-secondary">
-                      <DataTableRow>
-                        <span>#</span>
-                      </DataTableRow>
-                      <DataTableRow>
-                        <span>Product</span>
-                      </DataTableRow>
-                      <DataTableRow size="sm">
-                        <span>Service / Type</span>
-                      </DataTableRow>
-                      <DataTableRow size="sm">
-                        <span>Provider</span>
-                      </DataTableRow>
-                      <DataTableRow size="sm">
-                        <span>Size / Validity</span>
-                      </DataTableRow>
-                      <DataTableRow size="sm">
-                        <span>Amount</span>
-                      </DataTableRow>
-                      <DataTableRow size="md">
-                        <span>Provider Amt</span>
-                      </DataTableRow>
-                      <DataTableRow>
-                        <span>🔥 Hot</span>
-                      </DataTableRow>
-                      <DataTableRow>
-                        <span>Status</span>
-                      </DataTableRow>
-                      <DataTableRow className="nk-tb-col-tools">
-                        <span></span>
-                      </DataTableRow>
-                    </DataTableHead>
+                    <button
+                      type="button"
+                      className="btn d-inline-flex align-items-center justify-content-center gap-1"
+                      style={{
+                        background: "transparent",
+                        color: "#ffffff",
+                        border: "1.5px solid #ffffff",
+                        fontWeight: 600,
+                        padding: "9px 20px",
+                        borderRadius: 9,
+                        fontSize: 13,
+                        lineHeight: 1.4,
+                      }}
+                      onClick={() => handleBulkHot(false)}
+                      disabled={isBulkingHot}
+                    >
+                      Remove from Hot
+                    </button>
+                  </div>
 
-                    {products.map((item, idx) => {
-                      const service = item.serviceId;
-                      const serviceType = service?.serviceTypeId;
-                      const provider = item.providerId;
-                      const margin = item.amount - item.providerAmount;
+                  {/* Vertical Divider */}
+                  <div
+                    className="d-none d-lg-block"
+                    style={{
+                      width: 1.5,
+                      height: 34,
+                      background: "rgba(255, 255, 255, 0.25)",
+                      margin: "0 4px",
+                    }}
+                  />
 
-                      return (
-                        <DataTableItem key={item._id} className="text-secondary">
-                          {/* S/N */}
-                          <DataTableRow>
-                            <span className="text-muted small">
-                              {(page - 1) * limit + idx + 1}
-                            </span>
-                          </DataTableRow>
+                  {/* Group 2: Status Actions */}
+                  <div className="d-flex align-items-center" style={{ gap: 12 }}>
+                    <button
+                      type="button"
+                      className="btn d-inline-flex align-items-center justify-content-center gap-1"
+                      style={{
+                        background: "linear-gradient(135deg, #10b981, #059669)",
+                        color: "#ffffff",
+                        border: "none",
+                        fontWeight: 600,
+                        padding: "9px 20px",
+                        borderRadius: 9,
+                        fontSize: 13,
+                        boxShadow: "0 2px 10px rgba(16, 185, 129, 0.45)",
+                        lineHeight: 1.4,
+                      }}
+                      onClick={() => handleBulkStatus(true)}
+                      disabled={isBulkingStatus}
+                    >
+                      ✅ Activate
+                    </button>
 
-                          {/* Product info */}
-                          <DataTableRow>
-                            <div className="d-flex align-items-center gap-2">
-                              <img
-                                src={item.logo || service?.logo || NoIcon}
-                                alt={item.name}
-                                style={{ width: 32, height: 32, borderRadius: 8, objectFit: "contain", flexShrink: 0 }}
-                              />
-                              <div>
-                                <div className="fw-medium" style={{ fontSize: 13, lineHeight: 1.3 }}>
-                                  {item.name}
-                                </div>
-                                <div className="text-muted" style={{ fontSize: 11 }}>
-                                  {item.code}
+                    <button
+                      type="button"
+                      className="btn d-inline-flex align-items-center justify-content-center gap-1"
+                      style={{
+                        background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                        color: "#ffffff",
+                        border: "none",
+                        fontWeight: 600,
+                        padding: "9px 20px",
+                        borderRadius: 9,
+                        fontSize: 13,
+                        boxShadow: "0 2px 10px rgba(239, 68, 68, 0.45)",
+                        lineHeight: 1.4,
+                      }}
+                      onClick={() => handleBulkStatus(false)}
+                      disabled={isBulkingStatus}
+                    >
+                      ⛔ Deactivate
+                    </button>
+                  </div>
+
+                  {/* Vertical Divider */}
+                  <div
+                    className="d-none d-lg-block"
+                    style={{
+                      width: 1.5,
+                      height: 34,
+                      background: "rgba(255, 255, 255, 0.25)",
+                      margin: "0 4px",
+                    }}
+                  />
+
+                  {/* Group 3: Deselect All (Prominent secondary button with X icon) */}
+                  <button
+                    type="button"
+                    className="btn d-inline-flex align-items-center justify-content-center gap-2"
+                    style={{
+                      background: "rgba(255, 255, 255, 0.1)",
+                      color: "#ffffff",
+                      border: "1.5px solid rgba(255, 255, 255, 0.35)",
+                      fontWeight: 600,
+                      padding: "9px 20px",
+                      borderRadius: 9,
+                      fontSize: 13,
+                      lineHeight: 1.4,
+                    }}
+                    onClick={() => setSelectedIds([])}
+                  >
+                    <span style={{ fontWeight: 800, fontSize: 14 }}>✕</span> Deselect All
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── Products Table ── */}
+            <Card
+              className="products-table-card mb-4"
+              style={{
+                borderRadius: 16,
+                border: "none",
+                boxShadow: "0 2px 14px rgba(0,0,0,0.05)",
+                position: "relative",
+                zIndex: 10,
+              }}
+            >
+              <div className="card-inner border-bottom d-flex align-items-center justify-content-between py-4 px-4 px-xl-5">
+                <h6 className="title mb-0 fs-5 fw-bold">
+                  All Products
+                  {totalCount > 0 && (
+                    <Badge color="light" className="ms-2 text-primary fw-bold" style={{ fontSize: 12 }}>
+                      {totalCount.toLocaleString()}
+                    </Badge>
+                  )}
+                </h6>
+              </div>
+
+              <div className="card-inner p-0">
+                {isLoading ? (
+                  <LoadingSpinner />
+                ) : products.length > 0 ? (
+                  <>
+                    <DataTableBody className="is-compact">
+                      <DataTableHead className="tb-tnx-head bg-white fw-bold text-secondary">
+                        {/* Checkbox column with generous left edge padding */}
+                        <DataTableRow style={{ width: 60 }}>
+                          <div className="custom-control custom-control-sm custom-checkbox ps-2">
+                            <input
+                              type="checkbox"
+                              className="custom-control-input"
+                              id="select-all-products"
+                              checked={isAllSelected}
+                              onChange={handleSelectAll}
+                            />
+                            <label className="custom-control-label" htmlFor="select-all-products" />
+                          </div>
+                        </DataTableRow>
+
+                        <DataTableRow>
+                          <span>Product</span>
+                        </DataTableRow>
+                        <DataTableRow size="sm">
+                          <span>Service / Type</span>
+                        </DataTableRow>
+                        <DataTableRow size="sm">
+                          <span>Provider</span>
+                        </DataTableRow>
+                        <DataTableRow size="sm">
+                          <span>Size / Validity</span>
+                        </DataTableRow>
+                        <DataTableRow size="sm">
+                          <span>Amount</span>
+                        </DataTableRow>
+                        <DataTableRow className="text-center" style={{ width: 100 }}>
+                          <span className="d-block text-center">🔥 Hot</span>
+                        </DataTableRow>
+                        <DataTableRow style={{ width: 110 }}>
+                          <span>Status</span>
+                        </DataTableRow>
+                        <DataTableRow className="nk-tb-col-tools">
+                          <span></span>
+                        </DataTableRow>
+                      </DataTableHead>
+
+                      {products.map((item) => {
+                        const service = item.serviceId;
+                        const serviceType = service?.serviceTypeId;
+                        const provider = item.providerId;
+                        const margin = (item.amount || 0) - (item.providerAmount || 0);
+                        const isSelected = selectedIds.includes(item._id);
+
+                        return (
+                          <DataTableItem
+                            key={item._id}
+                            className={`text-secondary ${isSelected ? "product-row-selected" : ""}`}
+                          >
+                            {/* Checkbox */}
+                            <DataTableRow style={{ width: 60 }}>
+                              <div className="custom-control custom-control-sm custom-checkbox ps-2">
+                                <input
+                                  type="checkbox"
+                                  className="custom-control-input"
+                                  id={`select-prod-${item._id}`}
+                                  checked={isSelected}
+                                  onChange={() => handleSelectOne(item._id)}
+                                />
+                                <label className="custom-control-label" htmlFor={`select-prod-${item._id}`} />
+                              </div>
+                            </DataTableRow>
+
+                            {/* Product info */}
+                            <DataTableRow>
+                              <div className="d-flex align-items-center gap-2">
+                                <img
+                                  src={item.logo || service?.logo || NoIcon}
+                                  alt={item.name}
+                                  style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", flexShrink: 0 }}
+                                />
+                                <div>
+                                  <div
+                                    className="fw-medium text-dark"
+                                    style={{ fontSize: 13, lineHeight: 1.3, cursor: "pointer" }}
+                                    onClick={() => setDetailProduct(item)}
+                                  >
+                                    {item.name}
+                                  </div>
+                                  <div className="text-muted" style={{ fontSize: 11 }}>
+                                    {item.code}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </DataTableRow>
+                            </DataTableRow>
 
-                          {/* Service / Type */}
-                          <DataTableRow size="sm">
-                            <div>
-                              {service?.name && (
-                                <Badge
-                                  color="light"
-                                  className="text-secondary me-1 mb-1"
-                                  style={{ fontSize: 11, fontWeight: 500 }}
-                                >
-                                  {service.name}
-                                </Badge>
-                              )}
-                              {serviceType?.name && (
-                                <Badge
-                                  style={{
-                                    background: "#ede9fe",
-                                    color: "#7c3aed",
-                                    fontSize: 10,
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {serviceType.name}
-                                </Badge>
-                              )}
-                              {item.attributes?.dataType && (
-                                <div>
-                                  <Badge
-                                    style={{ background: "#ecfdf5", color: "#059669", fontSize: 10, marginTop: 2 }}
+                            {/* Service / Type */}
+                            <DataTableRow size="sm">
+                              <div className="d-flex flex-wrap align-items-center gap-1">
+                                {service?.name && (
+                                  <span
+                                    className="badge text-secondary border bg-light"
+                                    style={{ fontSize: 11, fontWeight: 500 }}
+                                  >
+                                    {service.name}
+                                  </span>
+                                )}
+                                {serviceType?.name && (
+                                  <span
+                                    className="badge"
+                                    style={{
+                                      background: "#ede9fe",
+                                      color: "#7c3aed",
+                                      fontSize: 10,
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {serviceType.name}
+                                  </span>
+                                )}
+                                {item.attributes?.dataType && (
+                                  <span
+                                    className="badge"
+                                    style={{ background: "#ecfdf5", color: "#059669", fontSize: 10 }}
                                   >
                                     {item.attributes.dataType}
-                                  </Badge>
-                                </div>
-                              )}
-                            </div>
-                          </DataTableRow>
-
-                          {/* Provider */}
-                          <DataTableRow size="sm">
-                            {provider?.name && (
-                              <div className="d-flex align-items-center gap-1">
-                                <img
-                                  src={provider?.logo || NoIcon}
-                                  alt={provider.name}
-                                  style={{ width: 20, height: 20, borderRadius: 4, objectFit: "contain" }}
-                                />
-                                <span style={{ fontSize: 12 }}>{provider.name}</span>
+                                  </span>
+                                )}
                               </div>
-                            )}
-                          </DataTableRow>
+                            </DataTableRow>
 
-                          {/* Size / Validity */}
-                          <DataTableRow size="sm">
-                            <div style={{ fontSize: 12 }}>
-                              {item.dataSizeDisplay && (
-                                <div className="fw-medium">{item.dataSizeDisplay}</div>
-                              )}
-                              {(item.validity || item.attributes?.validityPeriod) && (
-                                <div className="text-muted">
-                                  {item.validity || item.attributes?.validityPeriod}
+                            {/* Provider */}
+                            <DataTableRow size="sm">
+                              {provider?.name ? (
+                                <div className="d-flex align-items-center gap-1">
+                                  <img
+                                    src={provider?.logo || NoIcon}
+                                    alt={provider.name}
+                                    style={{ width: 24, height: 24, borderRadius: 4, objectFit: "contain" }}
+                                  />
+                                  <span style={{ fontSize: 12, fontWeight: 500 }}>{provider.name}</span>
                                 </div>
+                              ) : (
+                                <span className="text-muted small">—</span>
                               )}
-                            </div>
-                          </DataTableRow>
+                            </DataTableRow>
 
-                          {/* Amount */}
-                          <DataTableRow size="sm">
-                            <div>
-                              <div className="fw-medium" style={{ fontSize: 13 }}>
-                                {formatter("NGN").format(item.amount)}
+                            {/* Size / Validity */}
+                            <DataTableRow size="sm">
+                              <div style={{ fontSize: 12 }}>
+                                {item.dataSizeDisplay && (
+                                  <div className="fw-medium text-dark">{item.dataSizeDisplay}</div>
+                                )}
+                                {(item.validity || item.attributes?.validityPeriod) && (
+                                  <div className="text-muted small">
+                                    {item.validity || item.attributes?.validityPeriod}
+                                  </div>
+                                )}
                               </div>
-                              {margin > 0 && (
-                                <div style={{ fontSize: 11, color: "#16a34a" }}>
-                                  +{formatter("NGN").format(margin)}
+                            </DataTableRow>
+
+                            {/* Amount */}
+                            <DataTableRow size="sm">
+                              <div>
+                                <div className="fw-bold text-dark" style={{ fontSize: 13 }}>
+                                  {formatter("NGN").format(item.amount)}
                                 </div>
-                              )}
-                            </div>
-                          </DataTableRow>
+                                {margin > 0 && (
+                                  <div style={{ fontSize: 11, color: "#16a34a", fontWeight: 500 }}>
+                                    +{formatter("NGN").format(margin)} margin
+                                  </div>
+                                )}
+                              </div>
+                            </DataTableRow>
 
-                          {/* Provider Amount */}
-                          <DataTableRow size="md">
-                            <span style={{ fontSize: 12, color: "#64748b" }}>
-                              {formatter("NGN").format(item.providerAmount)}
-                            </span>
-                          </DataTableRow>
+                            {/* Hot Toggle */}
+                            <DataTableRow className="text-center">
+                              <HotToggle productId={item._id} isHot={!!item.isHot} />
+                            </DataTableRow>
 
-                          {/* Hot Toggle */}
-                          <DataTableRow>
-                            <HotToggle productId={item._id} isHot={!!item.isHot} />
-                          </DataTableRow>
+                            {/* Status Toggle */}
+                            <DataTableRow>
+                              <StatusToggle productId={item._id} isActive={!!item.isActive} />
+                            </DataTableRow>
 
-                          {/* Status Toggle */}
-                          <DataTableRow>
-                            <StatusToggle productId={item._id} isActive={!!item.isActive} />
-                          </DataTableRow>
+                            {/* Actions */}
+                            <DataTableRow className="nk-tb-col-tools">
+                              <ul className="nk-tb-actions gx-1 my-n1">
+                                <li>
+                                  <UncontrolledDropdown>
+                                    <DropdownToggle
+                                      tag="a"
+                                      className="btn btn-trigger dropdown-toggle btn-icon me-n1"
+                                    >
+                                      <Icon name="more-h" />
+                                    </DropdownToggle>
+                                    <DropdownMenu end style={{ zIndex: 1060 }}>
+                                      <ul className="link-list-opt no-bdr">
+                                        <li>
+                                          <DropdownItem
+                                            tag="a"
+                                            href="#details"
+                                            onClick={(ev) => {
+                                              ev.preventDefault();
+                                              setDetailProduct(item);
+                                            }}
+                                          >
+                                            <Icon name="eye" />
+                                            <span>View Details</span>
+                                          </DropdownItem>
+                                        </li>
+                                        <li>
+                                          <DropdownItem
+                                            tag="a"
+                                            href="#edit"
+                                            onClick={(ev) => {
+                                              ev.preventDefault();
+                                              setEditProduct(item);
+                                            }}
+                                          >
+                                            <Icon name="edit" />
+                                            <span>Edit Product</span>
+                                          </DropdownItem>
+                                        </li>
+                                      </ul>
+                                    </DropdownMenu>
+                                  </UncontrolledDropdown>
+                                </li>
+                              </ul>
+                            </DataTableRow>
+                          </DataTableItem>
+                        );
+                      })}
+                    </DataTableBody>
 
-                          {/* Actions */}
-                          <DataTableRow className="nk-tb-col-tools">
-                            <ul className="nk-tb-actions gx-1 my-n1">
-                              <li>
-                                <UncontrolledDropdown>
-                                  <DropdownToggle
-                                    tag="a"
-                                    className="btn btn-trigger dropdown-toggle btn-icon me-n1"
-                                  >
-                                    <Icon name="more-h" />
-                                  </DropdownToggle>
-                                  <DropdownMenu end>
-                                    <ul className="link-list-opt no-bdr">
-                                      <li>
-                                        <DropdownItem
-                                          tag="a"
-                                          href="#"
-                                          onClick={(ev) => ev.preventDefault()}
-                                        >
-                                          <Icon name="eye" />
-                                          <span>View Details</span>
-                                        </DropdownItem>
-                                      </li>
-                                    </ul>
-                                  </DropdownMenu>
-                                </UncontrolledDropdown>
-                              </li>
-                            </ul>
-                          </DataTableRow>
-                        </DataTableItem>
-                      );
-                    })}
-                  </DataTableBody>
-
-                  <div className="card-inner">
-                    {pagination.total > 0 && (
-                      <PaginationComponent
-                        itemPerPage={limit}
-                        totalItems={pagination.total}
-                        paginate={(p) =>
-                          setSearchParams((sp) => {
-                            sp.set("page", p);
-                            return sp;
-                          })
-                        }
-                        currentPage={page}
-                      />
-                    )}
+                    <div className="card-inner py-4 px-4 px-xl-5">
+                      {pagination.total > 0 && (
+                        <PaginationComponent
+                          itemPerPage={limit}
+                          totalItems={pagination.total}
+                          paginate={(p) =>
+                            setSearchParams((sp) => {
+                              sp.set("page", p);
+                              return sp;
+                            })
+                          }
+                          currentPage={page}
+                        />
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-5">
+                    <div style={{ fontSize: 48, marginBottom: 12 }}>📦</div>
+                    <p className="text-muted mb-1">No products found</p>
+                    <small className="text-muted">Try adjusting your filters or search term</small>
                   </div>
-                </>
-              ) : (
-                <div className="text-center py-5">
-                  <div style={{ fontSize: 48, marginBottom: 12 }}>📦</div>
-                  <p className="text-muted mb-1">No products found</p>
-                  <small className="text-muted">Try adjusting your filters or search term</small>
-                </div>
-              )}
-            </div>
-          </Card>
-        </Block>
+                )}
+              </div>
+            </Card>
+          </Block>
+        </div>
+
+        {/* Detail Modal */}
+        <ProductDetailModal
+          isOpen={!!detailProduct}
+          toggle={() => setDetailProduct(null)}
+          product={detailProduct}
+          onEdit={(prod) => setEditProduct(prod)}
+        />
+
+        {/* Adaptive Edit Modal */}
+        <ProductEditModal
+          isOpen={!!editProduct}
+          toggle={() => setEditProduct(null)}
+          product={editProduct}
+        />
       </Content>
     </React.Fragment>
   );

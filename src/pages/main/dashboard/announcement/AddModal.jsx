@@ -15,6 +15,7 @@ import BACKEND_URLS from "../../../../api/urls";
 import Cookies from "js-cookie";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { TRANSACTION_TYPE_OPTIONS } from "../../../../utils/constants";
 
 const channelOption = [
   { label: "Push", value: "push" },
@@ -53,6 +54,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
       title: formData.title || "",
       body: formData.body || "",
       channels: [],
+      type: null,
       target: null,
       schedule: true,
       dispatchDate: null,
@@ -90,6 +92,8 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
 
     let submittedData;
     const channels = data.channels.map((item) => item.value);
+    const hasPushSelected = channels.includes("push");
+    const pushType = hasPushSelected && data.type ? (data.type.value ? data.type.value : data.type) : undefined;
 
     let target_users = selectedUsers.map((item) => item.id);
     let target = data.target.value ? data.target.value : data.target;
@@ -100,6 +104,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
         body: data.body,
         target: data.target.value ? data.target.value : data.target,
         channels,
+        ...(pushType && { type: pushType }),
         ...(data.schedule && {
           dispatchTime: data.dispatchDate instanceof Date ? formatDateToISO(data.dispatchDate) : data.dispatchDate,
         }),
@@ -113,6 +118,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
         body: data.body,
         target: data.target.value ? data.target.value : data.target,
         channels,
+        ...(pushType && { type: pushType }),
         ...(data.schedule && {
           dispatchTime: data.dispatchDate instanceof Date ? formatDateToISO(data.dispatchDate) : data.dispatchDate,
         }),
@@ -148,6 +154,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
   // Check if SMS is selected
   const hasSMS = channels.some((channel) => channel.value === "sms");
   const hasEmail = channels.some((channel) => channel.value === "email");
+  const hasPush = channels.some((channel) => channel.value === "push");
 
   // Handle channel change to enforce Email alone rule
   const handleChannelChange = (selectedOptions) => {
@@ -178,10 +185,18 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
       label: `${user.firstname} ${user?.lastname} - ${user?.email}`,
     }));
 
+    const defaultType = formData.type
+      ? TRANSACTION_TYPE_OPTIONS.find((item) => item.value === formData.type) || {
+          label: formData.type,
+          value: formData.type,
+        }
+      : null;
+
     reset({
       title: formData.title || "",
       body: formData.body || "",
       channels: defaultChannels,
+      type: defaultType,
       target: formData.target ? { label: formData.target, value: formData.target } : null,
       schedule: formData.isImmediate,
       dispatchDate: formData.dispatchDate ? dayjs(formData.dispatchDate).toDate() : null,
@@ -313,7 +328,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
                   </div>
                 </div>
               </Col>
-              <Col md="6">
+              <Col md={hasPush ? "6" : "6"}>
                 <div className="form-group">
                   <label className="form-label">Select Channel</label>
                   <div className="form-control-wrap">
@@ -338,7 +353,33 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
                   <small className="text-muted">Note: Email can only be selected alone</small>
                 </div>
               </Col>
-              <Col md="6">
+              {hasPush && (
+                <Col md="6">
+                  <div className="form-group">
+                    <label className="form-label">Notification Type (Push)</label>
+                    <div className="form-control-wrap">
+                      <Controller
+                        control={control}
+                        name="type"
+                        render={({ field: { onChange, value }, fieldState }) => (
+                          <>
+                            <RSelect
+                              options={TRANSACTION_TYPE_OPTIONS}
+                              value={value}
+                              onChange={onChange}
+                              placeholder="Select transaction type..."
+                              isClearable
+                            />
+                            {fieldState.error && <span className="invalid">{fieldState.error.message}</span>}
+                          </>
+                        )}
+                      />
+                    </div>
+                    <small className="text-muted">Transaction type included in push data payload</small>
+                  </div>
+                </Col>
+              )}
+              <Col md={hasPush ? "12" : "6"}>
                 <div className="form-group">
                   <label className="form-label">Select Target Users</label>
                   <div className="form-control-wrap">

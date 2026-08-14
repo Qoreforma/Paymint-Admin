@@ -82,6 +82,7 @@ const AnnouncementPage = () => {
     title: "",
     body: "",
     target: "",
+    type: "",
     userCount: "",
     channels: [],
     failedNote: "",
@@ -117,6 +118,7 @@ const AnnouncementPage = () => {
       title: "",
       body: "",
       target: "",
+      type: "",
       userCount: "",
       channels: [],
       failedNote: "",
@@ -139,6 +141,7 @@ const AnnouncementPage = () => {
           body: item?.body,
           status: item?.status,
           target: item?.target,
+          type: item?.type || "",
           userCount: item?.userCount,
           users: item?.users,
           isImmediate: item?.isImmediate,
@@ -649,6 +652,12 @@ const AnnouncementPage = () => {
                     ))}
                   </span>
                 </Col>
+                {formData.type && (
+                  <Col lg={4}>
+                    <span className="sub-text">Push Type</span>
+                    <span className="caption-text text-capitalize">{formData.type.replaceAll("_", " ")}</span>
+                  </Col>
+                )}
                 <Col lg={4}>
                   <span className="sub-text">Date created</span>
                   <span className="caption-text">{formatDateWithHyphen(formData.dateCreated)}</span>

@@ -80,168 +80,197 @@ const Dashboard = () => {
     <React.Fragment>
       <Head title="Dashboard" />
       <Content>
-        <BlockHead size="sm">
-          <BlockBetween className="align-items-center flex-wrap gap-3">
-            <BlockHeadContent>
-              <BlockTitle page>Executive Dashboard</BlockTitle>
-              <div className="text-muted small mt-1">
+        {/* Header with Title and Period Filter Controls */}
+        <div className="nk-block-head nk-block-head-sm mb-4">
+          <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+            <div>
+              <h3 className="nk-block-title page-title mb-1">Executive Dashboard</h3>
+              <div className="text-muted small">
                 Real-time platform metrics, revenue volumes, and profit breakdowns.
               </div>
-            </BlockHeadContent>
+            </div>
 
-            <BlockHeadContent>
-              <div className="d-flex flex-wrap align-items-center gap-2">
-                {/* Period quick filter buttons */}
-                <div
-                  className="btn-group bg-white p-1 rounded border shadow-sm"
-                  role="group"
-                  style={{ gap: 2 }}
-                >
-                  {PERIOD_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      className={`btn btn-xs rounded ${
-                        period === opt.value && !hasCustomDate
-                          ? "btn-primary shadow-sm"
-                          : "btn-outline-light text-dark border-0"
-                      }`}
-                      style={{ fontSize: 12, padding: "5px 12px", fontWeight: 500 }}
-                      onClick={() => handlePeriodChange(opt.value)}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Date range picker for custom intervals */}
-                <div className="bg-white rounded border shadow-sm">
-                  <DateRangeFilter />
-                </div>
+            <div className="d-flex flex-wrap align-items-center gap-2">
+              {/* Period quick filter buttons */}
+              <div
+                className="btn-group bg-white p-1 rounded-3 border shadow-sm"
+                role="group"
+                style={{ gap: 2 }}
+              >
+                {PERIOD_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`btn btn-xs rounded-2 ${
+                      period === opt.value && !hasCustomDate
+                        ? "btn-primary shadow-sm"
+                        : "btn-outline-light text-dark border-0"
+                    }`}
+                    style={{ fontSize: 12, padding: "6px 14px", fontWeight: 500 }}
+                    onClick={() => handlePeriodChange(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
-            </BlockHeadContent>
-          </BlockBetween>
-        </BlockHead>
+
+              {/* Date range picker for custom intervals */}
+              <div className="bg-white rounded-3 border shadow-sm">
+                <DateRangeFilter />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Highlight Gross Profit Banner */}
-        <Block className="mb-4">
-          <Card
+        <div className="mb-4">
+          <div
             style={{
               background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
               color: "#fff",
-              borderRadius: 14,
-              border: "none",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
-              overflow: "hidden",
+              borderRadius: 16,
+              border: "1px solid rgba(255,255,255,0.06)",
+              boxShadow: "0 8px 30px rgba(15,23,42,0.18)",
+              padding: "24px 28px",
             }}
           >
-            <div className="card-inner p-4">
-              <Row className="align-items-center gy-3">
-                <Col lg={4} md={6}>
-                  <div className="d-flex align-items-center gap-3">
+            <div className="row g-4 align-items-center">
+              {/* Pod 1: Total Gross Profit */}
+              <div className="col-12 col-md-4">
+                <div className="d-flex align-items-center gap-3">
+                  <div
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: 14,
+                      background: "rgba(16, 185, 129, 0.18)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 24,
+                      border: "1px solid rgba(16, 185, 129, 0.3)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    💰
+                  </div>
+                  <div>
                     <div
+                      className="text-uppercase"
                       style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 14,
-                        background: "rgba(16, 185, 129, 0.18)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        color: "#94a3b8",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: "0.5px",
+                      }}
+                    >
+                      Total Gross Profit ({activePeriodLabel})
+                    </div>
+                    <div
+                      className="fw-bold mt-1"
+                      style={{
+                        color: "#34d399",
                         fontSize: 26,
-                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        lineHeight: 1.2,
+                        letterSpacing: "-0.5px",
                       }}
                     >
-                      💰
-                    </div>
-                    <div>
-                      <div
-                        className="text-uppercase small tracking-wider"
-                        style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700 }}
-                      >
-                        Total Gross Profit ({activePeriodLabel})
-                      </div>
-                      <div
-                        className="fw-bold fs-2 lh-1 mt-1"
-                        style={{ color: "#34d399", letterSpacing: "-0.5px" }}
-                      >
-                        {formatter("NGN").format(totalGrossProfit)}
-                      </div>
+                      {formatter("NGN").format(totalGrossProfit)}
                     </div>
                   </div>
-                </Col>
+                </div>
+              </div>
 
-                <Col lg={4} md={6}>
-                  <div className="d-flex align-items-center gap-3 border-start-lg border-secondary ps-lg-4">
+              {/* Pod 2: Services Volume */}
+              <div className="col-12 col-md-4 border-start-md" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+                <div className="d-flex align-items-center gap-3 ps-md-3">
+                  <div
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: 14,
+                      background: "rgba(59, 130, 246, 0.18)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 22,
+                      border: "1px solid rgba(59, 130, 246, 0.3)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    📈
+                  </div>
+                  <div>
                     <div
+                      className="text-uppercase"
                       style={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: 12,
-                        background: "rgba(59, 130, 246, 0.15)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 22,
-                        border: "1px solid rgba(59, 130, 246, 0.25)",
+                        color: "#94a3b8",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: "0.5px",
                       }}
                     >
-                      📈
+                      Services Volume
                     </div>
-                    <div>
-                      <div
-                        className="text-uppercase small tracking-wider"
-                        style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700 }}
-                      >
-                        Services Volume
-                      </div>
-                      <div className="fw-bold fs-4 text-white mt-1">
-                        {formatter("NGN").format(
-                          data?.services_transaction?.all?.successful?.amount || 0
-                        )}
-                      </div>
+                    <div
+                      className="fw-bold text-white mt-1"
+                      style={{ fontSize: 22, lineHeight: 1.2 }}
+                    >
+                      {formatter("NGN").format(
+                        data?.services_transaction?.all?.successful?.amount || 0
+                      )}
                     </div>
                   </div>
-                </Col>
+                </div>
+              </div>
 
-                <Col lg={4} md={12}>
-                  <div className="d-flex align-items-center gap-3 border-start-lg border-secondary ps-lg-4">
+              {/* Pod 3: Successful Transactions */}
+              <div className="col-12 col-md-4 border-start-md" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+                <div className="d-flex align-items-center gap-3 ps-md-3">
+                  <div
+                    style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: 14,
+                      background: "rgba(168, 85, 247, 0.18)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 22,
+                      border: "1px solid rgba(168, 85, 247, 0.3)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    ⚡
+                  </div>
+                  <div>
                     <div
+                      className="text-uppercase"
                       style={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: 12,
-                        background: "rgba(168, 85, 247, 0.15)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 22,
-                        border: "1px solid rgba(168, 85, 247, 0.25)",
+                        color: "#94a3b8",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: "0.5px",
                       }}
                     >
-                      ⚡
+                      Successful Transactions
                     </div>
-                    <div>
-                      <div
-                        className="text-uppercase small tracking-wider"
-                        style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700 }}
-                      >
-                        Successful Transactions
-                      </div>
-                      <div className="fw-bold fs-4 text-white mt-1">
-                        {(
-                          (data?.services_transaction?.all?.successful?.count || 0) +
-                          (data?.crypto_transaction?.sell?.approved?.count || 0) +
-                          (data?.giftcard_transaction?.sell?.approved?.count || 0)
-                        ).toLocaleString()}
-                      </div>
+                    <div
+                      className="fw-bold text-white mt-1"
+                      style={{ fontSize: 22, lineHeight: 1.2 }}
+                    >
+                      {(
+                        (data?.services_transaction?.all?.successful?.count || 0) +
+                        (data?.crypto_transaction?.sell?.approved?.count || 0) +
+                        (data?.giftcard_transaction?.sell?.approved?.count || 0)
+                      ).toLocaleString()}
                     </div>
                   </div>
-                </Col>
-              </Row>
+                </div>
+              </div>
             </div>
-          </Card>
-        </Block>
+          </div>
+        </div>
 
         <Block>
           {isLoading ? (

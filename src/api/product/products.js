@@ -46,6 +46,21 @@ export const useGetProductInfo = (id) => {
   );
 };
 
+// ─── GET: Product filter options (only active dimensions with products) ──
+export const useGetProductFilterOptions = () => {
+  return useQuery(
+    ["getProductFilterOptions"],
+    async () => {
+      const res = await instance.get(`${BACKEND_URLS.product}/filter-options`);
+      return res?.data;
+    },
+    {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    }
+  );
+};
+
 // ─── POST: Create product ────────────────────────────────────────────────
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
@@ -138,6 +153,56 @@ export const useToggleProductHot = (id) => {
       },
       onError: (err) => {
         toast.error(err?.response?.data?.message || "Failed to update hot status");
+      },
+    }
+  );
+};
+
+// ─── PUT: Bulk toggle product active status ─────────────────────────────
+export const useBulkToggleProductStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ productIds, isActive }) =>
+      toast.promise(
+        instance
+          .put(`${BACKEND_URLS.product}/bulk/status`, { productIds, isActive })
+          .then((res) => res.data)
+          .catch((err) => { throw err; }),
+        {
+          loading: "Updating products status...",
+          success: (data) => data?.message || "Products updated successfully",
+          error: (err) => err?.response?.data?.message || "Failed to update products status",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["getAllProducts"]);
+        queryClient.invalidateQueries(["provider-products"]);
+      },
+    }
+  );
+};
+
+// ─── PUT: Bulk toggle product hot status ────────────────────────────────
+export const useBulkToggleProductHot = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ productIds, isHot }) =>
+      toast.promise(
+        instance
+          .put(`${BACKEND_URLS.product}/bulk/hot`, { productIds, isHot })
+          .then((res) => res.data)
+          .catch((err) => { throw err; }),
+        {
+          loading: "Updating hot status...",
+          success: (data) => data?.message || "Hot status updated successfully",
+          error: (err) => err?.response?.data?.message || "Failed to update hot status",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["getAllProducts"]);
+        queryClient.invalidateQueries(["provider-products"]);
       },
     }
   );
