@@ -83,7 +83,6 @@ const Login = () => {
                   type="text"
                   id="default-01"
                   {...register("name", { required: "This field is required" })}
-                  defaultValue="opaferanmi01@gmail.com"
                   placeholder="Enter your email address or username"
                   className="form-control-lg form-control"
                 />
@@ -116,7 +115,6 @@ const Login = () => {
                   type={passState ? "text" : "password"}
                   id="password"
                   {...register("passcode", { required: "This field is required" })}
-                  defaultValue="SecurePass123!"
                   placeholder="Enter your passcode"
                   className={`form-control-lg form-control ${passState ? "is-hidden" : "is-shown"}`}
                 />
