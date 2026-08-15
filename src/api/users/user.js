@@ -3,21 +3,56 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { instance } from "../httpConfig";
 import { toast } from "react-hot-toast";
 
-export const useGetAllUsers = (currentPage, size, search, status) => {
-  const page = `page=${currentPage}`;
-  const per_page = `limit=${size}`;
-  const searchTerm = search ? `&search=${search}` : "";
-  const statusTerm = status ? `&status=${status}` : "";
+export const useGetAllUsers = (
+  currentPage = 1,
+  size = 100,
+  search = "",
+  status = "",
+  sortBy = "",
+  sortOrder = "",
+  startDate = "",
+  endDate = "",
+  period = "",
+  userType = "",
+  bvnVerified = "",
+) => {
+  const params = new URLSearchParams();
+  if (currentPage) params.append("page", currentPage);
+  if (size) params.append("limit", size);
+  if (search) params.append("search", search);
+  if (status) params.append("status", status);
+  if (sortBy) params.append("sortBy", sortBy);
+  if (sortOrder) params.append("sortOrder", sortOrder);
+  if (startDate) params.append("startDate", startDate);
+  if (endDate) params.append("endDate", endDate);
+  if (period && period !== "all") params.append("period", period);
+  if (userType) params.append("userType", userType);
+  if (bvnVerified) params.append("bvnVerified", bvnVerified);
+
+  const queryString = params.toString();
+
   return useQuery(
-    ["getAllUsers", page, size, searchTerm, statusTerm],
+    [
+      "getAllUsers",
+      currentPage,
+      size,
+      search,
+      status,
+      sortBy,
+      sortOrder,
+      startDate,
+      endDate,
+      period,
+      userType,
+      bvnVerified,
+    ],
     async () => {
       const request = await instance
-        .get(BACKEND_URLS.users + `?${page}&${per_page}${searchTerm}${statusTerm}`)
+        .get(`${BACKEND_URLS.users}?${queryString}`)
         .then((res) => res?.data)
         .catch((err) => {
           throw err;
         });
-      //   console.log(request);
       return request;
     },
     {
@@ -319,17 +354,24 @@ export const useViewUserBVN = (id, setValue) => {
   );
 };
 
-export const useGetUserStat = (id) => {
+export const useGetUserStat = (period = "all", startDate = "", endDate = "") => {
+  const params = new URLSearchParams();
+  if (period && period !== "all") params.append("period", period);
+  if (startDate) params.append("startDate", startDate);
+  if (endDate) params.append("endDate", endDate);
+
+  const queryString = params.toString();
+  const url = `${BACKEND_URLS.users}/stats${queryString ? `?${queryString}` : ""}`;
+
   return useQuery(
-    ["getSingleUser"],
+    ["getUserStat", period, startDate, endDate],
     async () => {
       const request = await instance
-        .get(BACKEND_URLS.users + `/stats`)
+        .get(url)
         .then((res) => res?.data)
         .catch((err) => {
           throw err;
         });
-      //   console.log(request);
       return request;
     },
     {

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Badge, DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import {
@@ -47,12 +47,30 @@ import LoadingSpinner from "../../../components/spinner";
 import Search from "../tables/Search";
 import SortToolTip from "../tables/SortTooltip";
 import { FilterOptions } from "../tables/filter-select";
+import DateRangeFilter from "../tables/date-range-filter";
 import AddModal from "./AddModal";
 import { filterStatus, userFilterOptions } from "./UserData";
 import UserTypeModal from "./userTypeModal";
 import { usePermission } from "../../../../utils/usePermission";
 import SendAnnouncementModal from "./SendAnnouncement";
 import { useCreateAnnouncement } from "../../../../api/announcement";
+
+const PERIOD_OPTIONS = [
+  { label: "All Time", value: "all" },
+  { label: "Today", value: "today" },
+  { label: "7 Days", value: "7d" },
+  { label: "30 Days", value: "1m" },
+  { label: "This Year", value: "1y" },
+];
+
+const userSortOptions = [
+  { label: "Newest Joined", field: "createdAt", order: "desc", isDefault: true },
+  { label: "Oldest Joined", field: "createdAt", order: "asc" },
+  { label: "Highest Wallet Balance", field: "balance", order: "desc" },
+  { label: "Lowest Wallet Balance", field: "balance", order: "asc" },
+  { label: "Name (A-Z)", field: "firstname", order: "asc" },
+  { label: "Name (Z-A)", field: "firstname", order: "desc" },
+];
 
 const UserList = () => {
   const { hasPermission } = usePermission();
@@ -65,13 +83,32 @@ const UserList = () => {
   const [multiple, setMultiple] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
 
-  const itemsPerPage = searchParams.get("limit") ?? 100;
-  const currentPage = searchParams.get("page") ?? 1;
+  const itemsPerPage = parseInt(searchParams.get("limit") ?? 100);
+  const currentPage = parseInt(searchParams.get("page") ?? 1);
   const search = searchParams.get("search") ?? "";
   const status = searchParams.get("status") ?? "";
+  const period = searchParams.get("period") || "all";
+  const startDate = searchParams.get("startDate") || "";
+  const endDate = searchParams.get("endDate") || "";
+  const sortBy = searchParams.get("sortBy") || "";
+  const sortOrder = searchParams.get("sortOrder") || "desc";
+  const userType = searchParams.get("userType") || "";
+  const bvnVerified = searchParams.get("bvnVerified") || "";
 
-  const { isLoading, data: users } = useGetAllUsers(currentPage, itemsPerPage, search, status);
-  const { isLoading: fetchingStat, data: userStat } = useGetUserStat();
+  const { isLoading, data: users } = useGetAllUsers(
+    currentPage,
+    itemsPerPage,
+    search,
+    status,
+    sortBy,
+    sortOrder,
+    startDate,
+    endDate,
+    period,
+    userType,
+    bvnVerified,
+  );
+  const { isLoading: fetchingStat, data: userStat } = useGetUserStat(period, startDate, endDate);
   const { mutate: financeUser } = useFinanceUser(userId);
   const { mutate: updateUserStatus } = useUpdateUserStatus(userId);
 
@@ -93,6 +130,56 @@ const UserList = () => {
     type: "",
     referral_earning_rate: "",
   });
+
+  const hasCustomDate = Boolean(startDate && endDate);
+
+  const handlePeriodChange = (newPeriod) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (newPeriod === "all") {
+        next.delete("period");
+      } else {
+        next.set("period", newPeriod);
+      }
+      next.delete("startDate");
+      next.delete("endDate");
+      next.set("page", "1");
+      return next;
+    });
+  };
+
+  const activePeriodLabel = useMemo(() => {
+    if (hasCustomDate) return `Custom (${startDate} - ${endDate})`;
+    const found = PERIOD_OPTIONS.find((p) => p.value === period);
+    return found ? found.label : "All Time";
+  }, [period, hasCustomDate, startDate, endDate]);
+
+  const handleSort = (column) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (sortBy === column) {
+        next.set("sortOrder", sortOrder === "asc" ? "desc" : "asc");
+      } else {
+        next.set("sortBy", column);
+        next.set("sortOrder", "desc");
+      }
+      next.set("page", "1");
+      return next;
+    });
+  };
+
+  const renderSortIcon = (column) => {
+    if (sortBy !== column) {
+      return <Icon name="sort" className="text-soft ms-1" style={{ fontSize: "11px", opacity: 0.5 }} />;
+    }
+    return (
+      <Icon
+        name={sortOrder === "asc" ? "arrow-up" : "arrow-down"}
+        className="text-primary ms-1"
+        style={{ fontSize: "11px", fontWeight: "bold" }}
+      />
+    );
+  };
 
   // function that loads the want to editted data
   const onEditClick = (id) => {
@@ -208,18 +295,53 @@ const UserList = () => {
     <React.Fragment>
       <Head title="User management"></Head>
       <Content>
-        <BlockHead size="sm">
-          <BlockBetween>
-            <BlockHeadContent>
-              <BlockTitle tag="h3" page>
-                Users Lists
-              </BlockTitle>
-              <BlockDes className="text-soft">
-                <p>You have total of {users?.pagination?.total?.toLocaleString()} users.</p>
-              </BlockDes>
-            </BlockHeadContent>
+        {/* Header with Title, Period Quick Filters, Date Picker, and Export */}
+        <div className="nk-block-head nk-block-head-sm mb-4">
+          <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+            <div>
+              <h3 className="nk-block-title page-title mb-1">Users Lists</h3>
+              <div className="text-muted small">
+                {activePeriodLabel !== "All Time" ? (
+                  <span>
+                    Filtered for: <Badge color="primary" className="badge-dim ms-1">{activePeriodLabel}</Badge>
+                    {" "}&bull; Total matching: <strong>{users?.pagination?.total?.toLocaleString() ?? 0}</strong> users
+                  </span>
+                ) : (
+                  <span>You have a total of {users?.pagination?.total?.toLocaleString() ?? 0} users.</span>
+                )}
+              </div>
+            </div>
 
-            <BlockHeadContent>
+            <div className="d-flex flex-wrap align-items-center gap-2">
+              {/* Period quick filter buttons */}
+              <div
+                className="btn-group bg-white p-1 rounded-3 border shadow-sm"
+                role="group"
+                style={{ gap: 2 }}
+              >
+                {PERIOD_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`btn btn-xs rounded-2 ${
+                      period === opt.value && !hasCustomDate
+                        ? "btn-primary shadow-sm"
+                        : "btn-outline-light text-dark border-0"
+                    }`}
+                    style={{ fontSize: 12, padding: "6px 14px", fontWeight: 500 }}
+                    onClick={() => handlePeriodChange(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Date range picker for custom intervals */}
+              <div className="bg-white rounded-3 border shadow-sm">
+                <DateRangeFilter />
+              </div>
+
+              {/* Export dropdown */}
               <UncontrolledDropdown>
                 <DropdownToggle tag="a" className="btn btn-trigger btn-icon dropdown-toggle">
                   <div className="toggle-wrap nk-block-tools-toggle">
@@ -299,17 +421,18 @@ const UserList = () => {
                   </ul>
                 </DropdownMenu>
               </UncontrolledDropdown>
-            </BlockHeadContent>
-          </BlockBetween>
-        </BlockHead>
+            </div>
+          </div>
+        </div>
 
-        <Row className="mb-5">
+        {/* Stats Section with Period Sensitivity */}
+        <Row className="mb-4">
           <Col lg={5}>
             <PreviewCard>
               <div className="card-inner">
                 <ul className="nk-tranx-statistics">
                   <li className="item">
-                    <Icon name="users" className="bg-primary-dim"></Icon>
+                    <Icon name="wallet" className="bg-primary-dim"></Icon>
                     <div className="info">
                       <div className="title">Total Wallet Balance</div>
                       <div className="count">
@@ -320,7 +443,9 @@ const UserList = () => {
                   <li className="item">
                     <Icon name="users" className="bg-info-dim"></Icon>
                     <div className="info">
-                      <div className="title">Total Users</div>
+                      <div className="title">
+                        {activePeriodLabel !== "All Time" ? "New Users (" + activePeriodLabel + ")" : "Total Users"}
+                      </div>
                       <div className="count">{userStat?.data?.total?.toLocaleString() || 0}</div>
                     </div>
                   </li>
@@ -441,7 +566,7 @@ const UserList = () => {
                                   <Icon name="setting"></Icon>
                                 </DropdownToggle>
                                 <DropdownMenu end className="dropdown-menu-xs">
-                                  <SortToolTip />
+                                  <SortToolTip sortOptions={userSortOptions} />
                                 </DropdownMenu>
                               </UncontrolledDropdown>
                             </li>
@@ -452,7 +577,7 @@ const UserList = () => {
                   </ul>
                 </div>
                 {/* Search component */}
-                <Search onSearch={onSearch} setonSearch={setonSearch} placeholder="name" />
+                <Search onSearch={onSearch} setonSearch={setonSearch} placeholder="name, email, phone, username" />
               </div>
             </div>
             {isLoading ? (
@@ -483,25 +608,60 @@ const UserList = () => {
                       )}
                     </DataTableRow>
                     <DataTableRow>
-                      <span className="tb-tnx-head bg-white text-secondary ">User</span>
+                      <span
+                        className="tb-tnx-head bg-white text-secondary d-inline-flex align-items-center"
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                        onClick={() => handleSort("firstname")}
+                        title="Click to sort by User Name"
+                      >
+                        User {renderSortIcon("firstname")}
+                      </span>
                     </DataTableRow>
                     <DataTableRow size="lg">
-                      <span className="tb-tnx-head bg-white text-secondary">Username</span>
+                      <span
+                        className="tb-tnx-head bg-white text-secondary d-inline-flex align-items-center"
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                        onClick={() => handleSort("username")}
+                        title="Click to sort by Username"
+                      >
+                        Username {renderSortIcon("username")}
+                      </span>
                     </DataTableRow>
                     <DataTableRow size="sm">
                       <span className="tb-tnx-head bg-white text-secondary">Phone</span>
                     </DataTableRow>
                     <DataTableRow size="sm">
-                      <span className="tb-tnx-head bg-white text-secondary">Wallet</span>
+                      <span
+                        className="tb-tnx-head bg-white text-secondary d-inline-flex align-items-center"
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                        onClick={() => handleSort("balance")}
+                        title="Click to sort by Wallet Balance"
+                      >
+                        Wallet {renderSortIcon("balance")}
+                      </span>
                     </DataTableRow>
                     <DataTableRow size="sm">
-                      <span className="tb-tnx-head bg-white text-secondary">Date Joined</span>
+                      <span
+                        className="tb-tnx-head bg-white text-secondary d-inline-flex align-items-center"
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                        onClick={() => handleSort("createdAt")}
+                        title="Click to sort by Date Joined"
+                      >
+                        Date Joined {renderSortIcon("createdAt")}
+                      </span>
                     </DataTableRow>
                     <DataTableRow size="sm">
                       <span className="tb-tnx-head bg-white text-secondary">BVN</span>
                     </DataTableRow>
                     <DataTableRow size="md">
-                      <span className="tb-tnx-head bg-white text-secondary">Status</span>
+                      <span
+                        className="tb-tnx-head bg-white text-secondary d-inline-flex align-items-center"
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                        onClick={() => handleSort("status")}
+                        title="Click to sort by Status"
+                      >
+                        Status {renderSortIcon("status")}
+                      </span>
                     </DataTableRow>
                     <DataTableRow className="nk-tb-col-tools text-end">
                       <UncontrolledDropdown>

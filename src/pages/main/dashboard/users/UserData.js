@@ -10,6 +10,23 @@ export const userFilterOptions = [
       { label: "Active", value: "active" },
       { label: "Inactive", value: "inactive" },
       { label: "Suspended", value: "suspended" },
+      { label: "Fraudulent", value: "fraudulent" },
+    ],
+  },
+  {
+    name: "userType",
+    options: [
+      { label: "Regular", value: "regular" },
+      { label: "Influencer", value: "influencer" },
+      { label: "Micro-Influencer", value: "micro-influencer" },
+      { label: "Vendor", value: "vendor" },
+    ],
+  },
+  {
+    name: "bvnVerified",
+    options: [
+      { label: "BVN Verified", value: "true" },
+      { label: "Not BVN Verified", value: "false" },
     ],
   },
 ];
