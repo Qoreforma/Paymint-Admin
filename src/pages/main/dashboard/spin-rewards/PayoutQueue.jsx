@@ -77,7 +77,7 @@ const PayoutQueue = () => {
           </span>
           <Badge
             color={row.rewardType === "balance" ? "info" : "warning"}
-            className="text-uppercase fs-10px"
+            className="text-uppercase px-2 py-1 fs-10px mt-1"
           >
             {row.rewardType}
           </Badge>
@@ -107,7 +107,7 @@ const PayoutQueue = () => {
               ? "danger"
               : "warning"
           }
-          className="text-capitalize"
+          className="text-capitalize px-2 py-1 fs-12px"
         >
           {status}
         </Badge>

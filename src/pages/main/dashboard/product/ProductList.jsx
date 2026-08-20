@@ -64,12 +64,12 @@ const SIZE_OPTIONS = [
 const SORT_OPTIONS = [
   { label: "Newest First", value: "createdAt", order: "desc", icon: "calendar" },
   { label: "Oldest First", value: "createdAt", order: "asc", icon: "calendar" },
-  { label: "Data Size (Smallest → Largest)", value: "dataSize", order: "asc", icon: "db" },
-  { label: "Data Size (Largest → Smallest)", value: "dataSize", order: "desc", icon: "db" },
-  { label: "Name (A → Z)", value: "name", order: "asc", icon: "sort-v" },
-  { label: "Name (Z → A)", value: "name", order: "desc", icon: "sort-v" },
-  { label: "Validity (Shortest → Longest)", value: "validity", order: "asc", icon: "clock" },
-  { label: "Validity (Longest → Shortest)", value: "validity", order: "desc", icon: "clock" },
+  { label: "Data Size (A-Z)", value: "dataSize", order: "asc", icon: "db" },
+  { label: "Data Size (Z-A)", value: "dataSize", order: "desc", icon: "db" },
+  { label: "Name (A-Z)", value: "name", order: "asc", icon: "sort-v" },
+  { label: "Name (Z-A)", value: "name", order: "desc", icon: "sort-v" },
+  { label: "Validity (A-Z)", value: "validity", order: "asc", icon: "clock" },
+  { label: "Validity (Z-A)", value: "validity", order: "desc", icon: "clock" },
   { label: "Validity Period (Daily → Yearly)", value: "validityPeriod", order: "asc", icon: "calender-date" },
   { label: "Price (Lowest → Highest)", value: "amount", order: "asc", icon: "money" },
   { label: "Price (Highest → Lowest)", value: "amount", order: "desc", icon: "money" },
@@ -511,6 +511,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                 value={formData.code}
                 onChange={handleChange}
                 required
+                disabled
               />
             </div>
 
@@ -541,6 +542,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                 required
                 min="0"
                 step="any"
+                disabled
               />
             </div>
 
@@ -596,7 +598,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
             )}
 
             {/* Description */}
-            <div className="col-12">
+            <div className="col-12 mt-4">
               <label className="form-label fw-bold small">Description</label>
               <textarea
                 name="description"
@@ -990,7 +992,7 @@ const ProductList = () => {
 
                 {/* Second Row: Dimension Dropdown Chips & Reset Button */}
                 <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 pt-4 mt-2">
-                  <div className="filter-chip-strip">
+                  <div className="d-flex flex-wrap gap-2">
                     {/* Provider */}
                     <UncontrolledDropdown>
                       <DropdownToggle
@@ -1174,7 +1176,7 @@ const ProductList = () => {
                         Active filters & sort:
                       </span>
                     </div>
-                    <div className="filter-chip-strip">
+                    <div className="d-flex flex-wrap gap-2">
                       {activeFilters.map(([key, val]) => {
                         let label = `${key}: ${val}`;
                         if (key === "sortBy") label = `Sort: ${currentSortOption.label}`;
