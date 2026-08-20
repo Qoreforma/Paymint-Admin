@@ -354,6 +354,12 @@ const menu = [
   //   link: "/account settings",
   // },
   {
+    icon: "curve-down-right",
+    text: "Spin & Win Rewards",
+    link: "/settings/spin-rewards",
+    permission: "all",
+  },
+  {
     icon: "opt-alt-fill",
     text: "Settings",
     link: "/settings",

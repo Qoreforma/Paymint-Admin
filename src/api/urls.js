@@ -67,6 +67,12 @@ const BACKEND_URLS = {
   auditlogs: "/auditlogs",
   systemBankAccount: "/bank-accounts",
   cache: "/cache",
+  appSettings: "/app-settings",
+  rewardTiers: "/reward-tiers",
+  qualificationRules: "/reward-tiers/qualification-rules",
+  spinWheels: "/spin-wheels",
+  rewardPayouts: "/reward-payouts",
+  rewardAnalytics: "/reward-analytics",
 };
 
 export default BACKEND_URLS;

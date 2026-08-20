@@ -78,6 +78,7 @@ import ServicesPage from "../pages/main/dashboard/services/services";
 import CashbacksMasterPage from "../pages/main/dashboard/cashbacks/CashbacksMaster";
 import AppUpdatePage from "../pages/main/dashboard/settings/AppUpdate";
 import ReferralBonusPage from "../pages/main/dashboard/settings/ReferralBonus";
+import SpinRewardsPage from "../pages/main/dashboard/spin-rewards/SpinRewards";
 import SupportPage from "../pages/main/dashboard/settings/support";
 import SystemAccountPage from "../pages/main/dashboard/settings/SystemAccount";
 import SystemBankAccountPage from "../pages/main/dashboard/system-bank-account/bank-accounts";
@@ -215,6 +216,7 @@ const routes = (
             <Route path="email-banners" element={<EmailBannersPage />} />
             <Route path="support" element={<SupportPage />} />
             <Route path="referral-bonus" element={<ReferralBonusPage />} />
+            <Route path="spin-rewards" element={<SpinRewardsPage />} />
             <Route path="trade-bonus" element={<TradeBonusPage />} />
             <Route path="cashbacks" element={<CashbacksMasterPage />} />
             <Route path="cache-management" element={<CacheManagementPage />} />

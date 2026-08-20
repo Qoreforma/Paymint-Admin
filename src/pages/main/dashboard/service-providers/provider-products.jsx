@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
@@ -40,9 +40,21 @@ import Content from "../../../../layout/content/Content";
 import Head from "../../../../layout/head/Head";
 import { formatDateWithTime, formatter } from "../../../../utils/Utils";
 import LoadingSpinner from "../../../components/spinner";
-import Search from "../tables/Search";
 import AddProductModal from "./modals/add-product";
 
+// ─── Constants ────────────────────────────────────────────────
+const DATA_TYPES_PP = ["SME", "GIFTING", "DIRECT", "CORPORATE GIFTING", "AWOOF"];
+const VALIDITY_OPTIONS_PP = [
+  "1 day", "7 days", "14 days", "30 days", "1 month", "2 months",
+  "3 months", "6 months", "1 year", "weekly", "monthly", "yearly",
+];
+const SIZE_OPTIONS_PP = [
+  "500MB", "1GB", "1.5GB", "2GB", "2.5GB", "3GB", "4GB", "5GB",
+  "6GB", "7GB", "8GB", "10GB", "15GB", "20GB", "25GB", "30GB",
+  "40GB", "50GB", "75GB", "100GB",
+];
+
+// ─── Hot Toggle ───────────────────────────────────────────────
 const HotToggleCell = ({ productId, isHot }) => {
   const { mutate: toggleHot, isLoading } = useToggleProductHot(productId);
   return (
@@ -82,6 +94,7 @@ const HotToggleCell = ({ productId, isHot }) => {
   );
 };
 
+// ─── Main Component ───────────────────────────────────────────
 const ServiceProvidersProducts = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -89,64 +102,92 @@ const ServiceProvidersProducts = () => {
   const location = useLocation();
   const name = location?.state?.providerName || "";
 
-  const itemsPerPage = searchParams.get("limit") ?? 100;
-  const currentPage = searchParams.get("page") ?? 1;
-  const search = searchParams.get("search") ?? "";
+  const itemsPerPage = Number(searchParams.get("limit") ?? 100);
+  const currentPage  = Number(searchParams.get("page")  ?? 1);
 
   const [editId, setEditedId] = useState();
-  const [onSearch, setonSearch] = useState(false);
 
   const { data: provider } = useGetProviderInfo(providerId);
   const { isLoading, data: products } = useGetServiceProducts(providerId, code, type);
   const { mutate: toggleProduct } = useToggleProvidersProducts(editId);
+  const { mutate: updateProduct  } = useUpdateProviderProduct(editId);
+  const { mutate: deleteProduct  } = useDeleteProviderProduct(editId);
 
-  const { mutate: updateProduct } = useUpdateProviderProduct(editId);
-  const { mutate: deleteProduct } = useDeleteProviderProduct(editId);
+  // ── Client-side filter state ──────────────────────────────
+  const [pendingSearch, setPendingSearch] = useState("");
+  const [search,        setSearch]        = useState("");
+  const [filterStatus,  setFilterStatus]  = useState("all");   // all | active | inactive
+  const [filterHot,     setFilterHot]     = useState("all");   // all | hot | regular
+  const [filterType,    setFilterType]    = useState("");
+  const [filterValidity,setFilterValidity]= useState("");
+  const [filterSize,    setFilterSize]    = useState("");
 
-  // console.log(accounts);
+  const resetFilters = () => {
+    setPendingSearch(""); setSearch("");
+    setFilterStatus("all"); setFilterHot("all");
+    setFilterType(""); setFilterValidity(""); setFilterSize("");
+    setSearchParams((sp) => { sp.set("page", 1); return sp; });
+  };
 
+  const hasActiveFilters =
+    search || filterStatus !== "all" || filterHot !== "all" ||
+    filterType || filterValidity || filterSize;
+
+  const allProducts = useMemo(() => products?.data ?? [], [products]);
+
+  // Apply filters
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((item) => {
+      if (search) {
+        const q = search.toLowerCase();
+        if (
+          !(item.name || "").toLowerCase().includes(q) &&
+          !(item.code || "").toLowerCase().includes(q)
+        ) return false;
+      }
+      if (filterStatus === "active"   && !item.isActive) return false;
+      if (filterStatus === "inactive" &&  item.isActive) return false;
+      if (filterHot === "hot"     && !item.isHot) return false;
+      if (filterHot === "regular" &&  item.isHot) return false;
+      if (filterType) {
+        const dt = (item.attributes?.dataType || item.productType || "").toUpperCase();
+        if (dt !== filterType.toUpperCase()) return false;
+      }
+      if (filterValidity) {
+        const v = (item.validity || item.attributes?.validityPeriod || "").toLowerCase();
+        if (!v.includes(filterValidity.toLowerCase())) return false;
+      }
+      if (filterSize) {
+        const sz = (item.dataSizeDisplay || "").toLowerCase();
+        if (sz !== filterSize.toLowerCase()) return false;
+      }
+      return true;
+    });
+  }, [allProducts, search, filterStatus, filterHot, filterType, filterValidity, filterSize]);
+
+  // Paginate filtered list client-side
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  // ── Form / Edit state ─────────────────────────────────────
   const [formData, setFormData] = useState({
-    name: "",
-    amount: "",
-    provider_amount: "",
-    dataSizeDisplay: "",
-    validityPeriod: "",
-    dataType: "",
+    name: "", amount: "", provider_amount: "",
+    dataSizeDisplay: "", validityPeriod: "", dataType: "",
   });
 
   const [view, setView] = useState({
-    add: false,
-    details: false,
-    edit: false,
-    products: false,
+    add: false, details: false, edit: false, products: false,
   });
 
-  // toggle function to view order detailse
+  const toggle = (t) =>
+    setView({ add: t==="add", details: t==="details", edit: t==="edit", products: t==="products" });
 
-  const toggle = (type) => {
-    setView({
-      add: type === "add" ? true : false,
-      details: type === "details" ? true : false,
-      edit: type === "edit" ? true : false,
-      products: type === "products" ? true : false,
-    });
-  };
+  const resetForm = () =>
+    setFormData({ name:"", amount:"", provider_amount:"", dataSizeDisplay:"", validityPeriod:"", dataType:"" });
 
-  // resets forms
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      amount: "",
-      provider_amount: "",
-      dataSizeDisplay: "",
-      validityPeriod: "",
-      dataType: "",
-    });
-  };
-
-  // Submits form data
   const onFormSubmit = (form) => {
-    console.log(form);
     updateProduct({
       amount: form.amount,
       name: form.name,
@@ -154,14 +195,12 @@ const ServiceProvidersProducts = () => {
       dataSizeDisplay: form.dataSizeDisplay,
       attributes: { dataType: form.dataType, validityPeriod: form.validityPeriod },
     });
-
     setView({ add: false, details: false, edit: false, products: false });
     resetForm();
   };
 
-  // function that loads the want to editted data
   const onEditClick = (id) => {
-    products?.data?.forEach((item) => {
+    allProducts.forEach((item) => {
       if (item?._id === id) {
         setFormData({
           name: item?.name,
@@ -176,39 +215,20 @@ const ServiceProvidersProducts = () => {
     setEditedId(id);
   };
 
-  useEffect(() => {
-    reset(formData);
-  }, [formData]);
+  const { reset, register, handleSubmit, watch, formState: { errors } } = useForm();
 
-  // function to close the form modal
+  useEffect(() => { reset(formData); }, [formData]);
+
   const onFormCancel = () => {
     setView({ add: false, details: false, edit: false });
     resetForm();
   };
 
-  //paginate
-  const paginate = (pageNumber) => {
-    setSearchParams((searchParams) => {
-      searchParams.set("page", pageNumber);
-      return searchParams;
-    });
-  };
-
-  // function to filter data
-  const filterData = useCallback(() => {
-    return;
-  }, []);
-
-  const {
-    reset,
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm();
+  const paginate = (pageNumber) =>
+    setSearchParams((sp) => { sp.set("page", pageNumber); return sp; });
 
   const total_amount = watch("amount");
-  const difference = total_amount - (formData?.provider_amount || 0);
+  const difference   = total_amount - (formData?.provider_amount || 0);
 
   return (
     <React.Fragment>
@@ -223,40 +243,21 @@ const ServiceProvidersProducts = () => {
             </BlockHeadContent>
             <BlockHeadContent>
               <div className="toggle-wrap nk-block-tools-toggle">
-                <Button color="light" outline className="bg-white d-none d-sm-inline-flex" onClick={() => navigate(-1)}>
+                <Button
+                  color="light" outline
+                  className="bg-white d-none d-sm-inline-flex"
+                  onClick={() => navigate(-1)}
+                >
                   <Icon name="arrow-left"></Icon>
                   <span>Back to Services</span>
                 </Button>
                 <a
                   href="#back"
-                  onClick={(ev) => {
-                    ev.preventDefault();
-                    navigate(-1);
-                  }}
+                  onClick={(ev) => { ev.preventDefault(); navigate(-1); }}
                   className="btn btn-icon btn-outline-light bg-white d-inline-flex d-sm-none"
                 >
                   <Icon name="arrow-left"></Icon>
                 </a>
-
-                {/* <Button
-                  className="toggle d-none d-md-inline-flex ms-2"
-                  color="secondary"
-                  onClick={() => {
-                    toggle("products");
-                  }}
-                >
-                  <Icon name="bag"></Icon>
-                  <span>Add Product</span>
-                </Button> */}
-                {/* <Button
-                  className="toggle btn-icon ms-2 d-md-none"
-                  color="secondary"
-                  onClick={() => {
-                    toggle("products");
-                  }}
-                >
-                  <Icon name="bag"></Icon>
-                </Button> */}
               </div>
             </BlockHeadContent>
           </BlockBetween>
@@ -264,224 +265,355 @@ const ServiceProvidersProducts = () => {
 
         <Block>
           <Card>
-            <div className="card-inner border-bottom">
-              <div className="card-title-group">
-                <div className="card-title">
-                  <h5 className="title">All Products</h5>
-                </div>
-                <div className="card-tools me-n1">
-                  <ul className="btn-toolbar gx-1">
-                    {/* <li>
-                      <Button
-                        href="#search"
-                        onClick={(ev) => {
-                          ev.preventDefault();
-                          setonSearch(true);
-                        }}
-                        className="btn-icon search-toggle toggle-search"
-                      >
-                        <Icon name="search"></Icon>
-                      </Button>
-                    </li> */}
-                    {/* <li className="btn-toolbar-sep"></li> */}
-                    {/* <li>
-                      <FilterOptions options={} />
-                    </li> */}
-                    {/* <li>
-                      <UncontrolledDropdown>
-                        <DropdownToggle tag="a" className="btn btn-trigger btn-icon dropdown-toggle">
-                          <Icon name="setting"></Icon>
-                        </DropdownToggle>
-                        <DropdownMenu end className="dropdown-menu-xs">
-                          <SortToolTip />
-                        </DropdownMenu>
-                      </UncontrolledDropdown>
-                    </li> */}
-                  </ul>
-                </div>
-                {/* Search component */}
-                <Search onSearch={onSearch} setonSearch={setonSearch} placeholder="hotel name" />
+            {/* ── Filter Bar ──────────────────────────────────── */}
+            <div className="pp-filter-bar">
+              {/* Search */}
+              <div className="input-group" style={{ flex: "1 1 220px", minWidth: 0 }}>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search by name or code…"
+                  value={pendingSearch}
+                  onChange={(e) => setPendingSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && setSearch(pendingSearch)}
+                  id="pp-search"
+                />
+                <button
+                  className="btn btn-primary px-3"
+                  onClick={() => setSearch(pendingSearch)}
+                  id="pp-search-btn"
+                >
+                  <Icon name="search" />
+                </button>
               </div>
+
+              {/* Status */}
+              <select
+                className="form-select pp-select"
+                value={filterStatus}
+                onChange={(e) => { setFilterStatus(e.target.value); paginate(1); }}
+                id="pp-filter-status"
+              >
+                <option value="all">All Statuses</option>
+                <option value="active">Active Only</option>
+                <option value="inactive">Inactive Only</option>
+              </select>
+
+              {/* Hot */}
+              <select
+                className="form-select pp-select"
+                value={filterHot}
+                onChange={(e) => { setFilterHot(e.target.value); paginate(1); }}
+                id="pp-filter-hot"
+              >
+                <option value="all">🔥 All Products</option>
+                <option value="hot">🔥 Hot Only</option>
+                <option value="regular">Regular Only</option>
+              </select>
+
+              {/* Data Type */}
+              <UncontrolledDropdown>
+                <DropdownToggle
+                  tag="button"
+                  className={`btn btn-sm ${filterType ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                  style={{ padding: "8px 14px", fontSize: 13, fontWeight: 500, borderRadius: 8, height: 40 }}
+                  id="pp-filter-datatype"
+                >
+                  <Icon name="signal" className="me-1" />
+                  {filterType || "Data Type"}
+                  <Icon name="chevron-down" className="ms-1" />
+                </DropdownToggle>
+                <DropdownMenu style={{ zIndex: 1060 }}>
+                  <DropdownItem
+                    onClick={() => { setFilterType(""); paginate(1); }}
+                    className={!filterType ? "fw-bold" : ""}
+                  >
+                    All Data Types
+                  </DropdownItem>
+                  <DropdownItem divider />
+                  {DATA_TYPES_PP.map((dt) => (
+                    <DropdownItem
+                      key={dt}
+                      onClick={() => { setFilterType(dt); paginate(1); }}
+                      className={filterType === dt ? "fw-bold text-primary" : ""}
+                    >
+                      {dt}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </UncontrolledDropdown>
+
+              {/* Validity */}
+              <UncontrolledDropdown>
+                <DropdownToggle
+                  tag="button"
+                  className={`btn btn-sm ${filterValidity ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                  style={{ padding: "8px 14px", fontSize: 13, fontWeight: 500, borderRadius: 8, height: 40 }}
+                  id="pp-filter-validity"
+                >
+                  <Icon name="clock" className="me-1" />
+                  {filterValidity || "Validity"}
+                  <Icon name="chevron-down" className="ms-1" />
+                </DropdownToggle>
+                <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", zIndex: 1060 }}>
+                  <DropdownItem
+                    onClick={() => { setFilterValidity(""); paginate(1); }}
+                    className={!filterValidity ? "fw-bold" : ""}
+                  >
+                    All Durations
+                  </DropdownItem>
+                  <DropdownItem divider />
+                  {VALIDITY_OPTIONS_PP.map((v) => (
+                    <DropdownItem
+                      key={v}
+                      onClick={() => { setFilterValidity(v); paginate(1); }}
+                      className={filterValidity === v ? "fw-bold text-primary" : ""}
+                    >
+                      {v}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </UncontrolledDropdown>
+
+              {/* Data Size */}
+              <UncontrolledDropdown>
+                <DropdownToggle
+                  tag="button"
+                  className={`btn btn-sm ${filterSize ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                  style={{ padding: "8px 14px", fontSize: 13, fontWeight: 500, borderRadius: 8, height: 40 }}
+                  id="pp-filter-size"
+                >
+                  <Icon name="db" className="me-1" />
+                  {filterSize || "Data Size"}
+                  <Icon name="chevron-down" className="ms-1" />
+                </DropdownToggle>
+                <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", zIndex: 1060 }}>
+                  <DropdownItem
+                    onClick={() => { setFilterSize(""); paginate(1); }}
+                    className={!filterSize ? "fw-bold" : ""}
+                  >
+                    All Sizes
+                  </DropdownItem>
+                  <DropdownItem divider />
+                  {SIZE_OPTIONS_PP.map((s) => (
+                    <DropdownItem
+                      key={s}
+                      onClick={() => { setFilterSize(s); paginate(1); }}
+                      className={filterSize === s ? "fw-bold text-primary" : ""}
+                    >
+                      {s}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </UncontrolledDropdown>
+
+              {/* Reset */}
+              {hasActiveFilters && (
+                <button
+                  className="btn btn-sm btn-outline-danger"
+                  style={{ padding: "8px 14px", fontSize: 13, fontWeight: 500, borderRadius: 8, height: 40 }}
+                  onClick={resetFilters}
+                >
+                  <Icon name="cross" className="me-1" />
+                  Reset
+                </button>
+              )}
             </div>
+
+            {/* ── Table Header ────────────────────────────────── */}
+            <div className="card-inner border-bottom py-3 px-4 d-flex align-items-center justify-content-between">
+              <h5 className="title mb-0 fw-bold">
+                All Products
+                <Badge
+                  color="light"
+                  className="ms-2 fw-bold"
+                  style={{ fontSize: 12, color: "#0f3dac" }}
+                >
+                  {filteredProducts.length}
+                  {filteredProducts.length !== allProducts.length && (
+                    <span className="text-muted fw-normal"> / {allProducts.length}</span>
+                  )}
+                </Badge>
+              </h5>
+            </div>
+
+            {/* ── Table Body ──────────────────────────────────── */}
             <div className="card-inner-group">
               <div className="card-inner p-0">
                 {isLoading ? (
                   <LoadingSpinner />
-                ) : products?.data?.length > 0 ? (
+                ) : filteredProducts.length > 0 ? (
                   <>
-                    <DataTableBody className="is-compact">
-                      <DataTableHead className="tb-tnx-head bg-white fw-bold text-secondary">
-                        <DataTableRow>
-                          <span className="tb-tnx-head bg-white text-secondary">S/N</span>
-                        </DataTableRow>
-                        <DataTableRow>
-                          <span className="tb-tnx-head bg-white text-secondary">Name</span>
-                        </DataTableRow>
+                    <div className="provider-products-table-wrap">
+                      <DataTableBody className="is-compact">
+                        <DataTableHead className="tb-tnx-head bg-white fw-bold text-secondary">
+                          <DataTableRow>
+                            <span>S/N</span>
+                          </DataTableRow>
+                          <DataTableRow>
+                            <span>Name</span>
+                          </DataTableRow>
+                          <DataTableRow>
+                            <span>Size</span>
+                          </DataTableRow>
+                          <DataTableRow size="sm">
+                            <span>Validity</span>
+                          </DataTableRow>
+                          <DataTableRow size="sm">
+                            <span>Provider Amount</span>
+                          </DataTableRow>
+                          <DataTableRow size="sm">
+                            <span>Additional Amount</span>
+                          </DataTableRow>
+                          <DataTableRow>
+                            <span>Amount</span>
+                          </DataTableRow>
+                          <DataTableRow size="sm">
+                            <span>Type</span>
+                          </DataTableRow>
+                          <DataTableRow>
+                            <span>Status</span>
+                          </DataTableRow>
+                          <DataTableRow>
+                            <span>🔥 Hot</span>
+                          </DataTableRow>
+                          <DataTableRow className="nk-tb-col-tools">
+                            <span></span>
+                          </DataTableRow>
+                        </DataTableHead>
 
-                        <DataTableRow>
-                          <span className="tb-tnx-head bg-white text-secondary">Size</span>
-                        </DataTableRow>
-                        <DataTableRow size="sm">
-                          <span className="tb-tnx-head bg-white text-secondary">Validity</span>
-                        </DataTableRow>
-                        <DataTableRow size="sm">
-                          <span className="tb-tnx-head bg-white text-secondary">Provider Amount</span>
-                        </DataTableRow>
-                        <DataTableRow size="sm">
-                          <span className="tb-tnx-head bg-white text-secondary">Additional Amount</span>
-                        </DataTableRow>
-                        <DataTableRow>
-                          <span className="tb-tnx-head bg-white text-secondary">Amount</span>
-                        </DataTableRow>
-                        <DataTableRow size="sm">
-                          <span className="tb-tnx-head bg-white text-secondary">Type</span>
-                        </DataTableRow>
-
-                        <DataTableRow>
-                          <span className="tb-tnx-head bg-white text-secondary">Status</span>
-                        </DataTableRow>
-
-                        <DataTableRow>
-                          <span className="tb-tnx-head bg-white text-secondary">🔥 Hot</span>
-                        </DataTableRow>
-                        <DataTableRow className="nk-tb-col-tools">
-                          <ul className="nk-tb-actions gx-1 my-n1">
-                            <li className="me-n1">
-                              <UncontrolledDropdown>
-                                <DropdownToggle
-                                  tag="a"
-                                  href="#toggle"
-                                  onClick={(ev) => ev.preventDefault()}
-                                  className="dropdown-toggle btn btn-icon btn-trigger disabled"
-                                >
-                                  <Icon name="more-h"></Icon>
-                                </DropdownToggle>
-                              </UncontrolledDropdown>
-                            </li>
-                          </ul>
-                        </DataTableRow>
-                      </DataTableHead>
-                      {products?.data?.map((item, idx) => {
-                        return (
-                          <DataTableItem key={item?._id} className="text-secondary">
-                            <DataTableRow>
-                              <span>{idx + 1}</span>
-                            </DataTableRow>
-                            <DataTableRow>
-                              <span className="tb-product">
-                                <img
-                                  src={item.logo ? item.logo : NoIcon}
-                                  alt={"provider logo for " + item.name}
-                                  className="thumb-sm  d-lg-inline-flex"
-                                />
-                                <span className="title d-none d-md-inline">{item.name}</span>
-                              </span>
-                            </DataTableRow>
-                            <DataTableRow>
-                              <span className="">{item.dataSizeDisplay}</span>
-                            </DataTableRow>
-                            <DataTableRow size="sm">
-                              <span className="">{item.validity}</span>
-                            </DataTableRow>
-                            <DataTableRow size="sm">
-                              <span>{formatter("NGN").format(item.providerAmount)}</span>
-                            </DataTableRow>{" "}
-                            <DataTableRow size="sm">
-                              <span>{formatter("NGN").format(item.additionalAmount ?? 0)}</span>
-                            </DataTableRow>
-                            <DataTableRow>
-                              <span>{formatter("NGN").format(item.amount)}</span>
-                            </DataTableRow>
-                            <DataTableRow size="sm">
-                              <span className="ccap">{item.serviceId.name}</span>
-                            </DataTableRow>
-                            <DataTableRow>
-                              <div className="custom-control-sm custom-switch">
-                                <input
-                                  type="checkbox"
-                                  className="custom-control-input"
-                                  checked={item?.isActive}
-                                  name={item.name}
-                                  onChange={() => {
-                                    setEditedId(item._id);
-                                    toggleProduct({ isActive: !item?.isActive });
-                                  }}
-                                  id={item?._id}
-                                />
-                                <label className="custom-control-label" htmlFor={item?._id}>
-                                  <span
-                                    className={`ccap fw-medium d-none d-md-inline ${item?.isActive ? "text-success" : ""}`}
+                        {paginatedProducts.map((item, idx) => {
+                          const globalIdx = (currentPage - 1) * itemsPerPage + idx + 1;
+                          return (
+                            <DataTableItem key={item?._id} className="text-secondary">
+                              <DataTableRow>
+                                <span>{globalIdx}</span>
+                              </DataTableRow>
+                              <DataTableRow>
+                                <span className="tb-product">
+                                  <img
+                                    src={item.logo ? item.logo : NoIcon}
+                                    alt={"logo for " + item.name}
+                                    className="thumb-sm d-lg-inline-flex"
+                                  />
+                                  <span className="title d-none d-md-inline">{item.name}</span>
+                                </span>
+                              </DataTableRow>
+                              <DataTableRow>
+                                <span>{item.dataSizeDisplay || "—"}</span>
+                              </DataTableRow>
+                              <DataTableRow size="sm">
+                                <span>
+                                  {item.validity || item.attributes?.validityPeriod || "—"}
+                                </span>
+                              </DataTableRow>
+                              <DataTableRow size="sm">
+                                <span>{formatter("NGN").format(item.providerAmount)}</span>
+                              </DataTableRow>
+                              <DataTableRow size="sm">
+                                <span>{formatter("NGN").format(item.additionalAmount ?? 0)}</span>
+                              </DataTableRow>
+                              <DataTableRow>
+                                <span>{formatter("NGN").format(item.amount)}</span>
+                              </DataTableRow>
+                              <DataTableRow size="sm">
+                                <span className="ccap">{item.serviceId?.name || "—"}</span>
+                              </DataTableRow>
+                              <DataTableRow>
+                                <div className="custom-control-sm custom-switch">
+                                  <input
+                                    type="checkbox"
+                                    className="custom-control-input"
+                                    checked={!!item?.isActive}
+                                    name={item.name}
+                                    onChange={() => {
+                                      setEditedId(item._id);
+                                      toggleProduct({ isActive: !item?.isActive });
+                                    }}
+                                    id={`pp-status-${item?._id}`}
+                                  />
+                                  <label
+                                    className="custom-control-label"
+                                    htmlFor={`pp-status-${item?._id}`}
                                   >
-                                    {item.isActive ? "active" : "inactive"}
-                                  </span>
-                                </label>
-                              </div>
-                            </DataTableRow>
-                            <DataTableRow>
-                              <HotToggleCell productId={item._id} isHot={!!item.isHot} />
-                            </DataTableRow>
-                            <DataTableRow className="nk-tb-col-tools">
-                              <ul className="nk-tb-actions gx-1 my-n1">
-                                <li>
-                                  <UncontrolledDropdown>
-                                    <DropdownToggle tag="a" className="btn btn-trigger dropdown-toggle btn-icon me-n1">
-                                      <Icon name="more-h"></Icon>
-                                    </DropdownToggle>
-                                    <DropdownMenu end>
-                                      <ul className="link-list-opt no-bdr">
-                                        <li>
-                                          <DropdownItem
-                                            tag="a"
-                                            href="#"
-                                            onClick={(ev) => {
-                                              ev.preventDefault();
-                                              onEditClick(item?._id);
-                                              setView({ add: false, edit: true, details: false });
-                                            }}
-                                          >
-                                            <Icon name="edit"></Icon>
-                                            <span>Edit</span>
-                                          </DropdownItem>
-                                        </li>
-                                        {/* <li>
-                                          <DropdownItem
-                                            tag="a"
-                                            href="#"
-                                            onClick={(ev) => {
-                                              ev.preventDefault();
-                                              onEditClick(item?._id);
-                                              deleteProduct();
-                                            }}
-                                            className="text-danger"
-                                          >
-                                            <Icon name={"trash"}></Icon>
-                                            <span>Delete</span>
-                                          </DropdownItem>
-                                        </li> */}
-                                      </ul>
-                                    </DropdownMenu>
-                                  </UncontrolledDropdown>
-                                </li>
-                              </ul>
-                            </DataTableRow>
-                          </DataTableItem>
-                        );
-                      })}
-                    </DataTableBody>
+                                    <span
+                                      className={`ccap fw-medium d-none d-md-inline ${
+                                        item?.isActive ? "text-success" : ""
+                                      }`}
+                                    >
+                                      {item.isActive ? "active" : "inactive"}
+                                    </span>
+                                  </label>
+                                </div>
+                              </DataTableRow>
+                              <DataTableRow>
+                                <HotToggleCell productId={item._id} isHot={!!item.isHot} />
+                              </DataTableRow>
+                              <DataTableRow className="nk-tb-col-tools">
+                                <ul className="nk-tb-actions gx-1 my-n1">
+                                  <li>
+                                    <UncontrolledDropdown>
+                                      <DropdownToggle
+                                        tag="a"
+                                        className="btn btn-trigger dropdown-toggle btn-icon me-n1"
+                                      >
+                                        <Icon name="more-h"></Icon>
+                                      </DropdownToggle>
+                                      <DropdownMenu end style={{ zIndex: 1060 }}>
+                                        <ul className="link-list-opt no-bdr">
+                                          <li>
+                                            <DropdownItem
+                                              tag="a"
+                                              href="#edit"
+                                              onClick={(ev) => {
+                                                ev.preventDefault();
+                                                onEditClick(item?._id);
+                                                setView({ add: false, edit: true, details: false });
+                                              }}
+                                            >
+                                              <Icon name="edit"></Icon>
+                                              <span>Edit</span>
+                                            </DropdownItem>
+                                          </li>
+                                        </ul>
+                                      </DropdownMenu>
+                                    </UncontrolledDropdown>
+                                  </li>
+                                </ul>
+                              </DataTableRow>
+                            </DataTableItem>
+                          );
+                        })}
+                      </DataTableBody>
+                    </div>
+
                     <div className="card-inner">
-                      {products?.data?.length > 0 && (
+                      {filteredProducts.length > itemsPerPage && (
                         <PaginationComponent
                           itemPerPage={itemsPerPage}
-                          totalItems={products?.data?.length}
+                          totalItems={filteredProducts.length}
                           paginate={paginate}
-                          currentPage={Number(currentPage)}
+                          currentPage={currentPage}
                         />
                       )}
                     </div>
                   </>
                 ) : (
-                  <div className="text-center" style={{ paddingBlock: "1rem" }}>
-                    <span className="text-silent">No Products found</span>
+                  <div className="text-center" style={{ paddingBlock: "2.5rem" }}>
+                    <div style={{ fontSize: 40, marginBottom: 8 }}>📦</div>
+                    <span className="text-silent d-block">
+                      {hasActiveFilters
+                        ? "No products match the current filters."
+                        : "No Products found"}
+                    </span>
+                    {hasActiveFilters && (
+                      <button
+                        className="btn btn-sm btn-outline-secondary mt-2"
+                        onClick={resetFilters}
+                      >
+                        Clear Filters
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -490,17 +622,20 @@ const ServiceProvidersProducts = () => {
         </Block>
 
         <AddProductModal modal={view.products} closeModal={() => onFormCancel()} />
-        {/* ADD CATEGORIES */}
-        <Modal isOpen={view.edit} toggle={() => onFormCancel()} className="modal-dialog-centered" size="md">
+
+        {/* ── Edit Modal ────────────────────────────────────── */}
+        <Modal
+          isOpen={view.edit}
+          toggle={() => onFormCancel()}
+          className="modal-dialog-centered"
+          size="md"
+        >
           <ModalBody className="bg-white rounded">
             <a href="#cancel" className="close">
               {" "}
               <Icon
                 name="cross-sm"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  onFormCancel();
-                }}
+                onClick={(ev) => { ev.preventDefault(); onFormCancel(); }}
               ></Icon>
             </a>
             <div className="p-2">
@@ -510,106 +645,100 @@ const ServiceProvidersProducts = () => {
                   <Row className="g-3">
                     <Col md="12">
                       <div className="form-group">
-                        <label className="form-label" htmlFor="product_name">
+                        <label className="form-label" htmlFor="pp-product-name">
                           Product Name
                         </label>
                         <div className="form-control-wrap">
                           <input
-                            id="product_name"
+                            id="pp-product-name"
                             type="text"
                             className="form-control"
-                            {...register("name", {
-                              required: "This field is required",
-                            })}
+                            {...register("name", { required: "This field is required" })}
                             defaultValue={formData.name}
                           />
-                          {errors.name && <span className="invalid">{errors.name.message}</span>}
+                          {errors.name && (
+                            <span className="invalid">{errors.name.message}</span>
+                          )}
                         </div>
                       </div>
                     </Col>
                     <Col md="12">
                       <div className="form-group">
-                        <label className="form-label" htmlFor="data_size">
+                        <label className="form-label" htmlFor="pp-data-size">
                           Data Size
                         </label>
                         <div className="form-control-wrap">
                           <input
-                            id="data_size"
+                            id="pp-data-size"
                             type="text"
                             className="form-control"
-                            {...register("dataSizeDisplay", {
-                              required: "This field is required",
-                            })}
+                            {...register("dataSizeDisplay", { required: "This field is required" })}
                             defaultValue={formData.dataSizeDisplay}
                           />
-                          {errors.dataSizeDisplay && <span className="invalid">{errors.dataSizeDisplay.message}</span>}
+                          {errors.dataSizeDisplay && (
+                            <span className="invalid">{errors.dataSizeDisplay.message}</span>
+                          )}
                         </div>
                       </div>
                     </Col>
                     <Col md="12">
                       <div className="form-group">
-                        <label className="form-label" htmlFor="validity_period">
+                        <label className="form-label" htmlFor="pp-validity">
                           Validity Period
                         </label>
                         <div className="form-control-wrap">
                           <input
-                            id="validity_period"
+                            id="pp-validity"
                             type="text"
                             className="form-control"
-                            {...register("validityPeriod", {
-                              required: "This field is required",
-                            })}
+                            {...register("validityPeriod", { required: "This field is required" })}
                             defaultValue={formData.validityPeriod}
                           />
-                          {errors.validityPeriod && <span className="invalid">{errors.validityPeriod.message}</span>}
+                          {errors.validityPeriod && (
+                            <span className="invalid">{errors.validityPeriod.message}</span>
+                          )}
                         </div>
                       </div>
                     </Col>
-
                     <Col md="12">
                       <div className="form-group">
-                        <label className="form-label" htmlFor="account_number">
+                        <label className="form-label" htmlFor="pp-amount">
                           New Amount
                         </label>
                         <div className="form-control-wrap">
                           <input
+                            id="pp-amount"
                             type="text"
                             className="form-control"
-                            {...register("amount", {
-                              required: "This field is required",
-                            })}
+                            {...register("amount", { required: "This field is required" })}
                             defaultValue={formData.amount}
                           />
-                          {errors.amount && <span className="invalid">{errors.amount.message}</span>}
+                          {errors.amount && (
+                            <span className="invalid">{errors.amount.message}</span>
+                          )}
                         </div>
                       </div>
                     </Col>
-
                     <Col md="12">
                       <div className="form-group">
-                        <label className="form-label" htmlFor="account_number">
-                          Provider Amount
-                        </label>
+                        <label className="form-label">Provider Amount</label>
                         <div className="form-control-wrap">
                           <input
                             type="number"
                             className="form-control"
-                            {...register("provider_amount", {
-                              required: "This field is required",
-                            })}
+                            {...register("provider_amount", { required: "This field is required" })}
                             disabled
                             defaultValue={formData.provider_amount}
                           />
-                          {errors.provider_amount && <span className="invalid">{errors.provider_amount.message}</span>}
+                          {errors.provider_amount && (
+                            <span className="invalid">{errors.provider_amount.message}</span>
+                          )}
                         </div>
                       </div>
                     </Col>
-
                     <Col md="12">
                       <div className="form-group">
-                        <label className="form-label" htmlFor="account_number">
-                          Difference
-                        </label>
+                        <label className="form-label">Difference</label>
                         <div className="form-control-wrap">
                           <input
                             type="number"
@@ -617,12 +746,14 @@ const ServiceProvidersProducts = () => {
                             disabled
                             value={difference > 0 ? difference : 0}
                           />
-
-                          {difference < 0 && <span className="invalid">New amount is less than provider amount</span>}
+                          {difference < 0 && (
+                            <span className="invalid">
+                              New amount is less than provider amount
+                            </span>
+                          )}
                         </div>
                       </div>
                     </Col>
-
                     <Col size="12">
                       <Button color="primary" type="submit">
                         <Icon className="plus"></Icon>
@@ -636,17 +767,19 @@ const ServiceProvidersProducts = () => {
           </ModalBody>
         </Modal>
 
-        {/* View */}
-        <Modal isOpen={view.details} toggle={() => onFormCancel()} className="modal-dialog-centered" size="lg">
+        {/* ── View Modal ────────────────────────────────────── */}
+        <Modal
+          isOpen={view.details}
+          toggle={() => onFormCancel()}
+          className="modal-dialog-centered"
+          size="lg"
+        >
           <ModalBody>
             <a href="#cancel" className="close">
               {" "}
               <Icon
                 name="cross-sm"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  onFormCancel();
-                }}
+                onClick={(ev) => { ev.preventDefault(); onFormCancel(); }}
               ></Icon>
             </a>
             <div className="p-2">
@@ -664,22 +797,25 @@ const ServiceProvidersProducts = () => {
                     <span className="sub-text">Product Type</span>
                     <span className="caption-text">
                       {formData.product_type?.map((item, index) => (
-                        <span className="ccap pe-1" key={index}>
-                          {item}
-                        </span>
+                        <span className="ccap pe-1" key={index}>{item}</span>
                       ))}
                     </span>
                   </Col>
                   <Col lg={6}>
                     <span className="sub-text">Provider Status</span>
-                    <span className={`caption-text ${formData.active ? "text-success" : "text-warning"}`}>
+                    <span
+                      className={`caption-text ${
+                        formData.active ? "text-success" : "text-warning"
+                      }`}
+                    >
                       {formData.active ? "Active" : "Inactive"}
                     </span>
                   </Col>
-
                   <Col lg={6}>
                     <span className="sub-text">Date Created</span>
-                    <span className="caption-text">{formatDateWithTime(formData.created_at)}</span>
+                    <span className="caption-text">
+                      {formatDateWithTime(formData.created_at)}
+                    </span>
                   </Col>
                 </Row>
               </div>

@@ -170,6 +170,17 @@ const UserProfileAside = ({ updateSm, sm }) => {
               </Link>
             </li>
           )}
+          {(hasPermission("spin_rewards.view") || hasPermission("all")) && (
+            <li onClick={() => updateSm(false)}>
+              <Link
+                to="/settings/spin-rewards"
+                className={location.pathname === `/settings/spin-rewards` ? "active" : ""}
+              >
+                <Icon name="curve-down-right"></Icon>
+                <span>Spin & Win Rewards</span>
+              </Link>
+            </li>
+          )}
           {hasPermission("manage_bonuses") && (
             <li onClick={() => updateSm(false)}>
               <Link

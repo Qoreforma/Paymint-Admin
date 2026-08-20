@@ -56,6 +56,11 @@ const VALIDITY_OPTIONS = [
   { label: "Daily", value: "daily" },
   { label: "Yearly", value: "yearly" },
 ];
+const SIZE_OPTIONS = [
+  "500MB", "1GB", "1.5GB", "2GB", "2.5GB", "3GB", "4GB", "5GB",
+  "6GB", "7GB", "8GB", "10GB", "15GB", "20GB", "25GB", "30GB",
+  "40GB", "50GB", "75GB", "100GB",
+];
 
 // ─── Stat Card ─────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, color, icon }) => (
@@ -660,6 +665,7 @@ const ProductList = () => {
     serviceId: "",
     dataType: "",
     validity: "",
+    dataSize: "",
     isHot: "all",
     status: "all",
   });
@@ -729,6 +735,15 @@ const ProductList = () => {
   const activeFilters = Object.entries(filters).filter(([k, v]) => v && v !== "all" && v !== "");
 
   const handleSearch = () => setFilter("search", pendingSearch);
+
+  // ── Client-side Data Size filter applied on top of server results ──
+  const filteredProducts = useMemo(() => {
+    if (!filters.dataSize) return products;
+    const needle = filters.dataSize.toLowerCase();
+    return products.filter((p) =>
+      (p.dataSizeDisplay || "").toLowerCase() === needle
+    );
+  }, [products, filters.dataSize]);
 
   // ── Selection Handlers ──
   const isAllSelected = products.length > 0 && products.every((p) => selectedIds.includes(p._id));
@@ -881,7 +896,7 @@ const ProductList = () => {
 
                 {/* Second Row: Dimension Dropdown Chips & Reset Button */}
                 <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 pt-4 mt-2">
-                  <div className="d-flex flex-wrap align-items-center" style={{ gap: 12 }}>
+                  <div className="filter-chip-strip">
                     {/* Provider */}
                     <UncontrolledDropdown>
                       <DropdownToggle
@@ -1014,14 +1029,39 @@ const ProductList = () => {
                         ))}
                       </DropdownMenu>
                     </UncontrolledDropdown>
+
+                    {/* Data Size */}
+                    <UncontrolledDropdown>
+                      <DropdownToggle
+                        tag="button"
+                        className={`btn btn-sm ${filters.dataSize ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                        id="filter-datasize-toggle"
+                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      >
+                        <Icon name="db" className="me-1" />
+                        {filters.dataSize || "Data Size"}
+                        <Icon name="chevron-down" className="ms-1" />
+                      </DropdownToggle>
+                      <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", zIndex: 1060 }}>
+                        <DropdownItem onClick={() => setFilter("dataSize", "")} className={!filters.dataSize ? "fw-bold" : ""}>
+                          All Sizes
+                        </DropdownItem>
+                        <DropdownItem divider />
+                        {SIZE_OPTIONS.map((s) => (
+                          <DropdownItem key={s} onClick={() => setFilter("dataSize", s)} className={filters.dataSize === s ? "fw-bold text-primary" : ""}>
+                            {s}
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
                   </div>
 
                   {activeFilters.length > 0 && (
                     <button
                       className="btn btn-sm btn-outline-danger"
-                      style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8, flexShrink: 0 }}
                       onClick={() => {
-                        setFilters({ search: "", providerId: "", serviceTypeId: "", serviceId: "", dataType: "", validity: "", isHot: "all", status: "all" });
+                        setFilters({ search: "", providerId: "", serviceTypeId: "", serviceId: "", dataType: "", validity: "", dataSize: "", isHot: "all", status: "all" });
                         setPendingSearch("");
                         setSearchParams((sp) => { sp.set("page", 1); return sp; });
                       }}
@@ -1040,13 +1080,14 @@ const ProductList = () => {
                         Active filters:
                       </span>
                     </div>
-                    <div className="d-flex flex-wrap align-items-center" style={{ gap: 12 }}>
+                    <div className="filter-chip-strip">
                       {activeFilters.map(([key, val]) => {
                         let label = `${key}: ${val}`;
                         if (key === "providerId") label = `Provider: ${providerOptions.find((p) => p.value === val)?.label ?? val}`;
                         if (key === "serviceTypeId") label = `Type: ${serviceTypeOptions.find((st) => st.value === val)?.label ?? val}`;
                         if (key === "serviceId") label = `Service: ${serviceOptions.find((s) => s.value === val)?.label ?? val}`;
-                        if (key === "dataType") label = `Data: ${val}`;
+                        if (key === "dataType") label = `Data Type: ${val}`;
+                        if (key === "dataSize") label = `Size: ${val}`;
                         if (key === "validity") label = `Validity: ${VALIDITY_OPTIONS.find((v) => v.value === val)?.label ?? val}`;
                         if (key === "isHot") label = val === "true" ? "🔥 Hot Only" : "Regular Only";
                         if (key === "status") label = val === "true" ? "✅ Active" : "⛔ Inactive";
@@ -1251,8 +1292,9 @@ const ProductList = () => {
               <div className="card-inner p-0">
                 {isLoading ? (
                   <LoadingSpinner />
-                ) : products.length > 0 ? (
+                ) : filteredProducts.length > 0 ? (
                   <>
+                    <div className="nk-tb-scroll-wrap">
                     <DataTableBody className="is-compact">
                       <DataTableHead className="tb-tnx-head bg-white fw-bold text-secondary">
                         {/* Checkbox column with generous left edge padding */}
@@ -1295,7 +1337,7 @@ const ProductList = () => {
                         </DataTableRow>
                       </DataTableHead>
 
-                      {products.map((item) => {
+                      {filteredProducts.map((item) => {
                         const service = item.serviceId;
                         const serviceType = service?.serviceTypeId;
                         const provider = item.providerId;
@@ -1482,6 +1524,7 @@ const ProductList = () => {
                         );
                       })}
                     </DataTableBody>
+                    </div>
 
                     <div className="card-inner py-4 px-4 px-xl-5">
                       {pagination.total > 0 && (
@@ -1496,6 +1539,11 @@ const ProductList = () => {
                           }
                           currentPage={page}
                         />
+                      )}
+                      {filters.dataSize && filteredProducts.length === 0 && (
+                        <p className="text-muted small mt-2 mb-0">
+                          No products match size <strong>{filters.dataSize}</strong> on this page. Try a different page or clear the size filter.
+                        </p>
                       )}
                     </div>
                   </>
