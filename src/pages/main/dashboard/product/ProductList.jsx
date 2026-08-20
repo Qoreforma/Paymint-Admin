@@ -61,6 +61,21 @@ const SIZE_OPTIONS = [
   "6GB", "7GB", "8GB", "10GB", "15GB", "20GB", "25GB", "30GB",
   "40GB", "50GB", "75GB", "100GB",
 ];
+const SORT_OPTIONS = [
+  { label: "Newest First", value: "createdAt", order: "desc", icon: "calendar" },
+  { label: "Oldest First", value: "createdAt", order: "asc", icon: "calendar" },
+  { label: "Data Size (Smallest → Largest)", value: "dataSize", order: "asc", icon: "db" },
+  { label: "Data Size (Largest → Smallest)", value: "dataSize", order: "desc", icon: "db" },
+  { label: "Name (A → Z)", value: "name", order: "asc", icon: "sort-v" },
+  { label: "Name (Z → A)", value: "name", order: "desc", icon: "sort-v" },
+  { label: "Validity (Shortest → Longest)", value: "validity", order: "asc", icon: "clock" },
+  { label: "Validity (Longest → Shortest)", value: "validity", order: "desc", icon: "clock" },
+  { label: "Validity Period (Daily → Yearly)", value: "validityPeriod", order: "asc", icon: "calender-date" },
+  { label: "Price (Lowest → Highest)", value: "amount", order: "asc", icon: "money" },
+  { label: "Price (Highest → Lowest)", value: "amount", order: "desc", icon: "money" },
+  { label: "Provider Cost (Lowest → Highest)", value: "providerAmount", order: "asc", icon: "coins" },
+  { label: "🔥 Hot Products First", value: "isHot", order: "desc", icon: "fire" },
+];
 
 // ─── Stat Card ─────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, color, icon }) => (
@@ -668,6 +683,8 @@ const ProductList = () => {
     dataSize: "",
     isHot: "all",
     status: "all",
+    sortBy: "createdAt",
+    sortOrder: "desc",
   });
   const [pendingSearch, setPendingSearch] = useState("");
 
@@ -688,8 +705,11 @@ const ProductList = () => {
     serviceId: filters.serviceId,
     dataType: filters.dataType,
     validity: filters.validity,
+    dataSize: filters.dataSize,
     isHot: filters.isHot,
     status: filters.status,
+    sortBy: filters.sortBy,
+    sortOrder: filters.sortOrder,
   });
 
   const { data: providersData } = useGetProviders(1, 200);
@@ -730,20 +750,57 @@ const ProductList = () => {
     setSearchParams((sp) => { sp.set("page", 1); return sp; });
   };
 
-  const clearFilter = (key) => setFilter(key, key === "isHot" || key === "status" ? "all" : "");
+  const handleSort = (sortBy, sortOrder) => {
+    setFilters((prev) => {
+      let nextOrder = sortOrder;
+      if (!nextOrder) {
+        if (prev.sortBy === sortBy) {
+          nextOrder = prev.sortOrder === "asc" ? "desc" : "asc";
+        } else {
+          nextOrder = (sortBy === "dataSize" || sortBy === "name" || sortBy === "validity" || sortBy === "amount" || sortBy === "providerAmount") ? "asc" : "desc";
+        }
+      }
+      return {
+        ...prev,
+        sortBy,
+        sortOrder: nextOrder,
+      };
+    });
+    setSelectedIds([]);
+    setSearchParams((sp) => {
+      sp.set("page", 1);
+      return sp;
+    });
+  };
 
-  const activeFilters = Object.entries(filters).filter(([k, v]) => v && v !== "all" && v !== "");
+  const currentSortOption = useMemo(() => {
+    return (
+      SORT_OPTIONS.find(
+        (opt) => opt.value === filters.sortBy && opt.order === filters.sortOrder
+      ) ||
+      SORT_OPTIONS.find((opt) => opt.value === filters.sortBy) ||
+      SORT_OPTIONS[0]
+    );
+  }, [filters.sortBy, filters.sortOrder]);
+
+  const clearFilter = (key) => {
+    if (key === "sortBy") {
+      handleSort("createdAt", "desc");
+      return;
+    }
+    setFilter(key, key === "isHot" || key === "status" ? "all" : "");
+  };
+
+  const activeFilters = Object.entries(filters).filter(([k, v]) => {
+    if (k === "sortBy" && v === "createdAt" && filters.sortOrder === "desc") return false;
+    if (k === "sortOrder") return false;
+    return v && v !== "all" && v !== "";
+  });
 
   const handleSearch = () => setFilter("search", pendingSearch);
 
-  // ── Client-side Data Size filter applied on top of server results ──
-  const filteredProducts = useMemo(() => {
-    if (!filters.dataSize) return products;
-    const needle = filters.dataSize.toLowerCase();
-    return products.filter((p) =>
-      (p.dataSizeDisplay || "").toLowerCase() === needle
-    );
-  }, [products, filters.dataSize]);
+  // Filtered products from server
+  const filteredProducts = products;
 
   // ── Selection Handlers ──
   const isAllSelected = products.length > 0 && products.every((p) => selectedIds.includes(p._id));
@@ -845,9 +902,9 @@ const ProductList = () => {
               }}
             >
               <div className="card-body p-4 p-xl-5" style={{ overflow: "visible" }}>
-                {/* Top Row: Search & Quick Selects */}
+                {/* Top Row: Search, Sort & Quick Selects */}
                 <div className="row g-3 align-items-center mb-3">
-                  <div className="col-12 col-md-6 col-lg-5">
+                  <div className="col-12 col-md-5 col-lg-4">
                     <div className="input-group">
                       <input
                         type="text"
@@ -865,7 +922,44 @@ const ProductList = () => {
                     </div>
                   </div>
 
-                  <div className="col-6 col-md-3 col-lg-3">
+                  {/* Sort By Dropdown */}
+                  <div className="col-12 col-sm-6 col-md-3 col-lg-3">
+                    <UncontrolledDropdown className="w-100">
+                      <DropdownToggle
+                        tag="button"
+                        className="btn btn-outline-light text-dark border w-100 d-flex align-items-center justify-content-between text-truncate"
+                        id="sort-dropdown-toggle"
+                        style={{ height: 44, fontSize: 13, borderRadius: 8, background: "#ffffff" }}
+                      >
+                        <div className="d-flex align-items-center text-truncate me-2">
+                          <Icon name={currentSortOption.icon || "sort-v"} className="me-1 text-primary flex-shrink-0" />
+                          <span className="text-truncate">
+                            Sort: <strong>{currentSortOption.label}</strong>
+                          </span>
+                        </div>
+                        <Icon name="chevron-down" className="flex-shrink-0 ms-1" />
+                      </DropdownToggle>
+                      <DropdownMenu style={{ maxHeight: 320, overflowY: "auto", minWidth: 260, zIndex: 1060 }}>
+                        <div className="px-3 py-1 text-muted small fw-bold text-uppercase" style={{ fontSize: 10, letterSpacing: 0.5 }}>
+                          Sort Options
+                        </div>
+                        <DropdownItem divider className="my-1" />
+                        {SORT_OPTIONS.map((opt) => (
+                          <DropdownItem
+                            key={`${opt.value}-${opt.order}`}
+                            onClick={() => handleSort(opt.value, opt.order)}
+                            className={filters.sortBy === opt.value && filters.sortOrder === opt.order ? "fw-bold text-primary bg-light" : ""}
+                            style={{ fontSize: 13, padding: "8px 16px" }}
+                          >
+                            <Icon name={opt.icon || "sort-v"} className="me-2 text-secondary" />
+                            {opt.label}
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
+                  </div>
+
+                  <div className="col-6 col-sm-3 col-md-2 col-lg-2">
                     <select
                       className="form-select"
                       value={filters.isHot}
@@ -879,7 +973,7 @@ const ProductList = () => {
                     </select>
                   </div>
 
-                  <div className="col-6 col-md-3 col-lg-4 d-flex align-items-center gap-2">
+                  <div className="col-6 col-sm-3 col-md-2 col-lg-3 d-flex align-items-center gap-2">
                     <select
                       className="form-select flex-grow-1"
                       value={filters.status}
@@ -1061,13 +1155,13 @@ const ProductList = () => {
                       className="btn btn-sm btn-outline-danger"
                       style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8, flexShrink: 0 }}
                       onClick={() => {
-                        setFilters({ search: "", providerId: "", serviceTypeId: "", serviceId: "", dataType: "", validity: "", dataSize: "", isHot: "all", status: "all" });
+                        setFilters({ search: "", providerId: "", serviceTypeId: "", serviceId: "", dataType: "", validity: "", dataSize: "", isHot: "all", status: "all", sortBy: "createdAt", sortOrder: "desc" });
                         setPendingSearch("");
                         setSearchParams((sp) => { sp.set("page", 1); return sp; });
                       }}
                     >
                       <Icon name="cross" className="me-1" />
-                      Reset All Filters
+                      Reset All Filters & Sort
                     </button>
                   )}
                 </div>
@@ -1077,12 +1171,13 @@ const ProductList = () => {
                   <div className="mt-4 pt-4">
                     <div className="d-flex align-items-center mb-3">
                       <span className="text-dark fw-bold" style={{ fontSize: 14, marginRight: 16 }}>
-                        Active filters:
+                        Active filters & sort:
                       </span>
                     </div>
                     <div className="filter-chip-strip">
                       {activeFilters.map(([key, val]) => {
                         let label = `${key}: ${val}`;
+                        if (key === "sortBy") label = `Sort: ${currentSortOption.label}`;
                         if (key === "providerId") label = `Provider: ${providerOptions.find((p) => p.value === val)?.label ?? val}`;
                         if (key === "serviceTypeId") label = `Type: ${serviceTypeOptions.find((st) => st.value === val)?.label ?? val}`;
                         if (key === "serviceId") label = `Service: ${serviceOptions.find((s) => s.value === val)?.label ?? val}`;
@@ -1312,7 +1407,19 @@ const ProductList = () => {
                         </DataTableRow>
 
                         <DataTableRow>
-                          <span>Product</span>
+                          <div
+                            className="d-flex align-items-center gap-1 user-select-none"
+                            onClick={() => handleSort("name")}
+                            title="Sort by Name (Click to toggle A-Z / Z-A)"
+                            style={{ cursor: "pointer" }}
+                          >
+                            <span className={filters.sortBy === "name" ? "text-primary fw-bold" : ""}>Product</span>
+                            <Icon
+                              name={filters.sortBy === "name" ? (filters.sortOrder === "asc" ? "arrow-up" : "arrow-down") : "sort-v"}
+                              className={filters.sortBy === "name" ? "text-primary" : "text-muted opacity-50"}
+                              style={{ fontSize: 11 }}
+                            />
+                          </div>
                         </DataTableRow>
                         <DataTableRow size="sm">
                           <span>Service / Type</span>
@@ -1321,16 +1428,64 @@ const ProductList = () => {
                           <span>Provider</span>
                         </DataTableRow>
                         <DataTableRow size="sm">
-                          <span>Size / Validity</span>
+                          <div
+                            className="d-flex align-items-center gap-1 user-select-none"
+                            onClick={() => handleSort("dataSize")}
+                            title="Sort by Data Size (Click to toggle Smallest / Largest)"
+                            style={{ cursor: "pointer" }}
+                          >
+                            <span className={filters.sortBy === "dataSize" ? "text-primary fw-bold" : ""}>Size / Validity</span>
+                            <Icon
+                              name={filters.sortBy === "dataSize" ? (filters.sortOrder === "asc" ? "arrow-up" : "arrow-down") : "sort-v"}
+                              className={filters.sortBy === "dataSize" ? "text-primary" : "text-muted opacity-50"}
+                              style={{ fontSize: 11 }}
+                            />
+                          </div>
                         </DataTableRow>
                         <DataTableRow size="sm">
-                          <span>Amount</span>
+                          <div
+                            className="d-flex align-items-center gap-1 user-select-none"
+                            onClick={() => handleSort("amount")}
+                            title="Sort by Price (Click to toggle Lowest / Highest)"
+                            style={{ cursor: "pointer" }}
+                          >
+                            <span className={filters.sortBy === "amount" ? "text-primary fw-bold" : ""}>Amount</span>
+                            <Icon
+                              name={filters.sortBy === "amount" ? (filters.sortOrder === "asc" ? "arrow-up" : "arrow-down") : "sort-v"}
+                              className={filters.sortBy === "amount" ? "text-primary" : "text-muted opacity-50"}
+                              style={{ fontSize: 11 }}
+                            />
+                          </div>
                         </DataTableRow>
                         <DataTableRow className="text-center" style={{ width: 100 }}>
-                          <span className="d-block text-center">🔥 Hot</span>
+                          <div
+                            className="d-flex align-items-center justify-content-center gap-1 user-select-none"
+                            onClick={() => handleSort("isHot", filters.sortBy === "isHot" && filters.sortOrder === "desc" ? "asc" : "desc")}
+                            title="Sort by Hot Products"
+                            style={{ cursor: "pointer" }}
+                          >
+                            <span className={filters.sortBy === "isHot" ? "text-warning fw-bold" : ""}>🔥 Hot</span>
+                            <Icon
+                              name={filters.sortBy === "isHot" ? (filters.sortOrder === "desc" ? "arrow-down" : "arrow-up") : "sort-v"}
+                              className={filters.sortBy === "isHot" ? "text-warning" : "text-muted opacity-50"}
+                              style={{ fontSize: 11 }}
+                            />
+                          </div>
                         </DataTableRow>
                         <DataTableRow style={{ width: 110 }}>
-                          <span>Status</span>
+                          <div
+                            className="d-flex align-items-center gap-1 user-select-none"
+                            onClick={() => handleSort("status", filters.sortBy === "status" && filters.sortOrder === "desc" ? "asc" : "desc")}
+                            title="Sort by Status"
+                            style={{ cursor: "pointer" }}
+                          >
+                            <span className={filters.sortBy === "status" ? "text-primary fw-bold" : ""}>Status</span>
+                            <Icon
+                              name={filters.sortBy === "status" ? (filters.sortOrder === "desc" ? "arrow-down" : "arrow-up") : "sort-v"}
+                              className={filters.sortBy === "status" ? "text-primary" : "text-muted opacity-50"}
+                              style={{ fontSize: 11 }}
+                            />
+                          </div>
                         </DataTableRow>
                         <DataTableRow className="nk-tb-col-tools">
                           <span></span>
