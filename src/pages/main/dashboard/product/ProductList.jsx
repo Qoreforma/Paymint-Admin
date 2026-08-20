@@ -941,7 +941,7 @@ const ProductList = () => {
                         </div>
                         <Icon name="chevron-down" className="flex-shrink-0 ms-1" />
                       </DropdownToggle>
-                      <DropdownMenu style={{ maxHeight: 320, overflowY: "auto", minWidth: 260, zIndex: 1060 }}>
+                      <DropdownMenu container="body" style={{ maxHeight: 320, overflowY: "auto", minWidth: 260, zIndex: 1060 }}>
                         <div className="px-3 py-1 text-muted small fw-bold text-uppercase" style={{ fontSize: 10, letterSpacing: 0.5 }}>
                           Sort Options
                         </div>
@@ -1007,7 +1007,7 @@ const ProductList = () => {
                           : "Provider"}
                         <Icon name="chevron-down" className="ms-1" />
                       </DropdownToggle>
-                      <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
+                      <DropdownMenu container="body" style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
                         <DropdownItem onClick={() => setFilter("providerId", "")} className={!filters.providerId ? "fw-bold" : ""}>
                           All Providers
                         </DropdownItem>
@@ -1034,7 +1034,7 @@ const ProductList = () => {
                           : "Service Type"}
                         <Icon name="chevron-down" className="ms-1" />
                       </DropdownToggle>
-                      <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
+                      <DropdownMenu container="body" style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
                         <DropdownItem onClick={() => setFilter("serviceTypeId", "")} className={!filters.serviceTypeId ? "fw-bold" : ""}>
                           All Service Types
                         </DropdownItem>
@@ -1061,7 +1061,7 @@ const ProductList = () => {
                           : "Service"}
                         <Icon name="chevron-down" className="ms-1" />
                       </DropdownToggle>
-                      <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
+                      <DropdownMenu container="body" style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
                         <DropdownItem onClick={() => setFilter("serviceId", "")} className={!filters.serviceId ? "fw-bold" : ""}>
                           All Services
                         </DropdownItem>
@@ -1086,7 +1086,7 @@ const ProductList = () => {
                         {filters.dataType || "Data Type"}
                         <Icon name="chevron-down" className="ms-1" />
                       </DropdownToggle>
-                      <DropdownMenu style={{ zIndex: 1060 }}>
+                      <DropdownMenu container="body" style={{ zIndex: 1060 }}>
                         <DropdownItem onClick={() => setFilter("dataType", "")} className={!filters.dataType ? "fw-bold" : ""}>
                           All Data Types
                         </DropdownItem>
@@ -1113,7 +1113,7 @@ const ProductList = () => {
                           : "Validity"}
                         <Icon name="chevron-down" className="ms-1" />
                       </DropdownToggle>
-                      <DropdownMenu style={{ zIndex: 1060 }}>
+                      <DropdownMenu container="body" style={{ zIndex: 1060 }}>
                         <DropdownItem onClick={() => setFilter("validity", "")} className={!filters.validity ? "fw-bold" : ""}>
                           All Durations
                         </DropdownItem>
@@ -1138,7 +1138,7 @@ const ProductList = () => {
                         {filters.dataSize || "Data Size"}
                         <Icon name="chevron-down" className="ms-1" />
                       </DropdownToggle>
-                      <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", zIndex: 1060 }}>
+                      <DropdownMenu container="body" style={{ maxHeight: 260, overflowY: "auto", zIndex: 1060 }}>
                         <DropdownItem onClick={() => setFilter("dataSize", "")} className={!filters.dataSize ? "fw-bold" : ""}>
                           All Sizes
                         </DropdownItem>
