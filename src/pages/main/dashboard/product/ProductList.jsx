@@ -1151,30 +1151,27 @@ const ProductList = () => {
                       </DropdownMenu>
                     </UncontrolledDropdown>
                   </div>
-
-                  {activeFilters.length > 0 && (
-                    <button
-                      className="btn btn-sm btn-outline-danger"
-                      style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8, flexShrink: 0 }}
-                      onClick={() => {
-                        setFilters({ search: "", providerId: "", serviceTypeId: "", serviceId: "", dataType: "", validity: "", dataSize: "", isHot: "all", status: "all", sortBy: "createdAt", sortOrder: "desc" });
-                        setPendingSearch("");
-                        setSearchParams((sp) => { sp.set("page", 1); return sp; });
-                      }}
-                    >
-                      <Icon name="cross" className="me-1" />
-                      Reset All Filters & Sort
-                    </button>
-                  )}
                 </div>
 
                 {/* Active Filter Pills – Spacious Display */}
                 {activeFilters.length > 0 && (
-                  <div className="mt-4 pt-4">
-                    <div className="d-flex align-items-center mb-3">
-                      <span className="text-dark fw-bold" style={{ fontSize: 14, marginRight: 16 }}>
+                  <div className="mt-4 pt-4 border-top">
+                    <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                      <span className="text-dark fw-bold" style={{ fontSize: 14 }}>
                         Active filters & sort:
                       </span>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8, flexShrink: 0 }}
+                        onClick={() => {
+                          setFilters({ search: "", providerId: "", serviceTypeId: "", serviceId: "", dataType: "", validity: "", dataSize: "", isHot: "all", status: "all", sortBy: "createdAt", sortOrder: "desc" });
+                          setPendingSearch("");
+                          setSearchParams((sp) => { sp.set("page", 1); return sp; });
+                        }}
+                      >
+                        <Icon name="cross" className="me-1" />
+                        Reset All Filters & Sort
+                      </button>
                     </div>
                     <div className="d-flex flex-wrap gap-2">
                       {activeFilters.map(([key, val]) => {
