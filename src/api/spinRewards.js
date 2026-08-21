@@ -83,11 +83,11 @@ export const useCreateQualificationRule = () => {
   );
 };
 
-export const useEditQualificationRule = (id) => {
+export const useEditQualificationRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    (data) =>
+    ({ id, ...data }) =>
       toast.promise(
         instance
           .put(`${BACKEND_URLS.qualificationRules}/${id}`, data)
@@ -161,11 +161,11 @@ export const useCreateRewardTier = () => {
   );
 };
 
-export const useEditRewardTier = (id) => {
+export const useEditRewardTier = () => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    (data) =>
+    ({ id, ...data }) =>
       toast.promise(
         instance
           .put(`${BACKEND_URLS.rewardTiers}/${id}`, data)
@@ -178,9 +178,9 @@ export const useEditRewardTier = (id) => {
         }
       ),
     {
-      onSuccess: () => {
+      onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["RewardTiers"]);
-        queryClient.invalidateQueries(["RewardTier", id]);
+        queryClient.invalidateQueries(["RewardTier", variables.id]);
       },
     }
   );
@@ -266,11 +266,11 @@ export const useCreateWheelConfig = () => {
   );
 };
 
-export const useEditWheelConfig = (id) => {
+export const useEditWheelConfig = () => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    (data) =>
+    ({ id, ...data }) =>
       toast.promise(
         instance
           .put(`${BACKEND_URLS.spinWheels}/${id}`, data)

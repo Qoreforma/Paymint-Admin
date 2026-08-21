@@ -41,9 +41,7 @@ const DEFAULT_SEGMENT = {
 const WheelEditor = ({ isOpen, toggle, tier }) => {
   const { data: wheelData, isLoading } = useGetWheelConfigByTier(tier?._id);
   const { mutate: createWheel, isLoading: isCreating } = useCreateWheelConfig();
-  const { mutate: editWheel, isLoading: isEditing } = useEditWheelConfig(
-    wheelData?.data?._id
-  );
+  const { mutate: editWheel, isLoading: isEditing } = useEditWheelConfig();
 
   const [poolSize, setPoolSize] = useState(20);
   const [airtimeRecipientMode, setAirtimeRecipientMode] = useState("user-choice");
