@@ -25,6 +25,7 @@ const RULE_TYPE_OPTIONS = [
   { value: "new-since-last-claim", label: "New Referrals Since Last Claim (Repeatable)" },
   { value: "referee-profile-complete", label: "Referee Completed Profile / KYC" },
   { value: "referee-min-transaction-value", label: "Referee Min Transaction Value" },
+  { value: "referee-setup-account", label: "Referee Registered & Verified Email" },
 ];
 
 const QualificationRules = () => {
