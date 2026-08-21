@@ -361,3 +361,33 @@ export const useRetryRewardPayout = () => {
     }
   );
 };
+
+// ─── Debug ──────────────────────────────────────────────────────────────
+
+export const useSeedReferrals = () => {
+  return useMutation(
+    (data) =>
+      toast.promise(
+        instance.post("/admin/debug/seed-referrals", data).then((res) => res.data),
+        {
+          loading: "Seeding dummy referrals...",
+          success: (res) => res?.message || "Successfully seeded referrals",
+          error: (err) => err?.response?.data?.message || "Failed to seed referrals",
+        }
+      )
+  );
+};
+
+export const useCleanupDummyData = () => {
+  return useMutation(
+    () =>
+      toast.promise(
+        instance.post("/admin/debug/cleanup-dummy-data").then((res) => res.data),
+        {
+          loading: "Cleaning up dummy data...",
+          success: (res) => res?.message || "Dummy data cleaned successfully",
+          error: (err) => err?.response?.data?.message || "Failed to clean dummy data",
+        }
+      )
+  );
+};

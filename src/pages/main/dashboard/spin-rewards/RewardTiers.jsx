@@ -20,6 +20,8 @@ import {
   useEditRewardTier,
   useDeleteRewardTier,
   useGetWheelConfigs,
+  useSeedReferrals,
+  useCleanupDummyData,
 } from "../../../../api/spinRewards";
 import { usePermission } from "../../../../utils/usePermission";
 import WheelEditor from "./WheelEditor";
@@ -39,9 +41,15 @@ const RewardTiers = () => {
   const { mutate: editTier, isLoading: isEditing } = useEditRewardTier();
   const { mutate: deleteTier } = useDeleteRewardTier();
 
+  const { mutate: seedReferrals, isLoading: isSeeding } = useSeedReferrals();
+  const { mutate: cleanupDummyData, isLoading: isCleaning } = useCleanupDummyData();
+
   const [modal, setModal] = useState({ add: false, edit: false });
   const [editedId, setEditedId] = useState(null);
   const [wheelModal, setWheelModal] = useState({ open: false, tier: null });
+  
+  const [debugEmail, setDebugEmail] = useState("");
+  const [debugCount, setDebugCount] = useState(5);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -260,6 +268,52 @@ const RewardTiers = () => {
           )}
         </div>
       </Block>
+
+      {hasPermission("spin_rewards.manage_tiers") && (
+        <Block>
+          <BlockHead>
+            <BlockTitle tag="h6">Debug Tools</BlockTitle>
+            <BlockDes>
+              <p>Quickly seed referrals to test spin evaluation socket notifications, or clean up dummy data.</p>
+            </BlockDes>
+          </BlockHead>
+          <div className="d-flex align-items-center gap-3 bg-light p-3 rounded">
+            <input
+              type="email"
+              className="form-control w-25"
+              placeholder="Target User Email"
+              value={debugEmail}
+              onChange={(e) => setDebugEmail(e.target.value)}
+            />
+            <input
+              type="number"
+              className="form-control"
+              style={{ width: "100px" }}
+              placeholder="Count"
+              value={debugCount}
+              onChange={(e) => setDebugCount(e.target.value)}
+            />
+            <Button
+              color="primary"
+              disabled={isSeeding || !debugEmail}
+              onClick={() => seedReferrals({ email: debugEmail, count: debugCount })}
+            >
+              <Icon name="play" />
+              <span>{isSeeding ? "Seeding..." : "Seed Referrals"}</span>
+            </Button>
+
+            <Button
+              color="danger"
+              outline
+              disabled={isCleaning}
+              onClick={() => cleanupDummyData()}
+            >
+              <Icon name="trash" />
+              <span>{isCleaning ? "Cleaning..." : "Cleanup Dummy Data"}</span>
+            </Button>
+          </div>
+        </Block>
+      )}
 
       {/* Add / Edit Tier Modal */}
       <Modal
