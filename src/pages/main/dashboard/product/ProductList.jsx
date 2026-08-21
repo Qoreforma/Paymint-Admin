@@ -1683,7 +1683,7 @@ const ProductList = () => {
                     </DataTableBody>
                     </div>
 
-                    <div className="card-inner py-4 px-4 px-xl-5">
+                    <div className="card-inner py-4 px-4 px-xl-5 d-flex flex-wrap align-items-center justify-content-between gap-3">
                       {pagination.total > 0 && (
                         <PaginationComponent
                           itemPerPage={limit}
@@ -1697,8 +1697,32 @@ const ProductList = () => {
                           currentPage={page}
                         />
                       )}
-                      {filters.dataSize && filteredProducts.length === 0 && (
-                        <p className="text-muted small mt-2 mb-0">
+                      
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="text-muted small">Show</span>
+                        <select
+                          className="form-select form-select-sm"
+                          style={{ width: "80px", cursor: "pointer" }}
+                          value={limit}
+                          onChange={(e) => {
+                            setSearchParams((sp) => {
+                              sp.set("limit", e.target.value);
+                              sp.set("page", 1);
+                              return sp;
+                            });
+                          }}
+                        >
+                          <option value="10">10</option>
+                          <option value="20">20</option>
+                          <option value="50">50</option>
+                          <option value="100">100</option>
+                          <option value="200">200</option>
+                        </select>
+                        <span className="text-muted small">per page</span>
+                      </div>
+
+                      {filters.dataSize && filteredProducts?.length === 0 && (
+                        <p className="text-muted small mt-2 mb-0 w-100">
                           No products match size <strong>{filters.dataSize}</strong> on this page. Try a different page or clear the size filter.
                         </p>
                       )}
