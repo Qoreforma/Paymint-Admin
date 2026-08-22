@@ -368,7 +368,7 @@ export const useSeedReferrals = () => {
   return useMutation(
     (data) =>
       toast.promise(
-        instance.post("/admin/debug/seed-referrals", data).then((res) => res.data),
+        instance.post("/debug/seed-referrals", data).then((res) => res.data),
         {
           loading: "Seeding dummy referrals...",
           success: (res) => res?.message || "Successfully seeded referrals",
@@ -382,7 +382,7 @@ export const useCleanupDummyData = () => {
   return useMutation(
     () =>
       toast.promise(
-        instance.post("/admin/debug/cleanup-dummy-data").then((res) => res.data),
+        instance.post("/debug/cleanup-dummy-data").then((res) => res.data),
         {
           loading: "Cleaning up dummy data...",
           success: (res) => res?.message || "Dummy data cleaned successfully",
