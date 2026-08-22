@@ -95,6 +95,7 @@ import AllWalletTransactionListPage from "../pages/main/dashboard/wallet/all-wal
 import WalletWithdrawalListPage from "../pages/main/dashboard/wallet/wallet-debit";
 import WalletDepositListPage from "../pages/main/dashboard/wallet/wallet-deposit";
 import WalletTransferListPage from "../pages/main/dashboard/wallet/wallet-transfer";
+import WalletBonusListPage from "../pages/main/dashboard/wallet/wallet-bonus";
 import VerifiyOTP from "../pages/auth/2fa";
 import RestrictedEntityList from "../pages/main/dashboard/restricted-entities/restricted-list";
 import RelatedGiftCardListPage from "../pages/main/dashboard/giftcards/multiple";
@@ -150,6 +151,7 @@ const routes = (
           <Route path="wallet/deposit" element={<WalletDepositListPage />} />
           <Route path="wallet/withdrawal" element={<WalletWithdrawalListPage />} />
           <Route path="wallet/transfer" element={<WalletTransferListPage />} />
+          <Route path="wallet/bonus" element={<WalletBonusListPage />} />
           <Route path="wallet/all" element={<AllWalletTransactionListPage />} />
 
           <Route path="transactions/all" element={<TransactionsPage />} />

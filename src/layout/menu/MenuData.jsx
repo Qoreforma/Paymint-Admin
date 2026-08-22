@@ -76,6 +76,11 @@ const menu = [
       //   permission: "all",
       // },
       {
+        text: "Bonus",
+        link: "/wallet/bonus",
+        permission: "transactions.view",
+      },
+      {
         text: "Withdrawal",
         link: "/wallet/withdrawal",
         permission: "transactions.view",
