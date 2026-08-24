@@ -82,11 +82,11 @@ const menu = [
         link: "/wallet/deposit",
         permission: "transactions.view",
       },
-      // {
-      //   text: "Transfer",
-      //   link: "/wallet/transfer",
-      //   permission: "all",
-      // },
+      {
+        text: "Transfer",
+        link: "/wallet/transfer",
+        permission: "transactions.view",
+      },
       {
         text: "Bonus",
         link: "/wallet/bonus",

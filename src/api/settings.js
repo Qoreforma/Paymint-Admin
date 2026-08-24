@@ -759,3 +759,54 @@ export const useGetTrustedDevices = (page = 1, limit = 10) => {
   );
 };
 
+// **************** AIRTIME-TO-CASH CONFIG *************************
+
+export const useGetAirtimeCashConfig = () => {
+  return useQuery(
+    ["airtimeCashConfig"],
+    async () => {
+      const response = await instance
+        .get("/configs/airtime-cash")
+        .then((res) => res?.data)
+        .catch((err) => {
+          throw err;
+        });
+      return response;
+    },
+    {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      retryDelay: 3000,
+    }
+  );
+};
+
+export const useUpdateAirtimeCashConfig = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (data) =>
+      toast.promise(
+        instance
+          .patch("/configs/airtime-cash", data)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err;
+          }),
+        {
+          success: "Airtime-to-Cash instructions updated",
+          loading: "Saving...",
+          error: (error) =>
+            error?.response?.data?.message ? error?.response?.data?.message : "Something went wrong",
+        },
+        {
+          style: { minWidth: "180px" },
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["airtimeCashConfig"]);
+      },
+    }
+  );
+};

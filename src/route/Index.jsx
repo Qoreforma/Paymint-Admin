@@ -112,6 +112,7 @@ import ServiceProvidersApiDiscounts from "../pages/main/dashboard/service-provid
 import ServicesApiDiscounts from "../pages/main/dashboard/services/services-api-discounts";
 import DeviceAndIpPage from "../pages/main/dashboard/settings/DeviceAndIp";
 import EmailBannersPage from "../pages/main/dashboard/settings/EmailBanners";
+import AirtimeCashConfigPage from "../pages/main/dashboard/settings/AirtimeCashConfig";
 
 const routes = (
   <Route>
@@ -228,6 +229,7 @@ const routes = (
             <Route path="trade-bonus" element={<TradeBonusPage />} />
             <Route path="cashbacks" element={<CashbacksMasterPage />} />
             <Route path="cache-management" element={<CacheManagementPage />} />
+            <Route path="airtime-cash-config" element={<AirtimeCashConfigPage />} />
           </Route>
         </Route>
       </Route>

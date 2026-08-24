@@ -151,6 +151,15 @@ const UserProfileAside = ({ updateSm, sm }) => {
               <span>Phone number prefix</span>
             </Link>
           </li>
+          <li onClick={() => updateSm(false)}>
+            <Link
+              to="/settings/airtime-cash-config"
+              className={location.pathname === `/settings/airtime-cash-config` ? "active" : ""}
+            >
+              <Icon name="swap" />
+              <span>Airtime-to-Cash Notes</span>
+            </Link>
+          </li>
           {hasPermission("app_versions.view") && (
             <li onClick={() => updateSm(false)}>
               <Link to="/settings/app-update" className={location.pathname === `/settings/app-update` ? "active" : ""}>

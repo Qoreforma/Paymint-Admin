@@ -410,6 +410,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
     dataSizeDisplay: "",
     dataType: "",
     validity: "",
+    validityPeriod: "",
     isHot: false,
     isActive: true,
   });
@@ -425,7 +426,8 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
         description: product.description || "",
         dataSizeDisplay: product.dataSizeDisplay || "",
         dataType: product.attributes?.dataType || "",
-        validity: product.validity || product.attributes?.validityPeriod || "",
+        validity: product.validity || "",
+        validityPeriod: product.attributes?.validityPeriod || "",
         isHot: !!product.isHot,
         isActive: product.isActive !== false,
       });
@@ -460,7 +462,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
       payload.attributes = {
         ...product.attributes,
         dataType: formData.dataType,
-        validityPeriod: formData.validity,
+        validityPeriod: formData.validityPeriod,
       };
     }
 
@@ -549,7 +551,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
             {/* Data-Specific Fields */}
             {isDataProduct && (
               <>
-                <div className="col-md-4">
+                <div className="col-md-3">
                   <label className="form-label fw-bold small">Data Size (e.g. 1GB, 2.5GB)</label>
                   <input
                     type="text"
@@ -561,7 +563,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                   />
                 </div>
 
-                <div className="col-md-4">
+                <div className="col-md-3">
                   <label className="form-label fw-bold small">Data Type</label>
                   <select
                     name="dataType"
@@ -578,20 +580,32 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                   </select>
                 </div>
 
-                <div className="col-md-4">
-                  <label className="form-label fw-bold small">Validity Duration</label>
-                  <select
+                <div className="col-md-3">
+                  <label className="form-label fw-bold small">Validity (Days)</label>
+                  <input
+                    type="number"
                     name="validity"
-                    className="form-select"
+                    className="form-control"
+                    placeholder="e.g. 30"
                     value={formData.validity}
                     onChange={handleChange}
+                    min="1"
+                  />
+                </div>
+
+                <div className="col-md-3">
+                  <label className="form-label fw-bold small">Validity Period</label>
+                  <select
+                    name="validityPeriod"
+                    className="form-select"
+                    value={formData.validityPeriod}
+                    onChange={handleChange}
                   >
-                    <option value="">Select Validity</option>
-                    {VALIDITY_OPTIONS.map((v) => (
-                      <option key={v.value} value={v.label}>
-                        {v.label}
-                      </option>
-                    ))}
+                    <option value="">Select Period</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
                   </select>
                 </div>
               </>

@@ -2,9 +2,31 @@ import React from "react";
 import { BlockBetween, BlockHead, BlockHeadContent, BlockTitle } from "../../../../components/Component";
 import Content from "../../../../layout/content/Content";
 import Head from "../../../../layout/head/Head";
-import WithdrawalTable from "./table";
+import { useGetWalletTransactions } from "../../../../api/transactions";
+import { useSearchParams } from "react-router-dom";
+import WalletTxnTable from "./wallet-txn-table";
 
 const WalletTransferListPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const itemsPerPage = searchParams.get("limit") ?? 100;
+  const currentPage = searchParams.get("page") ?? 1;
+  const status = searchParams.get("status") ?? "";
+  const search = searchParams.get("search") ?? "";
+  const startDate = searchParams.get("startDate") ?? "";
+  const endDate = searchParams.get("endDate") ?? "";
+
+  const { isLoading, data } = useGetWalletTransactions(
+    currentPage,
+    itemsPerPage,
+    status,
+    search,
+    startDate,
+    endDate,
+    "",
+    "wallet_transfer",
+  );
+
   return (
     <React.Fragment>
       <Head title="Transfer Transactions"></Head>
@@ -12,13 +34,12 @@ const WalletTransferListPage = () => {
         <BlockHead size="sm">
           <BlockBetween>
             <BlockHeadContent>
-              <BlockTitle> Transfer Transactions</BlockTitle>
+              <BlockTitle>Transfer Transactions</BlockTitle>
             </BlockHeadContent>
           </BlockBetween>
         </BlockHead>
-        {/* PRODUCT TABLE HERE */}
 
-        <WithdrawalTable type="transfer" />
+        <WalletTxnTable type={"wallet_transfer"} data={data?.data} isLoading={isLoading} />
       </Content>
     </React.Fragment>
   );
