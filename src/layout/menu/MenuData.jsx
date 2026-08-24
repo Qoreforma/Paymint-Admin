@@ -11,49 +11,61 @@ const menu = [
     permission: "all",
   },
   {
-    icon: "sign-btc-alt",
-    text: "Assets Transactions",
-    permission: "crypto.view",
-    subMenu: [
-      {
-        text: "All",
-        link: "/assets/all",
-        permission: "all",
-      },
-      {
-        text: "Buy",
-        link: "/assets/buy",
-        permission: "all",
-      },
-      {
-        text: "Sell",
-        link: "/assets/sell",
-        permission: "all",
-      },
-    ],
+    icon: "pie",
+    text: "Analytics",
+    link: "/analytics",
+    permission: "all",
   },
   {
-    icon: "cc-jcb",
-    text: "Giftcard Transactions",
-    permission: "giftcards.view",
-    subMenu: [
-      {
-        text: "All",
-        link: "/giftcards/all",
-        permission: "all",
-      },
-      {
-        text: "Buy",
-        link: "/giftcards/buy",
-        permission: "all",
-      },
-      {
-        text: "Sell",
-        link: "/giftcards/sell",
-        permission: "all",
-      },
-    ],
+    icon: "invest",
+    text: "Treasury & Ledger",
+    link: "/treasury",
+    permission: "all", // This will be protected by route anyway, but we show it to all and let route handle it, or we could use permission: "dashboard.view"
   },
+  // {
+  //   icon: "sign-btc-alt",
+  //   text: "Assets Transactions",
+  //   permission: "crypto.view",
+  //   subMenu: [
+  //     {
+  //       text: "All",
+  //       link: "/assets/all",
+  //       permission: "all",
+  //     },
+  //     {
+  //       text: "Buy",
+  //       link: "/assets/buy",
+  //       permission: "all",
+  //     },
+  //     {
+  //       text: "Sell",
+  //       link: "/assets/sell",
+  //       permission: "all",
+  //     },
+  //   ],
+  // },
+  // {
+  //   icon: "cc-jcb",
+  //   text: "Giftcard Transactions",
+  //   permission: "giftcards.view",
+  //   subMenu: [
+  //     {
+  //       text: "All",
+  //       link: "/giftcards/all",
+  //       permission: "all",
+  //     },
+  //     {
+  //       text: "Buy",
+  //       link: "/giftcards/buy",
+  //       permission: "all",
+  //     },
+  //     {
+  //       text: "Sell",
+  //       link: "/giftcards/sell",
+  //       permission: "all",
+  //     },
+  //   ],
+  // },
   {
     icon: "coins",
     text: "Wallet Transactions",
@@ -102,6 +114,11 @@ const menu = [
       {
         text: "Airtime Transactions",
         link: "/transactions/airtime",
+        permission: "all",
+      },
+      {
+        text: "Airtime To Cash Transactions",
+        link: "/transactions/airtime-cash",
         permission: "all",
       },
       {
@@ -261,45 +278,45 @@ const menu = [
     show: "all",
     // show: ["providers", "services", "route-actions"],
   },
-  {
-    icon: "cc-jcb",
-    text: "Giftcard Management",
-    permission: "giftcards.view",
-    subMenu: [
-      {
-        text: "Categories",
-        link: "/giftcard-categories",
-        permission: "all",
-      },
-      {
-        text: "Products",
-        link: "/giftcard-products",
-        permission: "all",
-      },
-    ],
-  },
-  {
-    icon: "sign-btc-alt",
-    text: "Crypto",
-    permission: "crypto.view",
-    subMenu: [
-      {
-        text: "Networks",
-        link: "/crypto-networks",
-        permission: "all",
-      },
-      {
-        text: "Assets",
-        link: "/crypto-assets",
-        permission: "all",
-      },
-      // {
-      //   text: "Currencies",
-      //   link: "/crypto-currencies",
-      //   permission: "manage_currencies",
-      // },
-    ],
-  },
+  // {
+  //   icon: "cc-jcb",
+  //   text: "Giftcard Management",
+  //   permission: "giftcards.view",
+  //   subMenu: [
+  //     {
+  //       text: "Categories",
+  //       link: "/giftcard-categories",
+  //       permission: "all",
+  //     },
+  //     {
+  //       text: "Products",
+  //       link: "/giftcard-products",
+  //       permission: "all",
+  //     },
+  //   ],
+  // },
+  // {
+  //   icon: "sign-btc-alt",
+  //   text: "Crypto",
+  //   permission: "crypto.view",
+  //   subMenu: [
+  //     {
+  //       text: "Networks",
+  //       link: "/crypto-networks",
+  //       permission: "all",
+  //     },
+  //     {
+  //       text: "Assets",
+  //       link: "/crypto-assets",
+  //       permission: "all",
+  //     },
+  //     // {
+  //     //   text: "Currencies",
+  //     //   link: "/crypto-currencies",
+  //     //   permission: "manage_currencies",
+  //     // },
+  //   ],
+  // },
   // {
   //   icon: "wallet",
   //   text: "System bank account",

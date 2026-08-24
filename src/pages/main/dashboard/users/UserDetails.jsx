@@ -282,6 +282,25 @@ const UserDetailsPage = () => {
                   </DropdownItem>
                 </li>
               )}
+              {hasPermission("users.suspend") && (
+                <li>
+                  <DropdownItem
+                    tag="a"
+                    href="#"
+                    onClick={(ev) => {
+                      ev.preventDefault();
+                      updateUserStatus({
+                        status: user?.data?.user?.status === "shadow-banned" ? "active" : "shadow-banned",
+                      });
+                    }}
+                  >
+                    <Icon name="user-cross" className={`${user?.data?.user?.status !== "shadow-banned" && "text-warning"}`}></Icon>
+                    <span className={`${user?.data?.user?.status !== "shadow-banned" && "text-warning"}`}>
+                      {user?.data?.user?.status === "shadow-banned" ? "Unshadowban User" : "Shadowban User"}
+                    </span>
+                  </DropdownItem>
+                </li>
+              )}
               {user?.data?.user?.status !== "fraudulent" && hasPermission("users.suspend") && (
                 <li
                   onClick={() => {

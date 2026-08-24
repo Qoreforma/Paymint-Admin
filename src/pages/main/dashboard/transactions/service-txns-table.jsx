@@ -567,6 +567,7 @@ export const ServiceTransactionTable = ({
                             <DataTableRow size="md">
                               <span className="text-capitalize">
                                 {" "}
+                                {item?.meta?.serviceName || item?.meta?.network ? `${item?.meta?.serviceName || item?.meta?.network} - ` : ""}
                                 {item?.type === "internationalairtime"
                                   ? "Int.Airtime"
                                   : item?.type === "internationaldata"

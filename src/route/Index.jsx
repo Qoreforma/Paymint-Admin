@@ -5,6 +5,8 @@ import EcomOrder from "../pages/main/dashboard/order/Orders";
 import EcomProducts from "../pages/main/dashboard/product/ProductList";
 // import EcomSettings from "../pages/main/dashboard/settings/Settings";
 import EcomDashboard from "../pages/main/dashboard/index";
+import ServiceComparison from "../pages/main/dashboard/analytics/ServiceComparison";
+import TreasuryDashboard from "../pages/main/dashboard/treasury/TreasuryDashboard";
 import ProductDetailPage from "../pages/main/dashboard/product/ProductDetail";
 import EcomStores from "../pages/main/dashboard/stores/StoreList";
 
@@ -84,6 +86,7 @@ import SystemAccountPage from "../pages/main/dashboard/settings/SystemAccount";
 import SystemBankAccountPage from "../pages/main/dashboard/system-bank-account/bank-accounts";
 import TradeSettings from "../pages/main/dashboard/trade-settings/ProductList";
 import AirtimeTransactionsPage from "../pages/main/dashboard/transactions/airtime";
+import AirtimeCashTransactionsPage from "../pages/main/dashboard/transactions/airtime-cash";
 import BettingTransactionsPage from "../pages/main/dashboard/transactions/betting";
 import CableTVTransactionsPage from "../pages/main/dashboard/transactions/cable-tv";
 import DataTransactionsPage from "../pages/main/dashboard/transactions/data";
@@ -117,6 +120,8 @@ const routes = (
       <Route element={<ProtectedRoute />}>
         <Route path={`/`} element={<Layout />}>
           <Route index element={<EcomDashboard />}></Route>
+          <Route path="analytics" element={<ServiceComparison />}></Route>
+          <Route path="treasury" element={<TreasuryDashboard />}></Route>
           <Route path="orders">
             <Route path="general" element={<EcomOrder />} />
             <Route path="single" element={<SingleOrders />} />
@@ -158,6 +163,7 @@ const routes = (
           <Route path="transactions/bettings" element={<BettingTransactionsPage />} />
           <Route path="transactions/data" element={<DataTransactionsPage />} />
           <Route path="transactions/airtime" element={<AirtimeTransactionsPage />} />
+          <Route path="transactions/airtime-cash" element={<AirtimeCashTransactionsPage />} />
           <Route path="transactions/electricity" element={<ElectricityTransactionsPage />} />
           <Route path="transactions/cable-tv" element={<CableTVTransactionsPage />} />
           <Route path="transactions/education" element={<EducationTransactionsPage />} />

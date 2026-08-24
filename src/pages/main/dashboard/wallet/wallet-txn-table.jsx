@@ -448,7 +448,11 @@ const WalletTxnTable = ({ type, data, isLoading, showStats, hideFilter = false }
                             <span className="text-capitalize"> {item?.provider}</span>
                           </DataTableRow>
                           <DataTableRow size="sm">
-                            <span className="text-capitalize"> {item?.type?.replaceAll("_", " ")}</span>
+                            <span className="text-capitalize">
+                              {" "}
+                              {item?.meta?.serviceName || item?.meta?.network ? `${item?.meta?.serviceName || item?.meta?.network} - ` : ""}
+                              {item?.type?.replaceAll("_", " ")}
+                            </span>
                           </DataTableRow>
 
                           <DataTableRow size="sm">

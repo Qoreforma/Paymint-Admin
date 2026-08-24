@@ -73,6 +73,8 @@ const BACKEND_URLS = {
   spinWheels: "/spin-wheels",
   rewardPayouts: "/reward-payouts",
   rewardAnalytics: "/reward-analytics",
+  analytics: "/analytics",
+  treasury: "/treasury",
 };
 
 export default BACKEND_URLS;
