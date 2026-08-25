@@ -24,17 +24,28 @@ const AirtimeCashConfigPage = () => {
   const [notes, setNotes] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
+  const [activeTab, setActiveTab] = useState("");
 
   const { data, isLoading } = useGetAirtimeCashConfig();
   const { mutate: updateConfig, isLoading: isUpdating } = useUpdateAirtimeCashConfig();
 
   useEffect(() => {
-    if (data?.data) {
+    if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
+      if (!activeTab) {
+        setActiveTab(data.data[0].network);
+      }
+      const currentConfig = activeTab ? data.data.find((c) => c.network === activeTab) : data.data[0];
+      if (currentConfig) {
+        setNotes(currentConfig.notes ?? "");
+        setIsActive(currentConfig.isActive ?? true);
+        setIsDirty(false);
+      }
+    } else if (data?.data && !Array.isArray(data.data)) {
       setNotes(data.data.notes ?? "");
       setIsActive(data.data.isActive ?? true);
       setIsDirty(false);
     }
-  }, [data]);
+  }, [data, activeTab]);
 
   const handleNotesChange = (e) => {
     setNotes(e.target.value);
@@ -46,8 +57,18 @@ const AirtimeCashConfigPage = () => {
     setIsDirty(true);
   };
 
+  const handleTabChange = (network) => {
+    setActiveTab(network);
+    const currentConfig = data?.data?.find((c) => c.network === network);
+    if (currentConfig) {
+      setNotes(currentConfig.notes ?? "");
+      setIsActive(currentConfig.isActive ?? true);
+      setIsDirty(false);
+    }
+  };
+
   const handleSave = () => {
-    updateConfig({ notes, isActive }, {
+    updateConfig({ network: activeTab, notes, isActive }, {
       onSuccess: () => setIsDirty(false),
     });
   };
@@ -127,9 +148,24 @@ const AirtimeCashConfigPage = () => {
                   </div>
                 ) : (
                   <div className="nk-data data-list">
+                    {Array.isArray(data?.data) && data.data.length > 0 && (
+                      <div className="d-flex mb-4 gap-2 px-3 pb-2" style={{ borderBottom: "1px solid #e5e9f2", overflowX: "auto" }}>
+                        {data.data.map((config) => (
+                          <button
+                            key={config.network}
+                            className={`btn btn-sm ${activeTab === config.network ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => handleTabChange(config.network)}
+                            style={{ minWidth: "80px", borderRadius: "1.5rem" }}
+                          >
+                            {config.network.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Toggle active status */}
                     <div className="data-head">
-                      <h6 className="overline-title mb-0">Visibility Settings</h6>
+                      <h6 className="overline-title mb-0">Visibility Settings {activeTab && `(${activeTab.toUpperCase()})`}</h6>
                     </div>
 
                     <div className="data-item" style={{ cursor: canEdit ? "pointer" : "default" }}>

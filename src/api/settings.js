@@ -788,7 +788,7 @@ export const useUpdateAirtimeCashConfig = () => {
     (data) =>
       toast.promise(
         instance
-          .patch("/configs/airtime-cash", data)
+          .patch("/configs/airtime-cash?network=" + data.network, data)
           .then((res) => res.data)
           .catch((err) => {
             throw err;
