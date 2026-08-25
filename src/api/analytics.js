@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import BACKEND_URLS from "./urls";
 import requests from "./requests";
 
