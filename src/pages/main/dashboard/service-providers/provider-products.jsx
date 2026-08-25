@@ -174,7 +174,7 @@ const ServiceProvidersProducts = () => {
   // ── Form / Edit state ─────────────────────────────────────
   const [formData, setFormData] = useState({
     name: "", amount: "", provider_amount: "",
-    dataSizeDisplay: "", validityPeriod: "", dataType: "",
+    dataSizeDisplay: "", validityPeriod: "", validity: "", dataType: "",
   });
 
   const [view, setView] = useState({
@@ -185,7 +185,7 @@ const ServiceProvidersProducts = () => {
     setView({ add: t==="add", details: t==="details", edit: t==="edit", products: t==="products" });
 
   const resetForm = () =>
-    setFormData({ name:"", amount:"", provider_amount:"", dataSizeDisplay:"", validityPeriod:"", dataType:"" });
+    setFormData({ name:"", amount:"", provider_amount:"", dataSizeDisplay:"", validityPeriod:"", validity:"", dataType:"" });
 
   const onFormSubmit = (form) => {
     updateProduct({
@@ -193,6 +193,7 @@ const ServiceProvidersProducts = () => {
       name: form.name,
       providerAmount: form.provider_amount,
       dataSizeDisplay: form.dataSizeDisplay,
+      validity: form.validity,
       attributes: { dataType: form.dataType, validityPeriod: form.validityPeriod },
     });
     setView({ add: false, details: false, edit: false, products: false });
@@ -207,6 +208,7 @@ const ServiceProvidersProducts = () => {
           amount: item?.amount,
           provider_amount: item?.providerAmount,
           dataSizeDisplay: item?.dataSizeDisplay,
+          validity: item?.validity,
           validityPeriod: item?.attributes?.validityPeriod,
           dataType: item?.attributes?.dataType,
         });
@@ -683,20 +685,33 @@ const ServiceProvidersProducts = () => {
                     </Col>
                     <Col md="12">
                       <div className="form-group">
+                        <label className="form-label" htmlFor="pp-validity-top">
+                          Validity (Top-Level)
+                        </label>
+                        <div className="form-control-wrap">
+                          <input
+                            id="pp-validity-top"
+                            type="text"
+                            className="form-control"
+                            {...register("validity")}
+                            defaultValue={formData.validity}
+                          />
+                        </div>
+                      </div>
+                    </Col>
+                    <Col md="12">
+                      <div className="form-group">
                         <label className="form-label" htmlFor="pp-validity">
-                          Validity Period
+                          Validity Period (Attributes)
                         </label>
                         <div className="form-control-wrap">
                           <input
                             id="pp-validity"
                             type="text"
                             className="form-control"
-                            {...register("validityPeriod", { required: "This field is required" })}
+                            {...register("validityPeriod")}
                             defaultValue={formData.validityPeriod}
                           />
-                          {errors.validityPeriod && (
-                            <span className="invalid">{errors.validityPeriod.message}</span>
-                          )}
                         </div>
                       </div>
                     </Col>

@@ -19,7 +19,7 @@ import { formatter } from "../../../../utils/Utils";
 import LoadingSpinner from "../../../components/spinner";
 import DateRangeFilter from "../tables/date-range-filter";
 import AddEntryModal from "./AddEntryModal";
-import moment from "moment";
+import dayjs from "dayjs";
 import PaginationComponent from "../../../../components/pagination/Pagination";
 
 const TreasuryDashboard = () => {
@@ -272,9 +272,9 @@ const TreasuryDashboard = () => {
                       ledger.map((item) => (
                         <tr key={item._id}>
                           <td>
-                            <span className="fw-medium">{moment(item.date).format("MMM DD, YYYY")}</span>
+                            <span className="fw-medium">{dayjs(item.date).format("MMM DD, YYYY")}</span>
                             <br />
-                            <span className="fs-12px text-soft">{moment(item.date).format("hh:mm A")}</span>
+                            <span className="fs-12px text-soft">{dayjs(item.date).format("hh:mm A")}</span>
                           </td>
                           <td>
                             <span className={`badge badge-sm badge-dim bg-${item.type === "EXPENSE" ? "danger" : "success"}`}>
