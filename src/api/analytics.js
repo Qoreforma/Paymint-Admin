@@ -13,7 +13,7 @@ export const useGetServiceComparison = (filters = {}) => {
 
       if (queryParams.endsWith("&")) queryParams = queryParams.slice(0, -1);
       
-      const endpoint = `${BACKEND_URLS.admin_baseUrl}${BACKEND_URLS.analytics}/service-comparison${queryParams ? `?${queryParams}` : ""}`;
+      const endpoint = `${BACKEND_URLS.analytics}/service-comparison${queryParams ? `?${queryParams}` : ""}`;
       
       const res = await requests.get(endpoint);
       return res;

@@ -14,7 +14,7 @@ export const useGetTreasuryLedger = (filters = {}, page = 1, limit = 20) => {
 
       if (queryParams.endsWith("&")) queryParams = queryParams.slice(0, -1);
       
-      const endpoint = `${BACKEND_URLS.admin_baseUrl}${BACKEND_URLS.treasury}/ledger?${queryParams}`;
+      const endpoint = `${BACKEND_URLS.treasury}/ledger?${queryParams}`;
       
       const res = await requests.get(endpoint);
       return res;
@@ -30,7 +30,7 @@ export const useGetPlatformFinances = () => {
   return useQuery(
     ["platform-finances"],
     async () => {
-      const endpoint = `${BACKEND_URLS.admin_baseUrl}${BACKEND_URLS.treasury}/finances`;
+      const endpoint = `${BACKEND_URLS.treasury}/finances`;
       const res = await requests.get(endpoint);
       return res;
     },
@@ -44,7 +44,7 @@ export const useAddTreasuryEntry = () => {
   const queryClient = useQueryClient();
   return useMutation(
     async (data) => {
-      const endpoint = `${BACKEND_URLS.admin_baseUrl}${BACKEND_URLS.treasury}/entry`;
+      const endpoint = `${BACKEND_URLS.treasury}/entry`;
       const res = await requests.post(endpoint, data);
       return res;
     },
