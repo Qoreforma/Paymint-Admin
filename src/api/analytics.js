@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import BACKEND_URLS from "./urls";
-import requests from "./requests";
+import { instance as requests } from "./httpConfig";
 
 export const useGetServiceComparison = (filters = {}) => {
   return useQuery(

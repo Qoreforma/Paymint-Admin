@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import BACKEND_URLS from "./urls";
-import requests from "./requests";
+import { instance as requests } from "./httpConfig";
 
 export const useGetTreasuryLedger = (filters = {}, page = 1, limit = 20) => {
   return useQuery(

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "reactstrap";
-import { Button, Col, Row } from "../../../../../components/Component";
-import { useAddTreasuryEntry } from "../../../../../api/treasury";
+import { Button, Col, Row } from "../../../../components/Component";
+import { useAddTreasuryEntry } from "../../../../api/treasury";
 import toast from "react-hot-toast";
-import LoadingSpinner from "../../../../components/spinner";
+import LoadingSpinner from "../../../components/spinner";
 
 const AddEntryModal = ({ isOpen, toggle }) => {
   const [type, setType] = useState("EXPENSE");
