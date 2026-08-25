@@ -16,7 +16,7 @@ const Footer = () => {
           </Col>
           <Col lg={6}>
             <div className="nk-block-content">
-              <p className="text-soft text-end">Powered by Soft-Web Digital</p>
+              <p className="text-soft text-end">Powered by Qoreforma Solution Limited</p>
             </div>
           </Col>
         </Row>

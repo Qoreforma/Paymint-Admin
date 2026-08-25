@@ -49,6 +49,8 @@ const AddEntryModal = ({ isOpen, toggle }) => {
   const getCategories = () => {
     if (type === "EXPENSE") {
       return ["HOSTING", "DOMAIN", "ADS", "SALARIES", "MARKETING", "OTHER"];
+    } else if (type === "CAPITAL_EXPENSE") {
+      return ["HOSTING", "DOMAIN", "ADS", "MARKETING", "OTHER"];
     } else {
       return ["PROVIDER_FUNDING", "OTHER"];
     }
@@ -72,11 +74,12 @@ const AddEntryModal = ({ isOpen, toggle }) => {
                     value={type}
                     onChange={(e) => {
                       setType(e.target.value);
-                      setCategory(e.target.value === "EXPENSE" ? "HOSTING" : "PROVIDER_FUNDING");
+                      setCategory(e.target.value === "EXPENSE" ? "HOSTING" : e.target.value === "CAPITAL_EXPENSE" ? "DOMAIN" : "PROVIDER_FUNDING");
                     }}
                   >
                     <option value="EXPENSE">Operational Expense</option>
                     <option value="CAPITAL_INJECTION">Capital Injection / Funding</option>
+                    <option value="CAPITAL_EXPENSE">Out of Pocket Expense (Sunk Capital)</option>
                   </select>
                 </div>
               </div>

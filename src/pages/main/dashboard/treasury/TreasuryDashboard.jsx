@@ -190,6 +190,10 @@ const TreasuryDashboard = () => {
                 <Col md="6">
                   <div className="d-flex justify-content-center justify-content-md-end align-items-center gap-4">
                     <div className="text-center">
+                      <h6 className="text-soft mb-1">Total Sunk Capital</h6>
+                      <h4 className="fw-bold m-0 text-warning">{formatter("NGN").format(finances.totalSunkCapital || 0)}</h4>
+                    </div>
+                    <div className="text-center">
                       <h6 className="text-soft mb-1">Platform Worth</h6>
                       <h4 className="fw-bold m-0">{formatter("NGN").format(finances.projectWorth)}</h4>
                     </div>
@@ -230,8 +234,9 @@ const TreasuryDashboard = () => {
                     style={{ width: "150px" }}
                   >
                     <option value="">All Entries</option>
-                    <option value="EXPENSE">Expenses Only</option>
-                    <option value="CAPITAL_INJECTION">Capital Only</option>
+                    <option value="EXPENSE">Operational Expenses</option>
+                    <option value="CAPITAL_INJECTION">Capital Injections</option>
+                    <option value="CAPITAL_EXPENSE">Out of Pocket Expenses</option>
                   </select>
                   <DateRangeFilter
                     startDate={startDate}
@@ -277,7 +282,7 @@ const TreasuryDashboard = () => {
                             <span className="fs-12px text-soft">{dayjs(item.date).format("hh:mm A")}</span>
                           </td>
                           <td>
-                            <span className={`badge badge-sm badge-dim bg-${item.type === "EXPENSE" ? "danger" : "success"}`}>
+                            <span className={`badge badge-sm badge-dim bg-${item.type === "EXPENSE" ? "danger" : item.type === "CAPITAL_EXPENSE" ? "warning" : "success"}`}>
                               {item.type.replaceAll("_", " ")}
                             </span>
                           </td>
@@ -287,8 +292,8 @@ const TreasuryDashboard = () => {
                             {item.provider && <span className="text-soft fs-12px">Provider: {item.provider}</span>}
                           </td>
                           <td>
-                            <span className={`text-${item.type === "EXPENSE" ? "danger" : "success"} fw-bold`}>
-                              {item.type === "EXPENSE" ? "-" : "+"}{formatter(item.currency || "NGN").format(item.amount)}
+                            <span className={`text-${item.type === "EXPENSE" ? "danger" : item.type === "CAPITAL_EXPENSE" ? "warning" : "success"} fw-bold`}>
+                              {item.type === "EXPENSE" || item.type === "CAPITAL_EXPENSE" ? "-" : "+"}{formatter(item.currency || "NGN").format(item.amount)}
                             </span>
                           </td>
                           <td>{item.recordedBy?.firstName} {item.recordedBy?.lastName}</td>
