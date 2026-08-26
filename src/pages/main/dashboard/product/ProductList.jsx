@@ -583,7 +583,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                 <div className="col-md-3">
                   <label className="form-label fw-bold small">Validity (Days)</label>
                   <input
-                    type="number"
+                    type="text"
                     name="validity"
                     className="form-control"
                     placeholder="e.g. 30"
