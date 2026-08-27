@@ -391,3 +391,17 @@ export const useCleanupDummyData = () => {
       )
   );
 };
+
+export const useWipeAllSpinAndWinProgress = () => {
+  return useMutation(
+    () =>
+      toast.promise(
+        instance.post("/debug/wipe-all-spin-and-win-progress").then((res) => res.data),
+        {
+          loading: "Wiping Spin & Win progress...",
+          success: (res) => res?.message || "Successfully wiped progress",
+          error: (err) => err?.response?.data?.message || "Failed to wipe progress",
+        }
+      )
+  );
+};

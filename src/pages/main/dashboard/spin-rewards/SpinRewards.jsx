@@ -20,6 +20,7 @@ import PayoutQueue from "./PayoutQueue";
 import {
   useGetAppSettings,
   useToggleRewardSystem,
+  useWipeAllSpinAndWinProgress,
 } from "../../../../api/spinRewards";
 import { usePermission } from "../../../../utils/usePermission";
 
@@ -31,11 +32,18 @@ const SpinRewardsPage = () => {
 
   const { data: settingsData, isLoading: settingsLoading } = useGetAppSettings();
   const { mutate: toggleFlag, isLoading: isToggling } = useToggleRewardSystem();
+  const { mutate: wipeProgress, isLoading: isWiping } = useWipeAllSpinAndWinProgress();
 
   const isRewardSystemEnabled = settingsData?.data?.isRewardSystem ?? false;
 
   const handleToggle = () => {
     toggleFlag(!isRewardSystemEnabled);
+  };
+
+  const handleWipeProgress = () => {
+    if (window.confirm("WARNING: This will permanently delete ALL Spin & Win tickets, results, and payouts for ALL users. Reward Tiers and Wheels will NOT be deleted. Core User balances will NOT be affected. Are you absolutely sure you want to reset all test progress?")) {
+      wipeProgress();
+    }
   };
 
   const viewChange = () => {
@@ -94,13 +102,30 @@ const SpinRewardsPage = () => {
                       </p>
                     </BlockDes>
                   </BlockHeadContent>
-                  <BlockHeadContent className="align-self-start d-lg-none">
-                    <Button
-                      className={`toggle btn btn-icon btn-trigger mt-n1 ${sm ? "active" : ""}`}
-                      onClick={() => updateSm(!sm)}
-                    >
-                      <Icon name="menu-alt-r"></Icon>
-                    </Button>
+                  <BlockHeadContent>
+                    <div className="toggle-wrap nk-block-tools-toggle">
+                      <Button
+                        className={`btn-icon btn-trigger toggle-expand me-n1 ${sm ? "active" : ""}`}
+                        onClick={() => updateSm(!sm)}
+                      >
+                        <Icon name="menu-alt-r"></Icon>
+                      </Button>
+                      <div className={`toggle-expand-content ${sm ? "expanded" : ""}`}>
+                        <ul className="nk-block-tools g-3">
+                          <li className="nk-block-tools-opt">
+                            <Button 
+                              color="danger" 
+                              outline 
+                              onClick={handleWipeProgress} 
+                              disabled={isWiping}
+                            >
+                              <Icon name="trash" />
+                              <span>{isWiping ? "Wiping..." : "Reset All Progress"}</span>
+                            </Button>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
                   </BlockHeadContent>
                 </BlockBetween>
               </BlockHead>
