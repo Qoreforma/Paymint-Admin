@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "reactstrap";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import {
   Block,
   BlockBetween,
@@ -157,7 +159,7 @@ const AirtimeCashConfigPage = () => {
                             onClick={() => handleTabChange(config.network)}
                             style={{ minWidth: "80px", borderRadius: "1.5rem" }}
                           >
-                            {config.network.toUpperCase()}
+                            {config.network.split('-')[0].toUpperCase()}
                           </button>
                         ))}
                       </div>
@@ -165,7 +167,7 @@ const AirtimeCashConfigPage = () => {
 
                     {/* Toggle active status */}
                     <div className="data-head">
-                      <h6 className="overline-title mb-0">Visibility Settings {activeTab && `(${activeTab.toUpperCase()})`}</h6>
+                      <h6 className="overline-title mb-0">Visibility Settings {activeTab && `(${activeTab.split('-')[0].toUpperCase()})`}</h6>
                     </div>
 
                     <div className="data-item" style={{ cursor: canEdit ? "pointer" : "default" }}>
@@ -211,25 +213,21 @@ const AirtimeCashConfigPage = () => {
                         <label className="form-label" htmlFor="airtimeCashNotes">
                           User-facing instructions / guide
                         </label>
-                        <textarea
-                          id="airtimeCashNotes"
-                          className="form-control"
-                          rows={6}
+                        <ReactQuill
+                          theme="snow"
                           value={notes}
                           onChange={handleNotesChange}
-                          disabled={!canEdit}
+                          readOnly={!canEdit}
                           placeholder={
                             "Example:\nTo convert your airtime to cash:\n1. Dial *XXX# on your phone\n2. Choose 'Share Airtime'\n3. Send the airtime to 0812 345 6789\n4. Enter your share PIN below"
                           }
                           style={{
-                            resize: "vertical",
-                            fontFamily: "inherit",
-                            fontSize: "0.875rem",
-                            lineHeight: "1.6",
+                            backgroundColor: "white",
+                            minHeight: "150px"
                           }}
                         />
-                        <small className="form-text text-muted mt-1 d-block">
-                          Plain text or line breaks are supported. These notes will appear inside an info banner on the Airtime-to-Cash screen.
+                        <small className="form-text text-muted mt-2 d-block">
+                          Rich text formatting is supported. These notes will appear inside an info banner on the Airtime-to-Cash screen.
                         </small>
                       </div>
 
@@ -242,9 +240,11 @@ const AirtimeCashConfigPage = () => {
                               <p className="fw-semibold mb-1" style={{ fontSize: "0.8rem", color: "#92400e" }}>
                                 How it works — Preview
                               </p>
-                              <p className="mb-0" style={{ fontSize: "0.8rem", color: "#b45309", whiteSpace: "pre-line", lineHeight: "1.6" }}>
-                                {notes}
-                              </p>
+                              <div 
+                                className="mb-0" 
+                                style={{ fontSize: "0.8rem", color: "#b45309", lineHeight: "1.6" }}
+                                dangerouslySetInnerHTML={{ __html: notes }}
+                              />
                             </div>
                           </div>
                         </div>
