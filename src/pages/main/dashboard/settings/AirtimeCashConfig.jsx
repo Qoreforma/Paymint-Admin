@@ -25,6 +25,8 @@ const AirtimeCashConfigPage = () => {
 
   const [notes, setNotes] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [margin, setMargin] = useState(0);
+  const [providerRate, setProviderRate] = useState(0);
   const [isDirty, setIsDirty] = useState(false);
   const [activeTab, setActiveTab] = useState("");
 
@@ -40,17 +42,29 @@ const AirtimeCashConfigPage = () => {
       if (currentConfig) {
         setNotes(currentConfig.notes ?? "");
         setIsActive(currentConfig.isActive ?? true);
+        setMargin(currentConfig.margin ?? 0);
+        setProviderRate(currentConfig.providerRate ?? 0);
         setIsDirty(false);
       }
     } else if (data?.data && !Array.isArray(data.data)) {
       setNotes(data.data.notes ?? "");
       setIsActive(data.data.isActive ?? true);
+      setMargin(data.data.margin ?? 0);
+      setProviderRate(data.data.providerRate ?? 0);
       setIsDirty(false);
     }
   }, [data, activeTab]);
 
-  const handleNotesChange = (e) => {
-    setNotes(e.target.value);
+  const handleNotesChange = (value) => {
+    setNotes(value);
+    setIsDirty(true);
+  };
+
+  const handleMarginChange = (e) => {
+    let val = parseFloat(e.target.value);
+    if (isNaN(val)) val = 0;
+    if (val < 0) val = 0;
+    setMargin(val);
     setIsDirty(true);
   };
 
@@ -65,12 +79,14 @@ const AirtimeCashConfigPage = () => {
     if (currentConfig) {
       setNotes(currentConfig.notes ?? "");
       setIsActive(currentConfig.isActive ?? true);
+      setMargin(currentConfig.margin ?? 0);
+      setProviderRate(currentConfig.providerRate ?? 0);
       setIsDirty(false);
     }
   };
 
   const handleSave = () => {
-    updateConfig({ network: activeTab, notes, isActive }, {
+    updateConfig({ network: activeTab, notes, isActive, margin }, {
       onSuccess: () => setIsDirty(false),
     });
   };
@@ -198,6 +214,71 @@ const AirtimeCashConfigPage = () => {
                             >
                               {isActive ? "Active" : "Inactive"}
                             </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Rate & Margin Settings */}
+                    <div className="data-head mt-4">
+                      <h6 className="overline-title mb-0">Rate & Margin Settings</h6>
+                    </div>
+                    
+                    <div className="p-3 row gy-4">
+                      <div className="col-md-6 col-lg-4">
+                        <div className="form-group">
+                          <label className="form-label text-muted">
+                            Provider Rate (%)
+                            <span className="d-block fw-normal" style={{ fontSize: "12px" }}>Auto-synced from provider</span>
+                          </label>
+                          <div className="form-control-wrap">
+                            <input
+                              type="number"
+                              className="form-control"
+                              value={providerRate}
+                              disabled
+                              style={{ backgroundColor: "#f8f9fa", fontWeight: "bold" }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="col-md-6 col-lg-4">
+                        <div className="form-group">
+                          <label className="form-label" htmlFor="adminMargin">
+                            Profit Margin (%)
+                            <span className="d-block fw-normal text-muted" style={{ fontSize: "12px" }}>Your cut per transaction</span>
+                          </label>
+                          <div className="form-control-wrap">
+                            <input
+                              type="number"
+                              id="adminMargin"
+                              className="form-control"
+                              value={margin}
+                              onChange={handleMarginChange}
+                              disabled={!canEdit}
+                              min={0}
+                              max={100}
+                              step={1}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="col-md-12 col-lg-4">
+                        <div className="form-group">
+                          <label className="form-label text-primary">
+                            Effective User Rate (%)
+                            <span className="d-block fw-normal text-muted" style={{ fontSize: "12px" }}>What users will receive</span>
+                          </label>
+                          <div className="form-control-wrap">
+                            <input
+                              type="text"
+                              className="form-control border-primary text-primary fw-bold"
+                              value={`${Math.max(0, providerRate - margin)}%`}
+                              disabled
+                              style={{ backgroundColor: "#eff6ff" }}
+                            />
                           </div>
                         </div>
                       </div>
