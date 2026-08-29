@@ -61,6 +61,8 @@ const RewardTiers = () => {
     perUserCap: "",
     globalBudgetCap: "",
     timeWindowCapHours: "",
+    validFrom: "",
+    validUntil: "",
     isActive: true,
   });
 
@@ -84,6 +86,8 @@ const RewardTiers = () => {
       perUserCap: "",
       globalBudgetCap: "",
       timeWindowCapHours: "",
+      validFrom: "",
+      validUntil: "",
       isActive: true,
     });
     setModal({ add: true, edit: false });
@@ -104,6 +108,8 @@ const RewardTiers = () => {
       perUserCap: tier.perUserCap || "",
       globalBudgetCap: tier.globalBudgetCap || "",
       timeWindowCapHours: tier.timeWindowCapHours || "",
+      validFrom: tier.validFrom ? new Date(tier.validFrom).toISOString().slice(0, 16) : "",
+      validUntil: tier.validUntil ? new Date(tier.validUntil).toISOString().slice(0, 16) : "",
       isActive: tier.isActive ?? true,
     });
     setModal({ add: false, edit: true });
@@ -132,6 +138,8 @@ const RewardTiers = () => {
       ...(formData.timeWindowCapHours
         ? { timeWindowCapHours: Number(formData.timeWindowCapHours) }
         : {}),
+      ...(formData.validFrom ? { validFrom: new Date(formData.validFrom).toISOString() } : {}),
+      ...(formData.validUntil ? { validUntil: new Date(formData.validUntil).toISOString() } : {}),
       ...(modal.edit ? { isActive: formData.isActive } : {}),
     };
 
@@ -465,6 +473,41 @@ const RewardTiers = () => {
                       value={formData.globalBudgetCap}
                       onChange={(e) =>
                         setFormData({ ...formData, globalBudgetCap: e.target.value })
+                      }
+                    />
+                  </div>
+                </Col>
+
+                <Col md="6">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="valid-from">
+                      Campaign Start (Optional)
+                    </label>
+                    <input
+                      id="valid-from"
+                      className="form-control"
+                      type="datetime-local"
+                      value={formData.validFrom}
+                      onChange={(e) =>
+                        setFormData({ ...formData, validFrom: e.target.value })
+                      }
+                    />
+                    <div className="text-muted fs-12px mt-1">Ignore referrals before this date</div>
+                  </div>
+                </Col>
+
+                <Col md="6">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="valid-until">
+                      Campaign End (Optional)
+                    </label>
+                    <input
+                      id="valid-until"
+                      className="form-control"
+                      type="datetime-local"
+                      value={formData.validUntil}
+                      onChange={(e) =>
+                        setFormData({ ...formData, validUntil: e.target.value })
                       }
                     />
                   </div>
