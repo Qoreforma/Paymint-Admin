@@ -86,7 +86,7 @@ export const useGetProductDataTypes = () => {
 export const useGetBanks = () => {
   return useQuery(["banks"], async () => {
     try {
-      const response = await instance.get("https://js.paymint.com/api/v1/reference/banks");
+      const response = await instance.get("/reference/banks");
       return response.data;
     } catch (e) {
       throw new Error(e);

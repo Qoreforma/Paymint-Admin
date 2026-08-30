@@ -312,3 +312,31 @@ export const useUpdateWithdrawalWalletStatus = (transactionID, status) => {
     },
   );
 };
+
+export const useGetTransactionChartData = (period = "all", startDate = "", endDate = "") => {
+  const params = new URLSearchParams();
+  if (period && period !== "all") params.append("period", period);
+  if (startDate) params.append("startDate", startDate);
+  if (endDate) params.append("endDate", endDate);
+
+  const queryString = params.toString();
+  const url = `${BACKEND_URLS.transaction}/chart${queryString ? `?${queryString}` : ""}`;
+
+  return useQuery(
+    ["getTransactionChartData", period, startDate, endDate],
+    async () => {
+      const request = await instance
+        .get(url)
+        .then((res) => res?.data)
+        .catch((err) => {
+          throw err;
+        });
+      return request;
+    },
+    {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      retryDelay: 3000,
+    },
+  );
+};

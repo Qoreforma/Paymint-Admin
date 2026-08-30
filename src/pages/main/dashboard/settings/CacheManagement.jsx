@@ -41,11 +41,17 @@ const CacheManagementPage = () => {
     <React.Fragment>
       <Head title="Cache Management" />
       <Content>
-        <Card className="card-bordered">
+        <Card>
           <div className="card-aside-wrap">
             <div
-              className={`card-inner card-inner-lg ${sm && mobileView ? "d-none" : ""}`}
+              className={`card-aside card-aside-left user-aside toggle-slide toggle-slide-left toggle-break-lg ${
+                sm ? "content-active" : ""
+              }`}
             >
+              <UserProfileAside updateSm={updateSm} sm={sm} />
+            </div>
+            <div className="card-inner card-inner-lg">
+              {sm && mobileView && <div className="toggle-overlay" onClick={() => updateSm(!sm)}></div>}
               <BlockHead size="md">
                 <BlockBetween>
                   <BlockHeadContent>
@@ -58,9 +64,12 @@ const CacheManagementPage = () => {
                       </p>
                     </BlockDes>
                   </BlockHeadContent>
-                  <BlockHeadContent>
-                    <Button color="light" className="btn-icon" onClick={() => refetch()} title="Refresh Stats">
-                      <Icon name="reload" />
+                  <BlockHeadContent className="align-self-start d-lg-none">
+                    <Button
+                      className={`toggle btn btn-icon btn-trigger mt-n1 ${sm ? "active" : ""}`}
+                      onClick={() => updateSm(!sm)}
+                    >
+                      <Icon name="menu-alt-r"></Icon>
                     </Button>
                   </BlockHeadContent>
                 </BlockBetween>
@@ -69,11 +78,17 @@ const CacheManagementPage = () => {
               <Block>
                 <div className="nk-data data-list">
                   <div className="data-head">
-                    <h6 className="overline-title">Cache Statistics</h6>
+                    <BlockBetween>
+                      <h6 className="overline-title mb-0">CACHE STATISTICS</h6>
+                      <Button color="light" size="sm" onClick={() => refetch()} disabled={isLoading}>
+                        <Icon name="reload" />
+                      </Button>
+                    </BlockBetween>
                   </div>
+
                   {isLoading ? (
-                    <div className="text-center p-3">
-                      <Spinner color="primary" />
+                    <div className="p-3 text-center">
+                      <Spinner size="sm" /> <span>Loading...</span>
                     </div>
                   ) : (
                     <>
@@ -133,8 +148,6 @@ const CacheManagementPage = () => {
                 </div>
               </Block>
             </div>
-            
-            <UserProfileAside updateSm={updateSm} sm={sm} />
           </div>
         </Card>
       </Content>

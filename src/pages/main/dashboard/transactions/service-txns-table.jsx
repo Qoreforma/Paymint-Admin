@@ -48,6 +48,7 @@ import ReverseModal from "./modals/reverse-transaction";
 import { usePermission } from "../../../../utils/usePermission";
 import { WalletAmountStatsCard } from "../wallet/stats-card";
 import DateRangeFilter from "../tables/date-range-filter";
+import TransactionChartModal from "./TransactionChartModal";
 
 export const ServiceTransactionTable = ({
   type,
@@ -77,6 +78,7 @@ export const ServiceTransactionTable = ({
   );
 
   const [editedId, setEditedId] = useState(null);
+  const [showChartModal, setShowChartModal] = useState(false);
 
   const [formData, setFormData] = useState({
     reference: "",
@@ -348,6 +350,13 @@ export const ServiceTransactionTable = ({
               )}
               <div className="bg-white rounded border shadow-sm">
                 <DateRangeFilter />
+              </div>
+
+              {/* View Chart Button */}
+              <div className="bg-white rounded border shadow-sm">
+                <Button color="white" className="btn-icon" onClick={() => setShowChartModal(true)} style={{ height: "100%", padding: "0 10px" }}>
+                  <Icon name="bar-chart"></Icon> <span className="ms-1" style={{ fontSize: "12px", fontWeight: 500 }}>Stats</span>
+                </Button>
               </div>
             </div>
           </div>
@@ -940,6 +949,13 @@ export const ServiceTransactionTable = ({
 
       <UpdateStatusModal modal={showStatus} closeModal={setShowStatus} editedId={editedId} status={statusToUpdate} />
       <ReverseModal modal={showReverse} closeModal={setShowReverse} editedId={editedId} />
+      <TransactionChartModal 
+        modal={showChartModal} 
+        closeModal={() => setShowChartModal(false)}
+        period={period}
+        startDate={startDate}
+        endDate={endDate}
+      />
     </>
   );
 };

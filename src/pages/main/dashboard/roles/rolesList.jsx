@@ -34,7 +34,7 @@ const RolesList = () => {
   const currentPage = searchParams.get("page") ?? 1;
 
   const { data: roles, isLoading } = useGetAllRoles(currentPage, itemsPerPage);
-  console.log({ roles });
+
   const { mutate: deleteRole } = useDeleteRole();
 
   const [sm, updateSm] = useState(false);

@@ -54,6 +54,7 @@ import UserTypeModal from "./userTypeModal";
 import { usePermission } from "../../../../utils/usePermission";
 import SendAnnouncementModal from "./SendAnnouncement";
 import { useCreateAnnouncement } from "../../../../api/announcement";
+import UserChartModal from "./UserChartModal";
 
 const PERIOD_OPTIONS = [
   { label: "All Time", value: "all" },
@@ -82,6 +83,7 @@ const UserList = () => {
   const [selected, setSelected] = useState([]);
   const [multiple, setMultiple] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [showChartModal, setShowChartModal] = useState(false);
 
   const itemsPerPage = parseInt(searchParams.get("limit") ?? 100);
   const currentPage = parseInt(searchParams.get("page") ?? 1);
@@ -339,6 +341,13 @@ const UserList = () => {
               {/* Date range picker for custom intervals */}
               <div className="bg-white rounded-3 border shadow-sm">
                 <DateRangeFilter />
+              </div>
+
+              {/* View Chart Button */}
+              <div className="bg-white rounded-3 border shadow-sm">
+                <Button color="white" className="btn-icon" onClick={() => setShowChartModal(true)} style={{ height: "100%", padding: "0 10px" }}>
+                  <Icon name="bar-chart"></Icon> <span className="ms-1" style={{ fontSize: "12px", fontWeight: 500 }}>Stats</span>
+                </Button>
               </div>
 
               {/* Export dropdown */}
@@ -891,6 +900,14 @@ const UserList = () => {
           modal={showAnnouncementModal}
           createFunction={createAnnouncement}
           selectedUsers={selected}
+        />
+
+        <UserChartModal
+          modal={showChartModal}
+          closeModal={() => setShowChartModal(false)}
+          period={period}
+          startDate={startDate}
+          endDate={endDate}
         />
       </Content>
     </React.Fragment>
