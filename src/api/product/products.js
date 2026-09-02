@@ -7,13 +7,19 @@ import { toast } from "react-hot-toast";
 const buildQuery = (params = {}) => {
   const qs = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== "" && v !== "all") qs.set(k, v);
+    if (v !== undefined && v !== null && v !== "" && v !== "all") {
+      if (Array.isArray(v)) {
+        if (v.length > 0) qs.set(k, v.join(","));
+      } else {
+        qs.set(k, v);
+      }
+    }
   });
   return qs.toString() ? `?${qs.toString()}` : "";
 };
 
 // ─── GET: All Products (admin management list with full filters) ──────────
-export const useGetAllProducts = (page = 1, limit = 20, filters = {}) => {
+export const useGetAllProducts = (page = 1, limit = 100, filters = {}) => {
   const query = buildQuery({ page, limit, ...filters });
   return useQuery(
     ["getAllProducts", page, limit, filters],

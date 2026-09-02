@@ -686,12 +686,12 @@ const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page") ?? 1);
-  const limit = Number(searchParams.get("limit") ?? 20);
+  const limit = Number(searchParams.get("limit") ?? 100);
 
   // ── Filter state ──
   const [filters, setFilters] = useState({
     search: "",
-    providerId: "",
+    providerId: [],
     serviceTypeId: "",
     serviceId: "",
     dataType: "",
@@ -716,7 +716,7 @@ const ProductList = () => {
   // ── Data fetching ──
   const { isLoading, data } = useGetAllProducts(page, limit, {
     search: filters.search,
-    providerId: filters.providerId,
+    providerId: Array.isArray(filters.providerId) ? (filters.providerId.length > 0 ? filters.providerId.join(",") : "") : filters.providerId,
     serviceTypeId: filters.serviceTypeId,
     serviceId: filters.serviceId,
     dataType: filters.dataType,
@@ -744,7 +744,7 @@ const ProductList = () => {
     return list.map((p) => ({ label: p.name, value: p._id }));
   }, [providersData]);
   const serviceTypeOptions = useMemo(
-    () => serviceTypesData?.data?.map((st) => ({ label: st.name, value: st._id })) ?? [],
+    () => serviceTypesData?.data?.map((st) => ({ label: st.name, value: st._id, code: st.code })) ?? [],
     [serviceTypesData]
   );
   const serviceOptions = useMemo(() => {
@@ -755,11 +755,47 @@ const ProductList = () => {
       .map((s) => ({ label: s.name, value: s._id }));
   }, [servicesData, filters.serviceTypeId]);
 
+  const selectedProviderIds = useMemo(() => {
+    if (!filters.providerId) return [];
+    if (Array.isArray(filters.providerId)) return filters.providerId;
+    return String(filters.providerId).split(",").filter(Boolean);
+  }, [filters.providerId]);
+
+  const toggleProvider = (id) => {
+    setFilters((prev) => {
+      const current = Array.isArray(prev.providerId)
+        ? prev.providerId
+        : (prev.providerId ? String(prev.providerId).split(",").filter(Boolean) : []);
+      const next = current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id];
+      return { ...prev, providerId: next };
+    });
+    setSelectedIds([]);
+    setSearchParams((sp) => { sp.set("page", 1); return sp; });
+  };
+
   // ── Filter helpers ──
   const setFilter = (key, val) => {
     setFilters((f) => {
       const next = { ...f, [key]: val };
-      if (key === "serviceTypeId") next.serviceId = "";
+      if (key === "serviceTypeId") {
+        next.serviceId = "";
+        const selectedType = serviceTypeOptions.find((st) => st.value === val);
+        const isData = selectedType && (selectedType.code === "data" || selectedType.label?.toLowerCase() === "data");
+        if (isData) {
+          next.sortBy = "dataSize";
+          next.sortOrder = "asc";
+        }
+      } else if (key === "serviceId") {
+        const selectedService = servicesData?.data?.find((s) => s._id === val);
+        const serviceTypeCode = selectedService?.serviceTypeId?.code || selectedService?.serviceType?.code;
+        const serviceName = selectedService?.name || "";
+        if (serviceTypeCode === "data" || serviceName.toLowerCase().includes("data")) {
+          next.sortBy = "dataSize";
+          next.sortOrder = "asc";
+        }
+      }
       return next;
     });
     setSelectedIds([]);
@@ -804,12 +840,17 @@ const ProductList = () => {
       handleSort("createdAt", "desc");
       return;
     }
+    if (key === "providerId") {
+      setFilter("providerId", []);
+      return;
+    }
     setFilter(key, key === "isHot" || key === "status" ? "all" : "");
   };
 
   const activeFilters = Object.entries(filters).filter(([k, v]) => {
     if (k === "sortBy" && v === "createdAt" && filters.sortOrder === "desc") return false;
     if (k === "sortOrder") return false;
+    if (k === "providerId" && Array.isArray(v) && v.length === 0) return false;
     return v && v !== "all" && v !== "";
   });
 
@@ -1011,26 +1052,39 @@ const ProductList = () => {
                     <UncontrolledDropdown>
                       <DropdownToggle
                         tag="button"
-                        className={`btn btn-sm ${filters.providerId ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                        className={`btn btn-sm ${selectedProviderIds.length > 0 ? "btn-primary" : "btn-outline-light text-dark border"}`}
                         id="filter-provider-toggle"
                         style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
                       >
                         <Icon name="rss" className="me-1" />
-                        {filters.providerId
-                          ? providerOptions.find((p) => p.value === filters.providerId)?.label ?? "Provider"
-                          : "Provider"}
+                        {selectedProviderIds.length === 0
+                          ? "Provider"
+                          : selectedProviderIds.length === 1
+                            ? providerOptions.find((p) => p.value === selectedProviderIds[0])?.label ?? "1 Provider"
+                            : `${selectedProviderIds.length} Providers`}
                         <Icon name="chevron-down" className="ms-1" />
                       </DropdownToggle>
-                      <DropdownMenu container="body" style={{ maxHeight: 260, overflowY: "auto", minWidth: 200, zIndex: 1060 }}>
-                        <DropdownItem onClick={() => setFilter("providerId", "")} className={!filters.providerId ? "fw-bold" : ""}>
+                      <DropdownMenu container="body" style={{ maxHeight: 260, overflowY: "auto", minWidth: 220, zIndex: 1060 }}>
+                        <DropdownItem onClick={() => setFilter("providerId", [])} className={selectedProviderIds.length === 0 ? "fw-bold" : ""}>
                           All Providers
                         </DropdownItem>
                         <DropdownItem divider />
-                        {providerOptions.map((p) => (
-                          <DropdownItem key={p.value} onClick={() => setFilter("providerId", p.value)} className={filters.providerId === p.value ? "fw-bold text-primary" : ""}>
-                            {p.label}
-                          </DropdownItem>
-                        ))}
+                        {providerOptions.map((p) => {
+                          const isSelected = selectedProviderIds.includes(p.value);
+                          return (
+                            <DropdownItem
+                              key={p.value}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toggleProvider(p.value);
+                              }}
+                              className={isSelected ? "fw-bold text-primary d-flex align-items-center justify-content-between" : "d-flex align-items-center justify-content-between"}
+                            >
+                              <span>{p.label}</span>
+                              {isSelected && <Icon name="check" className="text-primary ms-2" />}
+                            </DropdownItem>
+                          );
+                        })}
                       </DropdownMenu>
                     </UncontrolledDropdown>
 
@@ -1178,7 +1232,7 @@ const ProductList = () => {
                         className="btn btn-sm btn-outline-danger"
                         style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8, flexShrink: 0 }}
                         onClick={() => {
-                          setFilters({ search: "", providerId: "", serviceTypeId: "", serviceId: "", dataType: "", validity: "", dataSize: "", isHot: "all", status: "all", sortBy: "createdAt", sortOrder: "desc" });
+                          setFilters({ search: "", providerId: [], serviceTypeId: "", serviceId: "", dataType: "", validity: "", dataSize: "", isHot: "all", status: "all", sortBy: "createdAt", sortOrder: "desc" });
                           setPendingSearch("");
                           setSearchParams((sp) => { sp.set("page", 1); return sp; });
                         }}
@@ -1191,7 +1245,11 @@ const ProductList = () => {
                       {activeFilters.map(([key, val]) => {
                         let label = `${key}: ${val}`;
                         if (key === "sortBy") label = `Sort: ${currentSortOption.label}`;
-                        if (key === "providerId") label = `Provider: ${providerOptions.find((p) => p.value === val)?.label ?? val}`;
+                        if (key === "providerId") {
+                          const ids = Array.isArray(val) ? val : String(val).split(",").filter(Boolean);
+                          const names = ids.map((id) => providerOptions.find((p) => p.value === id)?.label ?? id).join(", ");
+                          label = `Provider: ${names || "All"}`;
+                        }
                         if (key === "serviceTypeId") label = `Type: ${serviceTypeOptions.find((st) => st.value === val)?.label ?? val}`;
                         if (key === "serviceId") label = `Service: ${serviceOptions.find((s) => s.value === val)?.label ?? val}`;
                         if (key === "dataType") label = `Data Type: ${val}`;
