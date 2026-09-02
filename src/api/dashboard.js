@@ -132,3 +132,42 @@ export const useGetDashboardStats = (period = "all", startDate = "", endDate = "
     }
   );
 };
+
+export const useGetProfitChartData = (period = "all", startDate = "", endDate = "") => {
+  const queryParams = new URLSearchParams();
+  if (period && period !== "all") queryParams.set("period", period);
+  if (startDate) queryParams.set("startDate", startDate);
+  if (endDate) queryParams.set("endDate", endDate);
+  const queryStr = queryParams.toString() ? `?${queryParams.toString()}` : "";
+
+  return useQuery(
+    ["dashboard-profit-chart", period, startDate, endDate],
+    async () => {
+      const response = await instance.get(`/dashboard/profit-chart${queryStr}`);
+      return response.data?.data;
+    },
+    {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      retryDelay: 3000,
+      keepPreviousData: true,
+    }
+  );
+};
+
+export const useGetYesterdayVsTodayComparison = () => {
+  return useQuery(
+    ["dashboard-yesterday-vs-today"],
+    async () => {
+      const response = await instance.get(`/dashboard/comparison`);
+      return response.data?.data;
+    },
+    {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      retryDelay: 3000,
+      keepPreviousData: true,
+    }
+  );
+};
+

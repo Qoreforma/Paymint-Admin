@@ -313,17 +313,18 @@ export const useUpdateWithdrawalWalletStatus = (transactionID, status) => {
   );
 };
 
-export const useGetTransactionChartData = (period = "all", startDate = "", endDate = "") => {
+export const useGetTransactionChartData = (period = "all", startDate = "", endDate = "", type = "") => {
   const params = new URLSearchParams();
   if (period && period !== "all") params.append("period", period);
   if (startDate) params.append("startDate", startDate);
   if (endDate) params.append("endDate", endDate);
+  if (type) params.append("type", type);
 
   const queryString = params.toString();
   const url = `${BACKEND_URLS.transaction}/chart${queryString ? `?${queryString}` : ""}`;
 
   return useQuery(
-    ["getTransactionChartData", period, startDate, endDate],
+    ["getTransactionChartData", period, startDate, endDate, type],
     async () => {
       const request = await instance
         .get(url)

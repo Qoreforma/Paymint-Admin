@@ -5,6 +5,7 @@ import { formatter } from "../../../../utils/Utils";
 import { WalletAmountStatsCard } from "../giftcards/stats-card";
 import { ServicesStatsCard } from "../transactions/stats-card";
 import { WalletStatsCard } from "../wallet/stats-card";
+export { default as YesterdayVsTodayCard } from "./YesterdayVsTodayCard";
 
 export function WalletStatsSection({ data }) {
   return (

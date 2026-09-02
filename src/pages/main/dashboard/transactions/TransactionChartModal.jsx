@@ -4,9 +4,9 @@ import { Icon, Button } from "../../../../components/Component";
 import { BarChartExample } from "../../../../components/charts/Chart";
 import { useGetTransactionChartData } from "../../../../api/transactions";
 
-const TransactionChartModal = ({ modal, closeModal, period, startDate, endDate }) => {
-  const { isLoading, data } = useGetTransactionChartData(period, startDate, endDate);
-  const [viewType, setViewType] = useState("count"); // "count" or "volume"
+const TransactionChartModal = ({ modal, closeModal, period, startDate, endDate, type }) => {
+  const { isLoading, data } = useGetTransactionChartData(period, startDate, endDate, type);
+  const [viewType, setViewType] = useState("count"); // "count" | "volume" | "profit"
 
   const chartData = useMemo(() => {
     if (!data || !data.data) {
@@ -16,15 +16,31 @@ const TransactionChartModal = ({ modal, closeModal, period, startDate, endDate }
       };
     }
     const labels = data.data.map(item => item.date);
-    const chartValues = data.data.map(item => viewType === "count" ? item.count : item.volume);
+    let chartValues = [];
+    let label = "Transaction Count";
+    let backgroundColor = "#007bff";
+
+    if (viewType === "count") {
+      chartValues = data.data.map(item => item.count);
+      label = "Transaction Count";
+      backgroundColor = "#007bff";
+    } else if (viewType === "volume") {
+      chartValues = data.data.map(item => item.volume);
+      label = "Transaction Volume (NGN)";
+      backgroundColor = "#28a745";
+    } else if (viewType === "profit") {
+      chartValues = data.data.map(item => item.profit || 0);
+      label = "Profit (NGN)";
+      backgroundColor = "#10b981";
+    }
 
     return {
       labels,
       datasets: [
         {
-          label: viewType === "count" ? "Transaction Count" : "Transaction Volume (NGN)",
+          label,
           data: chartValues,
-          backgroundColor: viewType === "count" ? "#007bff" : "#28a745",
+          backgroundColor,
         },
       ],
     };
@@ -60,6 +76,13 @@ const TransactionChartModal = ({ modal, closeModal, period, startDate, endDate }
                 size="sm"
               >
                 Volume
+              </Button>
+              <Button
+                color={viewType === "profit" ? "primary" : "light"}
+                onClick={() => setViewType("profit")}
+                size="sm"
+              >
+                Profit
               </Button>
             </div>
           </div>

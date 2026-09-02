@@ -339,16 +339,21 @@ const UserList = () => {
               </div>
 
               {/* Date range picker for custom intervals */}
-              <div className="bg-white rounded-3 border shadow-sm">
+              <div className="bg-white rounded border shadow-sm d-inline-flex align-items-center" style={{ height: "38px" }}>
                 <DateRangeFilter />
               </div>
 
               {/* View Chart Button */}
-              <div className="bg-white rounded-3 border shadow-sm">
-                <Button color="white" className="btn-icon" onClick={() => setShowChartModal(true)} style={{ height: "100%", padding: "0 10px" }}>
-                  <Icon name="bar-chart"></Icon> <span className="ms-1" style={{ fontSize: "12px", fontWeight: 500 }}>Stats</span>
-                </Button>
-              </div>
+              <button
+                type="button"
+                className="btn btn-white bg-white border rounded shadow-sm d-inline-flex align-items-center gap-1 px-3 text-dark"
+                onClick={() => setShowChartModal(true)}
+                style={{ height: "38px", fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap" }}
+                title="View User Registration Stats"
+              >
+                <Icon name="bar-chart" className="text-primary" style={{ fontSize: "15px" }} />
+                <span>Stats</span>
+              </button>
 
               {/* Export dropdown */}
               <UncontrolledDropdown>

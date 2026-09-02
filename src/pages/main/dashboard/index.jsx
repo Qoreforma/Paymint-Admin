@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, Badge } from "reactstrap";
 import {
@@ -19,7 +19,9 @@ import {
   ServicesStatsSection,
   WalletBalances,
   WalletStatsSection,
+  YesterdayVsTodayCard,
 } from "./dashboard-stats";
+import ProfitChartModal from "./ProfitChartModal";
 import { useGetDashboardStats } from "../../../api/dashboard";
 import { formatter } from "../../../utils/Utils";
 import LoadingSpinner from "../../components/spinner";
@@ -36,6 +38,7 @@ const PERIOD_OPTIONS = [
 const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const [showProfitChartModal, setShowProfitChartModal] = useState(false);
   const period = searchParams.get("period") || "all";
   const startDate = searchParams.get("startDate") || "";
   const endDate = searchParams.get("endDate") || "";
@@ -115,9 +118,21 @@ const Dashboard = () => {
               </div>
 
               {/* Date range picker for custom intervals */}
-              <div className="bg-white rounded-3 border shadow-sm">
+              <div className="bg-white rounded border shadow-sm d-inline-flex align-items-center" style={{ height: "38px" }}>
                 <DateRangeFilter />
               </div>
+
+              {/* View Profit Chart Button */}
+              <button
+                type="button"
+                className="btn btn-white bg-white border rounded shadow-sm d-inline-flex align-items-center gap-1 px-3 text-dark"
+                onClick={() => setShowProfitChartModal(true)}
+                style={{ height: "38px", fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap" }}
+                title="View Profit & Performance Chart"
+              >
+                <Icon name="bar-chart" className="text-success" style={{ fontSize: "15px" }} />
+                <span>Profit Chart</span>
+              </button>
             </div>
           </div>
         </div>
@@ -177,6 +192,21 @@ const Dashboard = () => {
                     >
                       {formatter("NGN").format(totalGrossProfit)}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowProfitChartModal(true)}
+                      className="btn btn-sm text-white px-2 py-1 mt-2 d-inline-flex align-items-center gap-1 border-0"
+                      style={{
+                        background: "rgba(16, 185, 129, 0.2)",
+                        borderRadius: 6,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      <Icon name="bar-chart"></Icon>
+                      <span>View Daily Breakdown</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -272,6 +302,9 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Yesterday vs Today Performance Pulse */}
+        <YesterdayVsTodayCard data={data?.comparison} isLoading={isLoading} />
+
         <Block>
           {isLoading ? (
             <div className="text-center py-5">
@@ -320,6 +353,15 @@ const Dashboard = () => {
             </Row>
           )}
         </Block>
+
+        {/* Profit Chart Modal */}
+        <ProfitChartModal
+          modal={showProfitChartModal}
+          closeModal={() => setShowProfitChartModal(false)}
+          period={period}
+          startDate={startDate}
+          endDate={endDate}
+        />
       </Content>
     </React.Fragment>
   );
