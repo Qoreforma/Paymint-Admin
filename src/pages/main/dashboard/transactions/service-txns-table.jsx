@@ -383,7 +383,7 @@ export const ServiceTransactionTable = ({
         (fetchingOverview ? (
           <LoadingSpinner />
         ) : (
-          <Row className="mb-5">
+          <Row className="g-3 mb-4 align-items-stretch">
             <Col lg={5}>
               <WalletAmountStatsCard
                 data={serviceTxnsOverview?.data?.overview?.totals?.totalAmount ?? 0}

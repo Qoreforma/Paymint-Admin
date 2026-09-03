@@ -136,18 +136,63 @@
 
 /* ── TRANX STATISTICS REFINEMENT ─────────────────────────── */
 .nk-tranx-statistics {
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  width: 100% !important;
+  margin: 0 !important;
   padding: 0.25rem 0 !important;
-  margin-bottom: 0 !important;
+}
+.nk-tranx-statistics .item {
+  flex: 1 1 0px !important;
+  width: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 0 12px !important;
+  min-width: 0 !important;
+}
+.nk-tranx-statistics .item:not(:last-child) {
+  border-right: 1px solid var(--border-light, #e5eaf3) !important;
 }
 .nk-tranx-statistics .icon {
-  margin-bottom: 0.65rem !important;
+  margin-bottom: 8px !important;
+  flex-shrink: 0;
 }
 .nk-tranx-statistics .title {
-  margin-bottom: 0.25rem !important;
-  font-size: 0.8rem !important;
+  margin-bottom: 4px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #8094ae !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 .nk-tranx-statistics .count {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
   line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+@media (max-width: 575.98px) {
+  .nk-tranx-statistics {
+    flex-wrap: wrap !important;
+    gap: 12px 0 !important;
+  }
+  .nk-tranx-statistics .item {
+    flex: 0 0 50% !important;
+    padding: 6px 8px !important;
+  }
+  .nk-tranx-statistics .item:not(:last-child) {
+    border-right: none !important;
+  }
 }
 
 /* ── EXECUTIVE DASHBOARD BANNER PODS ─────────────────────── */

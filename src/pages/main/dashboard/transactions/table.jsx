@@ -235,7 +235,7 @@ export const TransactionTable = ({ purpose, userId, showStats }) => {
   return (
     <>
       {(purpose || showStats) && (
-        <Row className="mb-5">
+        <Row className="g-3 mb-4 align-items-stretch">
           <Col lg={5}>
             <WalletAmountStatsCard
               data={data?.stat[purpose]?.total?.amount || 0}

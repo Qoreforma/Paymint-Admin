@@ -32,14 +32,17 @@ const ComparisonMetricPod = ({
   return (
     <div className="col">
       <div
-        className="h-100 p-3 rounded-3 bg-white border shadow-sm transition-all d-flex flex-column justify-content-between"
+        className="comparison-metric-pod h-100"
         style={{
-          border: "1px solid #e2e8f0",
-          transition: "transform 0.15s ease, box-shadow 0.15s ease",
+          padding: "20px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          gap: "12px",
         }}
       >
-        {/* Header row with Title, Icon & Trend Badge */}
-        <div className="d-flex align-items-center justify-content-between gap-1.5 mb-2">
+        {/* 1. Header row with Title, Icon & Trend Badge */}
+        <div className="d-flex align-items-center justify-content-between gap-2">
           <div className="d-flex align-items-center gap-2 overflow-hidden">
             <div
               style={{
@@ -81,37 +84,45 @@ const ComparisonMetricPod = ({
           </span>
         </div>
 
-        {/* Today Main Value */}
-        <div className="my-2">
+        {/* 2. Today Main Value */}
+        <div>
           <div
             className="fw-bold text-dark"
             style={{ fontSize: 20, letterSpacing: "-0.4px", lineHeight: 1.2 }}
           >
             {formattedToday}
           </div>
-          <div className="text-muted mt-1 d-flex align-items-center justify-content-between" style={{ fontSize: "11.5px" }}>
-            <span>vs yesterday:</span>
-            <span className="fw-semibold text-dark">{formattedYesterday}</span>
-          </div>
         </div>
 
-        {/* Visual Mini Progress Proportion */}
-        <div className="pt-2 border-top border-light">
-          <div className="d-flex align-items-center justify-content-between text-muted mb-1" style={{ fontSize: 10 }}>
-            <span>Today</span>
-            <span>Yesterday</span>
-          </div>
-          <div className="progress" style={{ height: 5, backgroundColor: "#f1f5f9", borderRadius: 3 }}>
-            <div
-              className="progress-bar"
-              role="progressbar"
-              style={{
-                width: `${todayProgress}%`,
-                backgroundColor: isPositive ? "#10b981" : isNegative ? "#ef4444" : "#3b82f6",
-                borderRadius: 3,
-              }}
-            ></div>
-          </div>
+        {/* 3. Comparison Row */}
+        <div
+          className="text-muted d-flex align-items-center justify-content-between"
+          style={{ fontSize: "11.5px" }}
+        >
+          <span>vs yesterday:</span>
+          <span className="fw-semibold text-dark">{formattedYesterday}</span>
+        </div>
+
+        {/* 4. Progress Bar */}
+        <div className="progress" style={{ height: 5, backgroundColor: "#f1f5f9", borderRadius: 3 }}>
+          <div
+            className="progress-bar"
+            role="progressbar"
+            style={{
+              width: `${todayProgress}%`,
+              backgroundColor: isPositive ? "#10b981" : isNegative ? "#ef4444" : "#3b82f6",
+              borderRadius: 3,
+            }}
+          ></div>
+        </div>
+
+        {/* 5. Footer Labels */}
+        <div
+          className="d-flex align-items-center justify-content-between text-muted"
+          style={{ fontSize: 10 }}
+        >
+          <span>Today</span>
+          <span>Yesterday</span>
         </div>
       </div>
     </div>

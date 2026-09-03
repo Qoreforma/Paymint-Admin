@@ -28,7 +28,7 @@ export function WalletBalances({ data }) {
     <Row className="g-3">
       <Col md={6}>
         <Card className="h-100">
-          <div className="card-inner py-3 px-4">
+          <div className="card-inner" style={{ padding: "20px" }}>
             <div className="d-flex align-items-center gap-3">
               <div
                 style={{
@@ -60,7 +60,7 @@ export function WalletBalances({ data }) {
       </Col>
       <Col md={6}>
         <Card className="h-100">
-          <div className="card-inner py-3 px-4">
+          <div className="card-inner" style={{ padding: "20px" }}>
             <div className="d-flex align-items-center gap-3">
               <div
                 style={{

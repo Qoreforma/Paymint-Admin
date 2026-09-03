@@ -47,7 +47,7 @@ export const WalletStatsCard = ({ tradeTypeData, data }) => {
 
   return (
     <Card className="h-100">
-      <div className="card-inner h-100 d-flex flex-column justify-content-center py-3">
+      <div className="card-inner h-100 d-flex flex-column justify-content-center" style={{ padding: "20px" }}>
         <ul className="nk-tranx-statistics my-auto w-100">
           <li className="item">
             <Icon name="sort-v" className="bg-primary-dim"></Icon>
@@ -92,9 +92,9 @@ export const WalletStatsCard = ({ tradeTypeData, data }) => {
 
 export const WalletAmountStatsCard = ({ data, successful, pending, profit }) => {
   return (
-    <Card>
-      <div className="card-inner">
-        <ul className="nk-tranx-statistics">
+    <Card className="h-100">
+      <div className="card-inner h-100 d-flex flex-column justify-content-center" style={{ padding: "20px" }}>
+        <ul className="nk-tranx-statistics my-auto w-100">
           {data !== undefined && (
             <li className="item">
               <Icon name="sign-kobo" className="bg-primary-dim"></Icon>

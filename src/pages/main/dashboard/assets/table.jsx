@@ -147,7 +147,7 @@ const AssetsTable = ({ data, showStats = false, isLoading, tradeType }) => {
         (fetchingOverview ? (
           <LoadingSpinner />
         ) : (
-          <Row className="mb-5">
+          <Row className="g-3 mb-4 align-items-stretch">
             <Col lg={5}>
               <StatsCard data={assetTxnsOverview?.data} />
             </Col>

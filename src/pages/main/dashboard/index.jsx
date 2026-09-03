@@ -26,6 +26,7 @@ import { useGetDashboardStats } from "../../../api/dashboard";
 import { formatter } from "../../../utils/Utils";
 import LoadingSpinner from "../../components/spinner";
 import DateRangeFilter from "./tables/date-range-filter";
+import "./executive-dashboard.css";
 
 const PERIOD_OPTIONS = [
   { label: "All Time", value: "all" },
@@ -83,299 +84,298 @@ const Dashboard = () => {
     <React.Fragment>
       <Head title="Dashboard" />
       <Content>
-        {/* Header with Title and Period Filter Controls */}
-        <div className="nk-block-head nk-block-head-sm mb-3">
-          <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
-            <div>
-              <h3 className="nk-block-title page-title mb-1">Executive Dashboard</h3>
-              <div className="text-muted small">
-                Real-time platform metrics, revenue volumes, and profit breakdowns.
-              </div>
-            </div>
-
-            <div className="d-flex flex-wrap align-items-center gap-2">
-              {/* Period quick filter buttons */}
-              <div
-                className="btn-group bg-white p-1 rounded-3 border shadow-sm align-items-center"
-                role="group"
-                style={{ height: "38px", gap: 2 }}
-              >
-                {PERIOD_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={`btn btn-xs rounded-2 ${
-                      period === opt.value && !hasCustomDate
-                        ? "btn-primary shadow-sm"
-                        : "btn-outline-light text-dark border-0"
-                    }`}
-                    style={{
-                      fontSize: 12,
-                      padding: "5px 12px",
-                      fontWeight: 500,
-                      height: "30px",
-                      display: "inline-flex",
-                      alignItems: "center",
-                    }}
-                    onClick={() => handlePeriodChange(opt.value)}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+        <div className="exec-dashboard">
+          {/* Header with Title and Period Filter Controls */}
+          <div className="nk-block-head nk-block-head-sm mb-4">
+            <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+              <div>
+                <h3 className="nk-block-title page-title mb-1">Executive Dashboard</h3>
+                <div className="text-muted small">
+                  Real-time platform metrics, revenue volumes, and profit breakdowns.
+                </div>
               </div>
 
-              {/* Date range picker for custom intervals */}
-              <div className="bg-white rounded border shadow-sm d-inline-flex align-items-center" style={{ height: "38px" }}>
-                <DateRangeFilter />
-              </div>
+              <div className="d-flex flex-wrap align-items-center gap-2">
+                {/* Period quick filter buttons */}
+                <div
+                  className="btn-group bg-white p-1 rounded-3 border shadow-sm align-items-center"
+                  role="group"
+                  style={{ height: "38px", gap: 2 }}
+                >
+                  {PERIOD_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`btn btn-xs rounded-2 ${
+                        period === opt.value && !hasCustomDate
+                          ? "btn-primary shadow-sm"
+                          : "btn-outline-light text-dark border-0"
+                      }`}
+                      style={{
+                        fontSize: 12,
+                        padding: "5px 12px",
+                        fontWeight: 500,
+                        height: "30px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                      }}
+                      onClick={() => handlePeriodChange(opt.value)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
 
-              {/* View Profit Chart Button */}
-              <button
-                type="button"
-                className="btn btn-white bg-white border rounded shadow-sm d-inline-flex align-items-center gap-1.5 px-3 text-dark"
-                onClick={() => setShowProfitChartModal(true)}
-                style={{ height: "38px", fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap" }}
-                title="View Profit & Performance Chart"
-              >
-                <Icon name="bar-chart" className="text-success" style={{ fontSize: "15px" }} />
-                <span>Profit Chart</span>
-              </button>
+                {/* Date range picker for custom intervals */}
+                <div className="bg-white rounded border shadow-sm d-inline-flex align-items-center" style={{ height: "38px" }}>
+                  <DateRangeFilter />
+                </div>
+
+                {/* View Profit Chart Button */}
+                <button
+                  type="button"
+                  className="btn btn-white bg-white border rounded shadow-sm d-inline-flex align-items-center gap-1.5 px-3 text-dark"
+                  onClick={() => setShowProfitChartModal(true)}
+                  style={{ height: "38px", fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap" }}
+                  title="View Profit & Performance Chart"
+                >
+                  <Icon name="bar-chart" className="text-success" style={{ fontSize: "15px" }} />
+                  <span>Profit Chart</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Highlight Gross Profit Banner */}
-        <div className="mb-4">
-          <div
-            style={{
-              background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
-              color: "#fff",
-              borderRadius: 16,
-              border: "1px solid rgba(255,255,255,0.08)",
-              boxShadow: "0 8px 30px rgba(15,23,42,0.18)",
-              padding: "20px 24px",
-            }}
-          >
-            <div className="row g-4 align-items-stretch">
-              {/* Pod 1: Total Gross Profit */}
-              <div className="col-12 col-md-4 d-flex">
-                <div className="d-flex align-items-center gap-3 w-100">
-                  <div
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: 14,
-                      background: "rgba(16, 185, 129, 0.18)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 24,
-                      border: "1px solid rgba(16, 185, 129, 0.3)",
-                      flexShrink: 0,
-                    }}
-                  >
-                    💰
-                  </div>
-                  <div className="d-flex flex-column justify-content-center">
+          {/* Highlight Gross Profit Banner */}
+          <div className="mb-4">
+            <div
+              className="exec-kpi-banner"
+              style={{
+                background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
+                color: "#fff",
+                borderRadius: 16,
+                border: "1px solid rgba(255,255,255,0.08)",
+                boxShadow: "0 8px 30px rgba(15,23,42,0.18)",
+                padding: "20px",
+              }}
+            >
+              <div className="row g-4 align-items-stretch">
+                {/* Pod 1: Total Gross Profit */}
+                <div className="col-12 col-md-4 d-flex flex-column justify-content-between">
+                  <div className="d-flex align-items-center gap-3 w-100">
                     <div
-                      className="text-uppercase"
                       style={{
-                        color: "#94a3b8",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        letterSpacing: "0.5px",
-                      }}
-                    >
-                      Total Gross Profit ({activePeriodLabel})
-                    </div>
-                    <div
-                      className="fw-bold mt-1"
-                      style={{
-                        color: "#34d399",
+                        width: 52,
+                        height: 52,
+                        borderRadius: 14,
+                        background: "rgba(16, 185, 129, 0.18)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         fontSize: 24,
-                        lineHeight: 1.2,
-                        letterSpacing: "-0.5px",
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        flexShrink: 0,
                       }}
                     >
-                      {formatter("NGN").format(totalGrossProfit)}
+                      💰
                     </div>
+                    <div className="d-flex flex-column justify-content-center">
+                      <div
+                        className="text-uppercase"
+                        style={{
+                          color: "#94a3b8",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          letterSpacing: "0.5px",
+                        }}
+                      >
+                        Total Gross Profit ({activePeriodLabel})
+                      </div>
+                      <div
+                        className="fw-bold mt-1"
+                        style={{
+                          color: "#34d399",
+                          fontSize: 22,
+                          lineHeight: 1.2,
+                          letterSpacing: "-0.5px",
+                        }}
+                      >
+                        {formatter("NGN").format(totalGrossProfit)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: "10px" }}>
                     <button
                       type="button"
                       onClick={() => setShowProfitChartModal(true)}
-                      className="btn btn-sm text-white px-2.5 py-1 mt-2 d-inline-flex align-items-center gap-1.5 border-0"
-                      style={{
-                        background: "rgba(16, 185, 129, 0.2)",
-                        borderRadius: 6,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        width: "fit-content",
-                      }}
+                      className="exec-kpi-pod-button"
+                      title="View Daily Breakdown"
                     >
                       <Icon name="bar-chart"></Icon>
                       <span>View Daily Breakdown</span>
                     </button>
                   </div>
                 </div>
-              </div>
 
-              {/* Pod 2: Services Volume */}
-              <div className="col-12 col-md-4 d-flex exec-dash-pod-divider">
-                <div className="d-flex align-items-center gap-3 ps-md-4 w-100">
-                  <div
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: 14,
-                      background: "rgba(59, 130, 246, 0.18)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 22,
-                      border: "1px solid rgba(59, 130, 246, 0.3)",
-                      flexShrink: 0,
-                    }}
-                  >
-                    📈
-                  </div>
-                  <div className="d-flex flex-column justify-content-center">
+                {/* Pod 2: Services Volume */}
+                <div className="col-12 col-md-4 d-flex flex-column justify-content-center exec-dash-pod-divider">
+                  <div className="d-flex align-items-center gap-3 ps-md-4 w-100">
                     <div
-                      className="text-uppercase"
                       style={{
-                        color: "#94a3b8",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        letterSpacing: "0.5px",
+                        width: 52,
+                        height: 52,
+                        borderRadius: 14,
+                        background: "rgba(59, 130, 246, 0.18)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 22,
+                        border: "1px solid rgba(59, 130, 246, 0.3)",
+                        flexShrink: 0,
                       }}
                     >
-                      Services Volume
+                      📈
                     </div>
-                    <div
-                      className="fw-bold text-white mt-1"
-                      style={{ fontSize: 22, lineHeight: 1.2 }}
-                    >
-                      {formatter("NGN").format(
-                        data?.services_transaction?.all?.successful?.amount || 0
-                      )}
-                    </div>
-                    <div className="small mt-1" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>
-                      Total platform bill payments
+                    <div className="d-flex flex-column justify-content-center">
+                      <div
+                        className="text-uppercase"
+                        style={{
+                          color: "#94a3b8",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          letterSpacing: "0.5px",
+                        }}
+                      >
+                        Services Volume
+                      </div>
+                      <div
+                        className="fw-bold text-white mt-1"
+                        style={{ fontSize: 22, lineHeight: 1.2 }}
+                      >
+                        {formatter("NGN").format(
+                          data?.services_transaction?.all?.successful?.amount || 0
+                        )}
+                      </div>
+                      <div className="small mt-1" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>
+                        Total platform bill payments
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Pod 3: Successful Transactions */}
-              <div className="col-12 col-md-4 d-flex exec-dash-pod-divider">
-                <div className="d-flex align-items-center gap-3 ps-md-4 w-100">
-                  <div
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: 14,
-                      background: "rgba(168, 85, 247, 0.18)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 22,
-                      border: "1px solid rgba(168, 85, 247, 0.3)",
-                      flexShrink: 0,
-                    }}
-                  >
-                    ⚡
-                  </div>
-                  <div className="d-flex flex-column justify-content-center">
+                {/* Pod 3: Successful Transactions */}
+                <div className="col-12 col-md-4 d-flex flex-column justify-content-center exec-dash-pod-divider">
+                  <div className="d-flex align-items-center gap-3 ps-md-4 w-100">
                     <div
-                      className="text-uppercase"
                       style={{
-                        color: "#94a3b8",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        letterSpacing: "0.5px",
+                        width: 52,
+                        height: 52,
+                        borderRadius: 14,
+                        background: "rgba(168, 85, 247, 0.18)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 22,
+                        border: "1px solid rgba(168, 85, 247, 0.3)",
+                        flexShrink: 0,
                       }}
                     >
-                      Successful Transactions
+                      ⚡
                     </div>
-                    <div
-                      className="fw-bold text-white mt-1"
-                      style={{ fontSize: 22, lineHeight: 1.2 }}
-                    >
-                      {(
-                        (data?.services_transaction?.all?.successful?.count || 0) +
-                        (data?.crypto_transaction?.sell?.approved?.count || 0) +
-                        (data?.giftcard_transaction?.sell?.approved?.count || 0)
-                      ).toLocaleString()}
-                    </div>
-                    <div className="small mt-1" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>
-                      Across all services & trades
+                    <div className="d-flex flex-column justify-content-center">
+                      <div
+                        className="text-uppercase"
+                        style={{
+                          color: "#94a3b8",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          letterSpacing: "0.5px",
+                        }}
+                      >
+                        Successful Transactions
+                      </div>
+                      <div
+                        className="fw-bold text-white mt-1"
+                        style={{ fontSize: 22, lineHeight: 1.2 }}
+                      >
+                        {(
+                          (data?.services_transaction?.all?.successful?.count || 0) +
+                          (data?.crypto_transaction?.sell?.approved?.count || 0) +
+                          (data?.giftcard_transaction?.sell?.approved?.count || 0)
+                        ).toLocaleString()}
+                      </div>
+                      <div className="small mt-1" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>
+                        Across all services & trades
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Yesterday vs Today Performance Pulse */}
+          <YesterdayVsTodayCard data={data?.comparison} isLoading={isLoading} />
+
+          <Block>
+            {isLoading ? (
+              <div className="text-center py-5">
+                <LoadingSpinner />
+              </div>
+            ) : (
+              <div className="d-flex flex-column gap-4">
+                <div>
+                  <h5 className="mb-3 d-flex align-items-center gap-2">
+                    <span>Total Wallet Transactions</span>
+                    <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
+                      {activePeriodLabel}
+                    </Badge>
+                  </h5>
+                  <WalletStatsSection data={data?.wallet_transaction} />
+                </div>
+
+                <div>
+                  <h5 className="mb-3 d-flex align-items-center gap-2">
+                    <span>Total Services Transactions & Profits</span>
+                    <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
+                      {activePeriodLabel}
+                    </Badge>
+                  </h5>
+                  <ServicesStatsSection data={data?.services_transaction} />
+                </div>
+
+                <div>
+                  <h5 className="mb-3">Wallet Balances & User Base</h5>
+                  <WalletBalances data={data?.wallet_balance} />
+                </div>
+
+                <div>
+                  <h5 className="mb-3 d-flex align-items-center gap-2">
+                    <span>Services Breakdown & Net Profit</span>
+                    <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
+                      {activePeriodLabel}
+                    </Badge>
+                  </h5>
+                  <AllServicesStats
+                    data={data?.services_transaction}
+                    crypto={data?.crypto_transaction}
+                    giftcard={data?.giftcard_transaction}
+                  />
+                </div>
+              </div>
+            )}
+          </Block>
+
+          {/* Profit Chart Modal */}
+          <ProfitChartModal
+            modal={showProfitChartModal}
+            closeModal={() => setShowProfitChartModal(false)}
+            period={period}
+            startDate={startDate}
+            endDate={endDate}
+          />
         </div>
-
-        {/* Yesterday vs Today Performance Pulse */}
-        <YesterdayVsTodayCard data={data?.comparison} isLoading={isLoading} />
-
-        <Block>
-          {isLoading ? (
-            <div className="text-center py-5">
-              <LoadingSpinner />
-            </div>
-          ) : (
-            <div className="d-flex flex-column gap-4">
-              <div>
-                <h5 className="mb-3 d-flex align-items-center gap-2">
-                  <span>Total Wallet Transactions</span>
-                  <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
-                    {activePeriodLabel}
-                  </Badge>
-                </h5>
-                <WalletStatsSection data={data?.wallet_transaction} />
-              </div>
-
-              <div>
-                <h5 className="mb-3 d-flex align-items-center gap-2">
-                  <span>Total Services Transactions & Profits</span>
-                  <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
-                    {activePeriodLabel}
-                  </Badge>
-                </h5>
-                <ServicesStatsSection data={data?.services_transaction} />
-              </div>
-
-              <div>
-                <h5 className="mb-3">Wallet Balances & User Base</h5>
-                <WalletBalances data={data?.wallet_balance} />
-              </div>
-
-              <div>
-                <h5 className="mb-3 d-flex align-items-center gap-2">
-                  <span>Services Breakdown & Net Profit</span>
-                  <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
-                    {activePeriodLabel}
-                  </Badge>
-                </h5>
-                <AllServicesStats
-                  data={data?.services_transaction}
-                  crypto={data?.crypto_transaction}
-                  giftcard={data?.giftcard_transaction}
-                />
-              </div>
-            </div>
-          )}
-        </Block>
-
-        {/* Profit Chart Modal */}
-        <ProfitChartModal
-          modal={showProfitChartModal}
-          closeModal={() => setShowProfitChartModal(false)}
-          period={period}
-          startDate={startDate}
-          endDate={endDate}
-        />
       </Content>
     </React.Fragment>
   );

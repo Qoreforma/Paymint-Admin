@@ -440,11 +440,11 @@ const UserList = () => {
         </div>
 
         {/* Stats Section with Period Sensitivity */}
-        <Row className="mb-4">
+        <Row className="g-3 mb-4 align-items-stretch">
           <Col lg={5}>
-            <PreviewCard>
-              <div className="card-inner">
-                <ul className="nk-tranx-statistics">
+            <PreviewCard className="h-100">
+              <div className="card-inner h-100 d-flex flex-column justify-content-center" style={{ padding: "20px" }}>
+                <ul className="nk-tranx-statistics my-auto w-100">
                   <li className="item">
                     <Icon name="wallet" className="bg-primary-dim"></Icon>
                     <div className="info">
@@ -468,9 +468,9 @@ const UserList = () => {
             </PreviewCard>
           </Col>
           <Col lg={7}>
-            <PreviewCard>
-              <div className="card-inner">
-                <ul className="nk-tranx-statistics">
+            <PreviewCard className="h-100">
+              <div className="card-inner h-100 d-flex flex-column justify-content-center" style={{ padding: "20px" }}>
+                <ul className="nk-tranx-statistics my-auto w-100">
                   <li className="item">
                     <Icon name="check-circle" className="bg-success-dim"></Icon>
                     <div className="info">

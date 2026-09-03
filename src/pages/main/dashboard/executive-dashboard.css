@@ -1,0 +1,111 @@
+/* ============================================================
+   EXECUTIVE DASHBOARD SCOPED STYLES
+   ============================================================ */
+
+.exec-dashboard {
+  --exec-card-padding: 20px;
+}
+
+/* ── REUSABLE CARD PADDING (20px) ────────────────────────── */
+.exec-dashboard .card-inner,
+.exec-dashboard .comparison-metric-pod,
+.exec-dashboard .exec-kpi-banner {
+  padding: var(--exec-card-padding) !important;
+}
+
+/* ── SUMMARY TRANSACTION CARDS (EVENLY DIVIDED WITH DIVIDERS) */
+.exec-dashboard .nk-tranx-statistics {
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.exec-dashboard .nk-tranx-statistics .item {
+  flex: 1 1 0px !important;
+  width: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 0 12px !important;
+  min-width: 0 !important;
+}
+
+.exec-dashboard .nk-tranx-statistics .item:not(:last-child) {
+  border-right: 1px solid var(--border-light, #e5eaf3) !important;
+}
+
+.exec-dashboard .nk-tranx-statistics .icon {
+  margin-bottom: 8px !important;
+  flex-shrink: 0;
+}
+
+.exec-dashboard .nk-tranx-statistics .title {
+  margin-bottom: 4px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #8094ae !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.exec-dashboard .nk-tranx-statistics .count {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+
+/* ── DAILY PULSE COMPARISON METRIC POD (12px INTERNAL GAP) ─── */
+.exec-dashboard .comparison-metric-pod {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 8px rgba(15, 61, 172, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  height: 100%;
+}
+
+.exec-dashboard .comparison-metric-pod:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 18px rgba(15, 61, 172, 0.11);
+}
+
+/* ── DARK KPI PODS ───────────────────────────────────────── */
+.exec-dashboard .exec-kpi-pod-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(16, 185, 129, 0.2);
+  border: none;
+  cursor: pointer;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s ease;
+}
+
+.exec-dashboard .exec-kpi-pod-button:hover {
+  background: rgba(16, 185, 129, 0.3);
+  color: #fff;
+}

@@ -24,9 +24,9 @@ export const AmountStatsCard = ({ data }) => {
   }, [data]);
 
   return (
-    <Card>
-      <div className="card-inner">
-        <ul className="nk-tranx-statistics">
+    <Card className="h-100">
+      <div className="card-inner h-100 d-flex flex-column justify-content-center" style={{ padding: "20px" }}>
+        <ul className="nk-tranx-statistics my-auto w-100">
           <li className="item">
             <Icon name="sign-kobo" className="bg-success-dim"></Icon>
             <div className="info">
@@ -50,9 +50,9 @@ export const AmountStatsCard = ({ data }) => {
 export const StatsDetailsCard = ({ data }) => {
   // console.log(data);
   return (
-    <Card>
-      <div className="card-inner">
-        <ul className="nk-tranx-statistics">
+    <Card className="h-100">
+      <div className="card-inner h-100 d-flex flex-column justify-content-center" style={{ padding: "20px" }}>
+        <ul className="nk-tranx-statistics my-auto w-100">
           <li className="item">
             <Icon name="check" className="bg-success-dim"></Icon>
             <div className="info">
@@ -107,7 +107,7 @@ export const StatsDetailsCard = ({ data }) => {
 export const WalletAmountStatsCard = ({ data, successful, profit }) => {
   return (
     <Card className="h-100">
-      <div className="card-inner h-100 d-flex flex-column justify-content-center py-3">
+      <div className="card-inner h-100 d-flex flex-column justify-content-center" style={{ padding: "20px" }}>
         <ul className="nk-tranx-statistics my-auto w-100">
           <li className="item">
             <Icon name="sign-kobo" className="bg-primary-dim"></Icon>
