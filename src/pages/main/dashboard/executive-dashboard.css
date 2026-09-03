@@ -7,7 +7,8 @@
 }
 
 /* ── REUSABLE CARD PADDING (20px) ────────────────────────── */
-.exec-dashboard .card-inner,
+/* Note: stat card components set padding: 20px via inline styles directly.
+   We only override the KPI banner padding here, not all .card-inner globally. */
 .exec-dashboard .comparison-metric-pod,
 .exec-dashboard .exec-kpi-banner {
   padding: var(--exec-card-padding) !important;

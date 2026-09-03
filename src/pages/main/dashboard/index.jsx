@@ -161,7 +161,7 @@ const Dashboard = () => {
             >
               <div className="row g-4 align-items-stretch">
                 {/* Pod 1: Total Gross Profit */}
-                <div className="col-12 col-md-4 d-flex flex-column justify-content-between">
+                <div className="col-12 col-md-4 d-flex">
                   <div className="d-flex align-items-center gap-3 w-100">
                     <div
                       style={{
@@ -202,24 +202,23 @@ const Dashboard = () => {
                       >
                         {formatter("NGN").format(totalGrossProfit)}
                       </div>
+                      <div style={{ marginTop: "8px" }}>
+                        <button
+                          type="button"
+                          onClick={() => setShowProfitChartModal(true)}
+                          className="exec-kpi-pod-button"
+                          title="View Daily Breakdown"
+                        >
+                          <Icon name="bar-chart"></Icon>
+                          <span>View Daily Breakdown</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-
-                  <div style={{ marginTop: "10px" }}>
-                    <button
-                      type="button"
-                      onClick={() => setShowProfitChartModal(true)}
-                      className="exec-kpi-pod-button"
-                      title="View Daily Breakdown"
-                    >
-                      <Icon name="bar-chart"></Icon>
-                      <span>View Daily Breakdown</span>
-                    </button>
                   </div>
                 </div>
 
                 {/* Pod 2: Services Volume */}
-                <div className="col-12 col-md-4 d-flex flex-column justify-content-center exec-dash-pod-divider">
+                <div className="col-12 col-md-4 d-flex exec-dash-pod-divider">
                   <div className="d-flex align-items-center gap-3 ps-md-4 w-100">
                     <div
                       style={{
@@ -265,7 +264,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Pod 3: Successful Transactions */}
-                <div className="col-12 col-md-4 d-flex flex-column justify-content-center exec-dash-pod-divider">
+                <div className="col-12 col-md-4 d-flex exec-dash-pod-divider">
                   <div className="d-flex align-items-center gap-3 ps-md-4 w-100">
                     <div
                       style={{
