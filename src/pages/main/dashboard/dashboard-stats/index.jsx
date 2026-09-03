@@ -9,7 +9,7 @@ export { default as YesterdayVsTodayCard } from "./YesterdayVsTodayCard";
 
 export function WalletStatsSection({ data }) {
   return (
-    <Row className="g-gs">
+    <Row className="g-3 align-items-stretch">
       <Col lg={5}>
         <WalletAmountStatsCard
           data={data?.all?.total?.amount || 0}
@@ -25,34 +25,68 @@ export function WalletStatsSection({ data }) {
 
 export function WalletBalances({ data }) {
   return (
-    <Row className="g-gs">
-      <Col lg={6}>
-        <Card>
-          <div className="card-inner">
-            <ul className="nk-tranx-statistics">
-              <li className="item">
-                <Icon name="sign-kobo" className="bg-primary-dim"></Icon>
-                <div className="info">
-                  <div className="title">Wallet Balances</div>
-                  <div className="count">{formatter("NGN").format(data?.amount || 0)}</div>
+    <Row className="g-3">
+      <Col md={6}>
+        <Card className="h-100">
+          <div className="card-inner py-3 px-4">
+            <div className="d-flex align-items-center gap-3">
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  background: "rgba(15, 61, 172, 0.1)",
+                  color: "#0f3dac",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 22,
+                  flexShrink: 0,
+                }}
+              >
+                <Icon name="sign-kobo" />
+              </div>
+              <div>
+                <div className="text-muted text-uppercase fw-bold" style={{ fontSize: 11, letterSpacing: "0.5px" }}>
+                  Wallet Balances
                 </div>
-              </li>
-            </ul>
+                <div className="fw-bold text-dark mt-1" style={{ fontSize: 20 }}>
+                  {formatter("NGN").format(data?.amount || 0)}
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
       </Col>
-      <Col lg={6}>
-        <Card>
-          <div className="card-inner">
-            <ul className="nk-tranx-statistics">
-              <li className="item">
-                <Icon name="users" className="bg-primary-dim"></Icon>
-                <div className="info">
-                  <div className="title">Total Users</div>
-                  <div className="count">{data?.users || 0}</div>
+      <Col md={6}>
+        <Card className="h-100">
+          <div className="card-inner py-3 px-4">
+            <div className="d-flex align-items-center gap-3">
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  background: "rgba(59, 130, 246, 0.1)",
+                  color: "#2563eb",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 22,
+                  flexShrink: 0,
+                }}
+              >
+                <Icon name="users" />
+              </div>
+              <div>
+                <div className="text-muted text-uppercase fw-bold" style={{ fontSize: 11, letterSpacing: "0.5px" }}>
+                  Total Users
                 </div>
-              </li>
-            </ul>
+                <div className="fw-bold text-dark mt-1" style={{ fontSize: 20 }}>
+                  {(data?.users || 0).toLocaleString()}
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
       </Col>
@@ -62,7 +96,7 @@ export function WalletBalances({ data }) {
 
 export function ServicesStatsSection({ data }) {
   return (
-    <Row className="g-gs">
+    <Row className="g-3 align-items-stretch">
       <Col lg={5}>
         <WalletAmountStatsCard
           data={data?.all?.total?.amount || 0}
@@ -125,7 +159,7 @@ export function AllServicesStats({ data, crypto, giftcard }) {
     (giftcard?.sell?.approved?.profit || 0) + (giftcard?.sell?.second_approval?.profit || 0);
 
   return (
-    <Row className="g-gs">
+    <Row className="g-3 align-items-stretch">
       <Col lg={6}>
         <Card className="h-100">
           <div className="card-inner">

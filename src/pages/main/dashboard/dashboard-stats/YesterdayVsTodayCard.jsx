@@ -32,15 +32,15 @@ const ComparisonMetricPod = ({
   return (
     <div className="col">
       <div
-        className="h-100 p-3 rounded-3 bg-white border shadow-sm transition-all"
+        className="h-100 p-3 rounded-3 bg-white border shadow-sm transition-all d-flex flex-column justify-content-between"
         style={{
           border: "1px solid #e2e8f0",
           transition: "transform 0.15s ease, box-shadow 0.15s ease",
         }}
       >
         {/* Header row with Title, Icon & Trend Badge */}
-        <div className="d-flex align-items-center justify-content-between mb-2">
-          <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center justify-content-between gap-1.5 mb-2">
+          <div className="d-flex align-items-center gap-2 overflow-hidden">
             <div
               style={{
                 width: 32,
@@ -58,19 +58,20 @@ const ComparisonMetricPod = ({
               <Icon name={icon}></Icon>
             </div>
             <span
-              className="text-uppercase text-muted fw-bold"
-              style={{ fontSize: 11, letterSpacing: "0.4px" }}
+              className="text-uppercase text-muted fw-bold text-truncate"
+              style={{ fontSize: 10.5, letterSpacing: "0.3px" }}
+              title={title}
             >
               {title}
             </span>
           </div>
 
           <span
-            className="badge rounded-pill px-2 py-1"
+            className="badge rounded-pill px-2 py-1 flex-shrink-0"
             style={{
               background: isPositive ? "#ecfdf5" : isNegative ? "#fef2f2" : "#f1f5f9",
               color: isPositive ? "#059669" : isNegative ? "#dc2626" : "#64748b",
-              fontSize: 11,
+              fontSize: 10.5,
               fontWeight: 700,
             }}
           >
@@ -81,26 +82,26 @@ const ComparisonMetricPod = ({
         </div>
 
         {/* Today Main Value */}
-        <div className="mt-2">
+        <div className="my-2">
           <div
             className="fw-bold text-dark"
             style={{ fontSize: 20, letterSpacing: "-0.4px", lineHeight: 1.2 }}
           >
             {formattedToday}
           </div>
-          <div className="text-muted small mt-1 d-flex align-items-center justify-content-between">
+          <div className="text-muted mt-1 d-flex align-items-center justify-content-between" style={{ fontSize: "11.5px" }}>
             <span>vs yesterday:</span>
             <span className="fw-semibold text-dark">{formattedYesterday}</span>
           </div>
         </div>
 
         {/* Visual Mini Progress Proportion */}
-        <div className="mt-3 pt-2 border-top border-light">
-          <div className="d-flex align-items-center justify-content-between text-muted" style={{ fontSize: 10 }}>
+        <div className="pt-2 border-top border-light">
+          <div className="d-flex align-items-center justify-content-between text-muted mb-1" style={{ fontSize: 10 }}>
             <span>Today</span>
             <span>Yesterday</span>
           </div>
-          <div className="progress mt-1" style={{ height: 5, backgroundColor: "#f1f5f9", borderRadius: 3 }}>
+          <div className="progress" style={{ height: 5, backgroundColor: "#f1f5f9", borderRadius: 3 }}>
             <div
               className="progress-bar"
               role="progressbar"

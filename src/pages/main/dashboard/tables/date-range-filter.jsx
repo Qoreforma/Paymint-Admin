@@ -62,16 +62,19 @@ const DateRangeFilter = () => {
     <UncontrolledDropdown isOpen={isOpen} toggle={toggle}>
       <DropdownToggle
         tag="a"
-        className="fw-medium"
+        className="fw-medium text-dark text-decoration-none"
         style={{
-          display: "flex",
+          display: "inline-flex",
           alignItems: "center",
-          padding: "8px 16px",
+          gap: "8px",
+          padding: "0 14px",
+          height: "38px",
           borderRadius: "6px",
           cursor: "pointer",
+          fontSize: "13px",
         }}
       >
-        <Icon name="calendar-alt" style={{ fontSize: "16px" }} />
+        <Icon name="calendar-alt" style={{ fontSize: "15px", color: "#64748b" }} />
         <span>Filter by Date</span>
       </DropdownToggle>
       <DropdownMenu end className="filter-wg dropdown-menu-xl" style={{ overflow: "visible", padding: "20px" }}>

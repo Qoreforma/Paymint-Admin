@@ -46,9 +46,9 @@ export const WalletStatsCard = ({ tradeTypeData, data }) => {
   };
 
   return (
-    <Card>
-      <div className="card-inner">
-        <ul className="nk-tranx-statistics">
+    <Card className="h-100">
+      <div className="card-inner h-100 d-flex flex-column justify-content-center py-3">
+        <ul className="nk-tranx-statistics my-auto w-100">
           <li className="item">
             <Icon name="sort-v" className="bg-primary-dim"></Icon>
             <div className="info">

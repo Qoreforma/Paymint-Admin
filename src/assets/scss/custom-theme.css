@@ -134,6 +134,38 @@
   text-overflow: ellipsis;
 }
 
+/* ── TRANX STATISTICS REFINEMENT ─────────────────────────── */
+.nk-tranx-statistics {
+  padding: 0.25rem 0 !important;
+  margin-bottom: 0 !important;
+}
+.nk-tranx-statistics .icon {
+  margin-bottom: 0.65rem !important;
+}
+.nk-tranx-statistics .title {
+  margin-bottom: 0.25rem !important;
+  font-size: 0.8rem !important;
+}
+.nk-tranx-statistics .count {
+  line-height: 1.25 !important;
+}
+
+/* ── EXECUTIVE DASHBOARD BANNER PODS ─────────────────────── */
+.exec-dash-pod-divider {
+  border-left: none;
+}
+@media (min-width: 768px) {
+  .exec-dash-pod-divider {
+    border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+}
+@media (max-width: 767.98px) {
+  .exec-dash-pod-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding-top: 1.25rem !important;
+  }
+}
+
 /* ── SECTION HEADINGS ────────────────────────────────────── */
 .dash-section-head {
   display: flex;

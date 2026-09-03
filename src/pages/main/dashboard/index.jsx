@@ -84,7 +84,7 @@ const Dashboard = () => {
       <Head title="Dashboard" />
       <Content>
         {/* Header with Title and Period Filter Controls */}
-        <div className="nk-block-head nk-block-head-sm mb-4">
+        <div className="nk-block-head nk-block-head-sm mb-3">
           <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
             <div>
               <h3 className="nk-block-title page-title mb-1">Executive Dashboard</h3>
@@ -96,9 +96,9 @@ const Dashboard = () => {
             <div className="d-flex flex-wrap align-items-center gap-2">
               {/* Period quick filter buttons */}
               <div
-                className="btn-group bg-white p-1 rounded-3 border shadow-sm"
+                className="btn-group bg-white p-1 rounded-3 border shadow-sm align-items-center"
                 role="group"
-                style={{ gap: 2 }}
+                style={{ height: "38px", gap: 2 }}
               >
                 {PERIOD_OPTIONS.map((opt) => (
                   <button
@@ -109,7 +109,14 @@ const Dashboard = () => {
                         ? "btn-primary shadow-sm"
                         : "btn-outline-light text-dark border-0"
                     }`}
-                    style={{ fontSize: 12, padding: "6px 14px", fontWeight: 500 }}
+                    style={{
+                      fontSize: 12,
+                      padding: "5px 12px",
+                      fontWeight: 500,
+                      height: "30px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                    }}
                     onClick={() => handlePeriodChange(opt.value)}
                   >
                     {opt.label}
@@ -125,7 +132,7 @@ const Dashboard = () => {
               {/* View Profit Chart Button */}
               <button
                 type="button"
-                className="btn btn-white bg-white border rounded shadow-sm d-inline-flex align-items-center gap-1 px-3 text-dark"
+                className="btn btn-white bg-white border rounded shadow-sm d-inline-flex align-items-center gap-1.5 px-3 text-dark"
                 onClick={() => setShowProfitChartModal(true)}
                 style={{ height: "38px", fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap" }}
                 title="View Profit & Performance Chart"
@@ -144,15 +151,15 @@ const Dashboard = () => {
               background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
               color: "#fff",
               borderRadius: 16,
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.08)",
               boxShadow: "0 8px 30px rgba(15,23,42,0.18)",
-              padding: "24px 28px",
+              padding: "20px 24px",
             }}
           >
-            <div className="row g-4 align-items-center">
+            <div className="row g-4 align-items-stretch">
               {/* Pod 1: Total Gross Profit */}
-              <div className="col-12 col-md-4">
-                <div className="d-flex align-items-center gap-3">
+              <div className="col-12 col-md-4 d-flex">
+                <div className="d-flex align-items-center gap-3 w-100">
                   <div
                     style={{
                       width: 52,
@@ -169,7 +176,7 @@ const Dashboard = () => {
                   >
                     💰
                   </div>
-                  <div>
+                  <div className="d-flex flex-column justify-content-center">
                     <div
                       className="text-uppercase"
                       style={{
@@ -185,7 +192,7 @@ const Dashboard = () => {
                       className="fw-bold mt-1"
                       style={{
                         color: "#34d399",
-                        fontSize: 26,
+                        fontSize: 24,
                         lineHeight: 1.2,
                         letterSpacing: "-0.5px",
                       }}
@@ -195,13 +202,14 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => setShowProfitChartModal(true)}
-                      className="btn btn-sm text-white px-2 py-1 mt-2 d-inline-flex align-items-center gap-1 border-0"
+                      className="btn btn-sm text-white px-2.5 py-1 mt-2 d-inline-flex align-items-center gap-1.5 border-0"
                       style={{
                         background: "rgba(16, 185, 129, 0.2)",
                         borderRadius: 6,
                         fontSize: 11,
                         fontWeight: 600,
                         cursor: "pointer",
+                        width: "fit-content",
                       }}
                     >
                       <Icon name="bar-chart"></Icon>
@@ -212,8 +220,8 @@ const Dashboard = () => {
               </div>
 
               {/* Pod 2: Services Volume */}
-              <div className="col-12 col-md-4 border-start-md" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
-                <div className="d-flex align-items-center gap-3 ps-md-3">
+              <div className="col-12 col-md-4 d-flex exec-dash-pod-divider">
+                <div className="d-flex align-items-center gap-3 ps-md-4 w-100">
                   <div
                     style={{
                       width: 52,
@@ -230,7 +238,7 @@ const Dashboard = () => {
                   >
                     📈
                   </div>
-                  <div>
+                  <div className="d-flex flex-column justify-content-center">
                     <div
                       className="text-uppercase"
                       style={{
@@ -250,13 +258,16 @@ const Dashboard = () => {
                         data?.services_transaction?.all?.successful?.amount || 0
                       )}
                     </div>
+                    <div className="small mt-1" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>
+                      Total platform bill payments
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Pod 3: Successful Transactions */}
-              <div className="col-12 col-md-4 border-start-md" style={{ borderColor: "rgba(255,255,255,0.12)" }}>
-                <div className="d-flex align-items-center gap-3 ps-md-3">
+              <div className="col-12 col-md-4 d-flex exec-dash-pod-divider">
+                <div className="d-flex align-items-center gap-3 ps-md-4 w-100">
                   <div
                     style={{
                       width: 52,
@@ -273,7 +284,7 @@ const Dashboard = () => {
                   >
                     ⚡
                   </div>
-                  <div>
+                  <div className="d-flex flex-column justify-content-center">
                     <div
                       className="text-uppercase"
                       style={{
@@ -295,6 +306,9 @@ const Dashboard = () => {
                         (data?.giftcard_transaction?.sell?.approved?.count || 0)
                       ).toLocaleString()}
                     </div>
+                    <div className="small mt-1" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>
+                      Across all services & trades
+                    </div>
                   </div>
                 </div>
               </div>
@@ -311,8 +325,8 @@ const Dashboard = () => {
               <LoadingSpinner />
             </div>
           ) : (
-            <Row className="g-gs">
-              <Col lg={12}>
+            <div className="d-flex flex-column gap-4">
+              <div>
                 <h5 className="mb-3 d-flex align-items-center gap-2">
                   <span>Total Wallet Transactions</span>
                   <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
@@ -320,25 +334,25 @@ const Dashboard = () => {
                   </Badge>
                 </h5>
                 <WalletStatsSection data={data?.wallet_transaction} />
-              </Col>
+              </div>
 
-              <Col lg={12}>
-                <h5 className="mb-3 d-flex align-items-center gap-2 mt-4">
+              <div>
+                <h5 className="mb-3 d-flex align-items-center gap-2">
                   <span>Total Services Transactions & Profits</span>
                   <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
                     {activePeriodLabel}
                   </Badge>
                 </h5>
                 <ServicesStatsSection data={data?.services_transaction} />
-              </Col>
+              </div>
 
-              <Col lg={12}>
-                <h5 className="mb-3 mt-4">Wallet Balances & User Base</h5>
+              <div>
+                <h5 className="mb-3">Wallet Balances & User Base</h5>
                 <WalletBalances data={data?.wallet_balance} />
-              </Col>
+              </div>
 
-              <Col lg={12}>
-                <h5 className="mb-3 d-flex align-items-center gap-2 mt-4">
+              <div>
+                <h5 className="mb-3 d-flex align-items-center gap-2">
                   <span>Services Breakdown & Net Profit</span>
                   <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
                     {activePeriodLabel}
@@ -349,8 +363,8 @@ const Dashboard = () => {
                   crypto={data?.crypto_transaction}
                   giftcard={data?.giftcard_transaction}
                 />
-              </Col>
-            </Row>
+              </div>
+            </div>
           )}
         </Block>
 

@@ -63,9 +63,9 @@ export const ServicesStatsCard = ({ tradeTypeStat, data }) => {
   ];
 
   return (
-    <Card>
-      <div className="card-inner">
-        <ul className="nk-tranx-statistics">
+    <Card className="h-100">
+      <div className="card-inner h-100 d-flex flex-column justify-content-center py-3">
+        <ul className="nk-tranx-statistics my-auto w-100">
           {statConfigs.map((stat) => (
             <li key={stat.key} className="item">
               <Icon name={stat.icon} className={stat.iconClass}></Icon>
