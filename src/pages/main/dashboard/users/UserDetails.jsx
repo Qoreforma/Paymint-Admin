@@ -29,6 +29,7 @@ import {
   useUpdateUserStatus,
   useMarkAsFraud,
   useBlacklistUser,
+  useUpdateUserType,
 } from "../../../../api/users/user";
 import Content from "../../../../layout/content/Content";
 import Head from "../../../../layout/head/Head";
@@ -36,6 +37,7 @@ import FaqTable from "../faq/faqTable";
 import { TransactionTable } from "../transactions/table";
 import WithdrawalTable from "../wallet/table";
 import AddModal from "./AddModal";
+import UserTypeModal from "./userTypeModal";
 import Details from "./details/details";
 import ReferralUserList from "./details/referral-table";
 import { formatter } from "../../../../utils/Utils";
@@ -122,6 +124,7 @@ const UserDetailsPage = () => {
   const { mutate: updateUserStatus } = useUpdateUserStatus(userId);
   const { mutate: markAsFraud } = useMarkAsFraud(userId);
   const { mutate: toggleBlacklist } = useBlacklistUser(userId);
+  const { mutate: updateUserType } = useUpdateUserType(userId);
 
   const copyAccountDetails = (id, data) => {
     let account = data?.find((item) => item?._id === id);
@@ -226,7 +229,9 @@ const UserDetailsPage = () => {
     <ul className="nk-tb-actions gx-1 my-n1">
       <li>
         <UncontrolledDropdown>
-          {(hasPermission("users.manage_wallet") || hasPermission("users.suspend")) && (
+          {(hasPermission("users.manage_wallet") ||
+            hasPermission("users.suspend") ||
+            hasPermission("users.update")) && (
             <DropdownToggle tag="a" className="btn btn-trigger dropdown-toggle btn-icon me-n1">
               <Icon name="more-v"></Icon>
             </DropdownToggle>
@@ -244,6 +249,20 @@ const UserDetailsPage = () => {
                     }}
                   >
                     <Icon name="tranx-fill" /> <span>Finance User</span>
+                  </DropdownItem>
+                </li>
+              )}
+              {hasPermission("users.update") && (
+                <li>
+                  <DropdownItem
+                    tag="a"
+                    href="#"
+                    onClick={(ev) => {
+                      ev.preventDefault();
+                      toggleModal("userType");
+                    }}
+                  >
+                    <Icon name="user-check-fill" /> <span>Change User Type</span>
                   </DropdownItem>
                 </li>
               )}
@@ -339,12 +358,48 @@ const UserDetailsPage = () => {
 
   const [view, setView] = useState({
     finance: false,
+    userType: false,
   });
 
   const toggleModal = (type) => {
     setView({
-      finance: type === "finance" ? true : false,
+      finance: type === "finance",
+      userType: type === "userType",
     });
+  };
+
+  const userTypeFormData = {
+    userType: user?.data?.user?.userType || "regular",
+    influencerRules: {
+      accountCompletion: {
+        isActive: user?.data?.user?.influencerRules?.accountCompletion?.isActive ?? false,
+        rewardAmount: user?.data?.user?.influencerRules?.accountCompletion?.rewardAmount ?? 0,
+      },
+      firstBillPayment: {
+        isActive: user?.data?.user?.influencerRules?.firstBillPayment?.isActive ?? false,
+        rewardAmount: user?.data?.user?.influencerRules?.firstBillPayment?.rewardAmount ?? 0,
+      },
+      transactionVolume: {
+        isActive: user?.data?.user?.influencerRules?.transactionVolume?.isActive ?? false,
+        rewardAmount: user?.data?.user?.influencerRules?.transactionVolume?.rewardAmount ?? 0,
+        targetVolume: user?.data?.user?.influencerRules?.transactionVolume?.targetVolume ?? 0,
+      },
+      kycCompletion: {
+        isActive: user?.data?.user?.influencerRules?.kycCompletion?.isActive ?? false,
+        rewardAmount: user?.data?.user?.influencerRules?.kycCompletion?.rewardAmount ?? 0,
+      },
+    },
+  };
+
+  const onSubmitUserType = (data) => {
+    const payload = {
+      userType: data.userType,
+    };
+    if (data.userType === "influencer" || data.userType === "micro-influencer") {
+      payload.influencerRules = data.influencerRules;
+    }
+    updateUserType(payload);
+    closeModal();
   };
 
   // resets forms
@@ -356,7 +411,7 @@ const UserDetailsPage = () => {
   };
 
   const closeModal = () => {
-    setView({ finance: false });
+    setView({ finance: false, userType: false });
     resetForm();
 
     setShowAnnouncementModal(false);
@@ -605,6 +660,13 @@ const UserDetailsPage = () => {
           </div>
         </Card>
         <AddModal modal={view.finance} closeModal={closeModal} onSubmit={onFormSubmit} />
+
+        <UserTypeModal
+          modal={view.userType}
+          formData={userTypeFormData}
+          closeModal={closeModal}
+          onSubmit={onSubmitUserType}
+        />
 
         <SendAnnouncementModal
           closeModal={closeModal}

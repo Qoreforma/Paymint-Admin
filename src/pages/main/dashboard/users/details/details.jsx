@@ -173,6 +173,140 @@ const Details = ({ user, isLoading }) => {
 
       <div className="nk-divider divider md"></div>
 
+      {/* ── Influencer Rules Section (shown only for influencer/micro-influencer) ── */}
+      {(user?.data?.user?.userType === "influencer" ||
+        user?.data?.user?.userType === "micro-influencer") && (
+        <>
+          <Block>
+            <BlockHead className="nk-block-head-line">
+              <BlockTitle tag="h4" className="overline-title">
+                Influencer Rules
+              </BlockTitle>
+            </BlockHead>
+            <div className="profile-ud-list">
+
+              {/* Account Completion */}
+              <div className="profile-ud-item">
+                <div className="profile-ud wider">
+                  <span className="profile-ud-label">Account Completion Bonus</span>
+                  <span className="profile-ud-value">
+                    <Badge
+                      className="badge-sm badge-dot has-bg d-none d-sm-inline-flex me-2"
+                      color={
+                        user?.data?.user?.influencerRules?.accountCompletion?.isActive
+                          ? "success"
+                          : "danger"
+                      }
+                    >
+                      <span>
+                        {user?.data?.user?.influencerRules?.accountCompletion?.isActive
+                          ? "Active"
+                          : "Inactive"}
+                      </span>
+                    </Badge>
+                    {user?.data?.user?.influencerRules?.accountCompletion?.rewardAmount != null
+                      ? `₦${user.data.user.influencerRules.accountCompletion.rewardAmount.toLocaleString()}`
+                      : "Not configured"}
+                  </span>
+                </div>
+              </div>
+
+              {/* First Bill Payment */}
+              <div className="profile-ud-item">
+                <div className="profile-ud wider">
+                  <span className="profile-ud-label">First Bill Payment Bonus</span>
+                  <span className="profile-ud-value">
+                    <Badge
+                      className="badge-sm badge-dot has-bg d-none d-sm-inline-flex me-2"
+                      color={
+                        user?.data?.user?.influencerRules?.firstBillPayment?.isActive
+                          ? "success"
+                          : "danger"
+                      }
+                    >
+                      <span>
+                        {user?.data?.user?.influencerRules?.firstBillPayment?.isActive
+                          ? "Active"
+                          : "Inactive"}
+                      </span>
+                    </Badge>
+                    {user?.data?.user?.influencerRules?.firstBillPayment?.rewardAmount != null
+                      ? `₦${user.data.user.influencerRules.firstBillPayment.rewardAmount.toLocaleString()}`
+                      : "Not configured"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Transaction Volume */}
+              <div className="profile-ud-item">
+                <div className="profile-ud wider">
+                  <span className="profile-ud-label">Transaction Volume Bonus</span>
+                  <span className="profile-ud-value">
+                    <Badge
+                      className="badge-sm badge-dot has-bg d-none d-sm-inline-flex me-2"
+                      color={
+                        user?.data?.user?.influencerRules?.transactionVolume?.isActive
+                          ? "success"
+                          : "danger"
+                      }
+                    >
+                      <span>
+                        {user?.data?.user?.influencerRules?.transactionVolume?.isActive
+                          ? "Active"
+                          : "Inactive"}
+                      </span>
+                    </Badge>
+                    {user?.data?.user?.influencerRules?.transactionVolume?.rewardAmount != null ? (
+                      <>
+                        Reward:{" "}
+                        <strong>
+                          ₦{user.data.user.influencerRules.transactionVolume.rewardAmount.toLocaleString()}
+                        </strong>
+                        {" | Target Vol.: "}
+                        <strong>
+                          ₦{(user?.data?.user?.influencerRules?.transactionVolume?.targetVolume ?? 0).toLocaleString()}
+                        </strong>
+                      </>
+                    ) : (
+                      "Not configured"
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {/* KYC Completion */}
+              <div className="profile-ud-item">
+                <div className="profile-ud wider">
+                  <span className="profile-ud-label">KYC Completion Bonus</span>
+                  <span className="profile-ud-value">
+                    <Badge
+                      className="badge-sm badge-dot has-bg d-none d-sm-inline-flex me-2"
+                      color={
+                        user?.data?.user?.influencerRules?.kycCompletion?.isActive
+                          ? "success"
+                          : "danger"
+                      }
+                    >
+                      <span>
+                        {user?.data?.user?.influencerRules?.kycCompletion?.isActive
+                          ? "Active"
+                          : "Inactive"}
+                      </span>
+                    </Badge>
+                    {user?.data?.user?.influencerRules?.kycCompletion?.rewardAmount != null
+                      ? `₦${user.data.user.influencerRules.kycCompletion.rewardAmount.toLocaleString()}`
+                      : "Not configured"}
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </Block>
+
+          <div className="nk-divider divider md"></div>
+        </>
+      )}
+
       <Block>
         <BlockHead className="nk-block-head-line">
           <BlockTitle tag="h4" className="overline-title">

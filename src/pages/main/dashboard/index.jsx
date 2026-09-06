@@ -106,11 +106,10 @@ const Dashboard = () => {
                     <button
                       key={opt.value}
                       type="button"
-                      className={`btn btn-xs rounded-2 ${
-                        period === opt.value && !hasCustomDate
-                          ? "btn-primary shadow-sm"
-                          : "btn-outline-light text-dark border-0"
-                      }`}
+                      className={`btn btn-xs rounded-2 ${period === opt.value && !hasCustomDate
+                        ? "btn-primary shadow-sm"
+                        : "btn-outline-light text-dark border-0"
+                        }`}
                       style={{
                         fontSize: 12,
                         padding: "5px 12px",
@@ -149,17 +148,21 @@ const Dashboard = () => {
           {/* Highlight Gross Profit Banner */}
           <div className="mb-4">
             <div
-              className="exec-kpi-banner"
+              className="exec-kpi-banner d-flex align-items-center"
               style={{
                 background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
                 color: "#fff",
                 borderRadius: 16,
                 border: "1px solid rgba(255,255,255,0.08)",
                 boxShadow: "0 8px 30px rgba(15,23,42,0.18)",
-                padding: "20px",
+                padding: "30px",
+                minHeight: "120px",
               }}
             >
-              <div className="row g-4 align-items-stretch">
+              <div className="row g-4 align-items-stretch"
+                style={{
+                  width: "100%"
+                }}>
                 {/* Pod 1: Total Gross Profit */}
                 <div className="col-12 col-md-4 d-flex">
                   <div className="d-flex align-items-center gap-3 w-100">
@@ -317,15 +320,15 @@ const Dashboard = () => {
           {/* Yesterday vs Today Performance Pulse */}
           <YesterdayVsTodayCard data={data?.comparison} isLoading={isLoading} />
 
-          <Block>
+          <div style={{ height: "fit-content" }}>
             {isLoading ? (
               <div className="text-center py-5">
                 <LoadingSpinner />
               </div>
             ) : (
-              <div className="d-flex flex-column gap-4">
+              <div className="d-flex flex-column gap-4" style={{ height: "fit-content" }}>
                 <div>
-                  <h5 className="mb-3 d-flex align-items-center gap-2">
+                  <h5 className="mb-3 d-flex align-items-center gap-2" style={{ height: "fit-content" }}>
                     <span>Total Wallet Transactions</span>
                     <Badge color="light" className="text-muted fw-normal" style={{ fontSize: 11 }}>
                       {activePeriodLabel}
@@ -364,7 +367,7 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
-          </Block>
+          </div>
 
           {/* Profit Chart Modal */}
           <ProfitChartModal

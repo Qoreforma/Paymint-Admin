@@ -47,6 +47,7 @@ const DataEpinTransactionsPage = () => {
           purpose={"Data Epin"}
           data={data?.data}
           isLoading={isLoading}
+          showType
         />
       </Content>
     </React.Fragment>

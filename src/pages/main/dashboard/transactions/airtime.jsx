@@ -41,7 +41,7 @@ const AirtimeTransactionsPage = () => {
           </BlockBetween>
         </BlockHead>
 
-        <ServiceTransactionTable showStats type="airtime" purpose={"Airtime"} data={data?.data} isLoading={isLoading} />
+        <ServiceTransactionTable showStats type="airtime" purpose={"Airtime"} data={data?.data} isLoading={isLoading} showType />
       </Content>
     </React.Fragment>
   );

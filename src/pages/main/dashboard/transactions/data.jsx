@@ -41,7 +41,7 @@ const DataTransactionsPage = () => {
           </BlockBetween>
         </BlockHead>
 
-        <ServiceTransactionTable showStats type="data" purpose={"Data"} data={data?.data} isLoading={isLoading} />
+        <ServiceTransactionTable showStats type="data" purpose={"Data"} data={data?.data} isLoading={isLoading} showType />
       </Content>
     </React.Fragment>
   );

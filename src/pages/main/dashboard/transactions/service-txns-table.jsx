@@ -50,6 +50,116 @@ import { WalletAmountStatsCard } from "../wallet/stats-card";
 import DateRangeFilter from "../tables/date-range-filter";
 import TransactionChartModal from "./TransactionChartModal";
 
+export const formatTransactionType = (serviceNameOrNetwork, rawType) => {
+  if (!rawType && !serviceNameOrNetwork) return "-";
+
+  const formatTypeName = (t) => {
+    if (!t) return "";
+    switch (t.toLowerCase()) {
+      case "airtime_epin":
+        return "Airtime E-PIN";
+      case "data_epin":
+        return "Data E-PIN";
+      case "airtime_cash":
+        return "Airtime To Cash";
+      case "internationalairtime":
+        return "Int. Airtime";
+      case "internationaldata":
+        return "Int. Data";
+      case "cable_tv":
+        return "Cable TV";
+      default:
+        return t
+          .split(/[_\s]+/)
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(" ");
+    }
+  };
+
+  const typeStr = formatTypeName(rawType);
+  const prefixStr = (serviceNameOrNetwork || "").trim();
+
+  if (!prefixStr) return typeStr;
+  if (!typeStr) return prefixStr;
+
+  const prefixLower = prefixStr.toLowerCase();
+  const typeWords = typeStr.split(/[\s-]+/);
+
+  // Filter out words from type that are already present in prefix (e.g. "Airtime", "Data")
+  const remainingTypeWords = typeWords.filter(
+    (word) => !prefixLower.includes(word.toLowerCase())
+  );
+
+  if (remainingTypeWords.length === 0) {
+    return prefixStr;
+  }
+
+  // If some words remain (e.g. "E-PIN" from "Airtime E-PIN"), join with hyphen
+  const remainingSuffix = remainingTypeWords.join(" ");
+  return `${prefixStr} - ${remainingSuffix}`;
+};
+
+export const getProviderDisplay = (item) => {
+  const p = (item?.provider || "").trim();
+  const sName = (item?.meta?.serviceName || "").toLowerCase().trim();
+  const sCode = (item?.meta?.serviceCode || "").toLowerCase().trim();
+  const net = (item?.meta?.network || "").toLowerCase().trim();
+  const pLower = p.toLowerCase();
+
+  // Known real providers
+  const knownProviders = [
+    "pairgate",
+    "clubkonnect",
+    "coolsub",
+    "bilalsadasub",
+    "vtpass",
+    "shago",
+    "safehaven",
+    "monnify",
+    "flutterwave",
+    "paystack",
+  ];
+  if (knownProviders.includes(pLower)) {
+    return p;
+  }
+
+  // Check if provider is wrongly carrying the service name, network, or service code
+  const isErroneous =
+    !p ||
+    (sName && pLower === sName) ||
+    (sCode && pLower === sCode) ||
+    (net && pLower === net) ||
+    pLower.includes("airtime") ||
+    pLower.includes("data");
+
+  if (isErroneous) {
+    // Try to extract actual provider from metadata
+    const metaProvider =
+      item?.meta?.providerResponse?.providerCode ||
+      item?.meta?.providerResponse?.provider ||
+      item?.meta?.providerCode ||
+      item?.meta?.provider?.code ||
+      item?.meta?.provider?.name ||
+      item?.meta?.serviceProvider?.code ||
+      item?.meta?.serviceProvider?.name;
+
+    if (
+      metaProvider &&
+      !metaProvider.toLowerCase().includes("airtime") &&
+      !metaProvider.toLowerCase().includes("data")
+    ) {
+      return metaProvider;
+    }
+
+    // If it's an EPIN transaction, Pairgate is the primary EPIN processor
+    if (item?.type === "airtime_epin" || item?.type === "data_epin") {
+      return "Pairgate";
+    }
+  }
+
+  return p || "-";
+};
+
 export const ServiceTransactionTable = ({
   type,
   purpose,
@@ -57,7 +167,7 @@ export const ServiceTransactionTable = ({
   isLoading,
   showStats,
   hideFilter = false,
-  showType = false,
+  showType = true,
 }) => {
   const { hasPermission } = usePermission();
 
@@ -586,18 +696,15 @@ export const ServiceTransactionTable = ({
                             <span className="text-capitalize">{formatter("NGN").format(item?.balanceAfter)}</span>
                           </DataTableRow>
                           <DataTableRow size="md">
-                            <span className="text-capitalize"> {item?.provider}</span>
+                            <span className="text-capitalize">{getProviderDisplay(item)}</span>
                           </DataTableRow>
                           {showType && (
                             <DataTableRow size="md">
                               <span className="text-capitalize">
-                                {" "}
-                                {item?.meta?.serviceName || item?.meta?.network ? `${item?.meta?.serviceName || item?.meta?.network} - ` : ""}
-                                {item?.type === "internationalairtime"
-                                  ? "Int.Airtime"
-                                  : item?.type === "internationaldata"
-                                    ? "Int.Data"
-                                    : item?.type?.replaceAll("_", " ")}
+                                {formatTransactionType(
+                                  item?.meta?.serviceName || item?.meta?.network,
+                                  item?.type,
+                                )}
                               </span>
                             </DataTableRow>
                           )}
@@ -830,7 +937,7 @@ export const ServiceTransactionTable = ({
               </Col>
               <Col lg={4}>
                 <span className="sub-text">Provider</span>
-                <span className="caption-text ccap">{formData.provider}</span>
+                <span className="caption-text ccap">{getProviderDisplay(formData)}</span>
               </Col>
               <Col lg={4}>
                 <span className="sub-text">Status</span>

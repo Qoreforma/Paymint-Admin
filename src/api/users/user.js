@@ -253,35 +253,39 @@ export const useUpdateUserType = (id) => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    (data) =>
-      toast.promise(
+    (data) => {
+      const targetId = data?.targetUserId || id;
+      const payload = { ...data };
+      delete payload.targetUserId;
+
+      return toast.promise(
         instance
-          .post(BACKEND_URLS.users + `/${id}/type`, data)
+          .put(BACKEND_URLS.users + `/${targetId}/user-type`, payload)
           .then((res) => res.data)
           .catch((err) => {
             throw err;
           }),
         {
-          success: (data) => data?.message || "Successful",
-          // success: `Store status updated.`,
+          success: (data) => data?.message || "User type updated",
           loading: "Please wait...",
-          error: "Something happened",
+          error: (e) => e?.response?.data?.message || "Something happened",
         },
         {
           style: {
             minWidth: "180px",
           },
         },
-      ),
+      );
+    },
     {
       onSuccess: (data) => {
-        // console.log(data);
         queryClient.invalidateQueries(["getAllUsers"]);
         queryClient.invalidateQueries(["getSingleUser"]);
       },
     },
   );
 };
+
 
 export const useGetUserType = () => {
   return useQuery(

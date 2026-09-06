@@ -127,10 +127,13 @@ const UserList = () => {
   });
 
   const [formData, setFormData] = useState({
-    name: "",
-    status: "",
-    type: "",
-    referral_earning_rate: "",
+    userType: "regular",
+    influencerRules: {
+      accountCompletion: { isActive: false, rewardAmount: 0 },
+      firstBillPayment: { isActive: false, rewardAmount: 0 },
+      transactionVolume: { isActive: false, rewardAmount: 0, targetVolume: 0 },
+      kycCompletion: { isActive: false, rewardAmount: 0 },
+    },
   });
 
   const hasCustomDate = Boolean(startDate && endDate);
@@ -183,15 +186,31 @@ const UserList = () => {
     );
   };
 
-  // function that loads the want to editted data
+  // function that loads the data of the user to be edited
   const onEditClick = (id) => {
     users?.data?.forEach((item) => {
       if (item?._id === id) {
         setFormData({
-          name: item?.name,
-          status: item?.status,
-          type: item?.type,
-          referral_earning_rate: item?.referral_earning_rate,
+          userType: item?.userType || "regular",
+          influencerRules: {
+            accountCompletion: {
+              isActive: item?.influencerRules?.accountCompletion?.isActive ?? false,
+              rewardAmount: item?.influencerRules?.accountCompletion?.rewardAmount ?? 0,
+            },
+            firstBillPayment: {
+              isActive: item?.influencerRules?.firstBillPayment?.isActive ?? false,
+              rewardAmount: item?.influencerRules?.firstBillPayment?.rewardAmount ?? 0,
+            },
+            transactionVolume: {
+              isActive: item?.influencerRules?.transactionVolume?.isActive ?? false,
+              rewardAmount: item?.influencerRules?.transactionVolume?.rewardAmount ?? 0,
+              targetVolume: item?.influencerRules?.transactionVolume?.targetVolume ?? 0,
+            },
+            kycCompletion: {
+              isActive: item?.influencerRules?.kycCompletion?.isActive ?? false,
+              rewardAmount: item?.influencerRules?.kycCompletion?.rewardAmount ?? 0,
+            },
+          },
         });
       }
     });
@@ -209,12 +228,16 @@ const UserList = () => {
   };
 
   const onSubmitUserType = (data) => {
-    // console.log(data);
-    let submittedData = {
-      type: data.type,
-      referral_earning_rate: data.referral_earning_rate,
+    // Build the payload expected by the backend updateUserType endpoint
+    const payload = {
+      targetUserId: userId,
+      userType: data.userType,
     };
-    updateUserType(submittedData);
+    // Only include influencerRules when the type warrants it
+    if (data.userType === "influencer" || data.userType === "micro-influencer") {
+      payload.influencerRules = data.influencerRules;
+    }
+    updateUserType(payload);
     closeModal();
   };
 
@@ -231,8 +254,13 @@ const UserList = () => {
   // resets forms
   const resetForm = () => {
     setFormData({
-      name: "",
-      status: "",
+      userType: "regular",
+      influencerRules: {
+        accountCompletion: { isActive: false, rewardAmount: 0 },
+        firstBillPayment: { isActive: false, rewardAmount: 0 },
+        transactionVolume: { isActive: false, rewardAmount: 0, targetVolume: 0 },
+        kycCompletion: { isActive: false, rewardAmount: 0 },
+      },
     });
   };
 
@@ -816,6 +844,23 @@ const UserList = () => {
                                         >
                                           <Icon name="tranx-fill"></Icon>
                                           <span>Finance User</span>
+                                        </DropdownItem>
+                                      </li>
+                                    )}
+                                    {hasPermission("users.update") && (
+                                      <li>
+                                        <DropdownItem
+                                          tag="a"
+                                          href="#type"
+                                          onClick={(ev) => {
+                                            ev.preventDefault();
+                                            setUserId(item?._id);
+                                            onEditClick(item?._id);
+                                            toggleModal("userType");
+                                          }}
+                                        >
+                                          <Icon name="user-check-fill"></Icon>
+                                          <span>Change User Type</span>
                                         </DropdownItem>
                                       </li>
                                     )}
