@@ -215,35 +215,71 @@ export const useMarkAsFraud = (id) => {
   );
 };
 
-export const useFinanceUser = (id) => {
-  const queryClient = useQueryClient();
-
+export const useSendWalletOtp = (id) => {
   return useMutation(
-    (data) =>
-      toast.promise(
+    (data) => {
+      const targetId = data?.userId || id;
+      return toast.promise(
         instance
-          .post(BACKEND_URLS.users + `/${id}/wallet/debit`, data)
+          .post(BACKEND_URLS.users + `/${targetId}/wallet/send-otp`, {
+            amount: Number(data.amount),
+            type: data.type,
+          })
           .then((res) => res.data)
           .catch((err) => {
             throw err;
           }),
         {
-          success: (data) => data?.message || "Successful",
-          // success: `Store status updated.`,
-          loading: "Please wait...",
-          error: "Something happened",
+          success: (res) => res?.message || "OTP code sent to your registered email address.",
+          loading: "Sending authorization OTP...",
+          error: (err) => err?.response?.data?.message || err?.message || "Failed to send OTP",
         },
         {
           style: {
             minWidth: "180px",
           },
         },
-      ),
+      );
+    },
+  );
+};
+
+export const useFinanceUser = (id) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (data) => {
+      const targetId = data?.userId || id;
+      const targetType = data?.type || "credit";
+      return toast.promise(
+        instance
+          .post(BACKEND_URLS.users + `/${targetId}/wallet/${targetType}`, {
+            amount: Number(data.amount),
+            type: targetType,
+            remark: data.remark,
+            otp: data.otp,
+          })
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err;
+          }),
+        {
+          success: (res) => res?.message || "Wallet updated successfully",
+          loading: "Processing wallet action...",
+          error: (err) => err?.response?.data?.message || err?.message || "Operation failed",
+        },
+        {
+          style: {
+            minWidth: "180px",
+          },
+        },
+      );
+    },
     {
-      onSuccess: (data) => {
-        // console.log(data);
+      onSuccess: () => {
         queryClient.invalidateQueries(["getAllUsers"]);
         queryClient.invalidateQueries(["getSingleUser"]);
+        queryClient.invalidateQueries(["getWalletTransactions"]);
       },
     },
   );

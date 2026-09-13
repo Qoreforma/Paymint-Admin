@@ -347,12 +347,7 @@ const UserDetailsPage = () => {
     </ul>
   );
 
-  const onFormSubmit = (data) => {
-    let submittedData = {
-      ...data,
-      type: data.type.value,
-    };
-    financeUser(submittedData);
+  const onFormSubmit = () => {
     closeModal();
   };
 
@@ -659,7 +654,7 @@ const UserDetailsPage = () => {
             </div>
           </div>
         </Card>
-        <AddModal modal={view.finance} closeModal={closeModal} onSubmit={onFormSubmit} />
+        <AddModal modal={view.finance} closeModal={closeModal} userId={userId} onSubmit={onFormSubmit} />
 
         <UserTypeModal
           modal={view.userType}

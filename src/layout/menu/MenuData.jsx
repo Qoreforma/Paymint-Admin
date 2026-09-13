@@ -231,6 +231,12 @@ const menu = [
     // show: ["alerts", "announcement", "faqs", "referral-terms", "all"],
   },
   {
+    icon: "send-alt",
+    text: "Email Campaigns",
+    link: "/email-campaigns",
+    permission: "all",
+  },
+  {
     icon: "inbox-fill",
     text: "Announcement",
     link: "/announcement",

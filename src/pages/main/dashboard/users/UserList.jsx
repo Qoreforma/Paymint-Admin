@@ -217,13 +217,8 @@ const UserList = () => {
     setUserId(id);
   };
 
-  // Finance user form submit
-  const onFormSubmit = (data) => {
-    let submittedData = {
-      ...data,
-      type: data.type.value,
-    };
-    financeUser(submittedData);
+  // Finance user form submit completion
+  const onFormSubmit = () => {
     closeModal();
   };
 
@@ -934,7 +929,7 @@ const UserList = () => {
             )}
           </DataTable>
         </Block>
-        <AddModal modal={view.finance} closeModal={closeModal} onSubmit={onFormSubmit} />
+        <AddModal modal={view.finance} closeModal={closeModal} userId={userId} onSubmit={onFormSubmit} />
 
         <UserTypeModal
           modal={view.userType}
