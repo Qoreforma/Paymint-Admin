@@ -109,6 +109,99 @@ const RuleCard = ({ ruleKey, label, register, errors, watch, hasTargetVolume = f
 };
 
 /**
+ * Rule configuration card for the invited user's first-transaction welcome cashback.
+ */
+const RefereeRuleCard = ({ register, errors, watch }) => {
+  const isActive = watch("influencerRules.refereeFirstTransaction.isActive");
+
+  return (
+    <div
+      style={{
+        border: "1px solid #c7d2fe",
+        borderRadius: "6px",
+        padding: "12px 16px",
+        marginBottom: "12px",
+        background: isActive ? "#eff6ff" : "#fafafa",
+      }}
+    >
+      <div className="d-flex align-items-center justify-content-between mb-1">
+        <div>
+          <label className="form-label mb-0" style={{ fontWeight: 600, fontSize: "13px", color: "#1e3a8a" }}>
+            🎁 Referee First-Transaction Welcome Offer
+          </label>
+          <div style={{ fontSize: "11px", color: "#64748b" }}>
+            Credited to the referred user's bonus balance upon completing their 1st transaction.
+          </div>
+        </div>
+        <div className="form-check form-switch ms-2">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id="refereeFirstTransaction-active"
+            {...register("influencerRules.refereeFirstTransaction.isActive")}
+          />
+          <label className="form-check-label" htmlFor="refereeFirstTransaction-active">
+            {isActive ? "Active" : "Inactive"}
+          </label>
+        </div>
+      </div>
+
+      <div className="row g-2 mt-1">
+        <div className="col-6">
+          <label className="form-label" style={{ fontSize: "12px" }}>
+            Cashback Percentage (%)
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="100"
+            step="1"
+            placeholder="10"
+            className={`form-control form-control-sm ${
+              errors?.influencerRules?.refereeFirstTransaction?.discountPercentage ? "is-invalid" : ""
+            }`}
+            {...register("influencerRules.refereeFirstTransaction.discountPercentage", {
+              valueAsNumber: true,
+              min: { value: 1, message: "Min 1%" },
+              max: { value: 100, message: "Max 100%" },
+            })}
+          />
+          {errors?.influencerRules?.refereeFirstTransaction?.discountPercentage && (
+            <span className="invalid-feedback">
+              {errors.influencerRules.refereeFirstTransaction.discountPercentage.message}
+            </span>
+          )}
+        </div>
+
+        <div className="col-6">
+          <label className="form-label" style={{ fontSize: "12px" }}>
+            Max Cap (₦)
+          </label>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            placeholder="200"
+            className={`form-control form-control-sm ${
+              errors?.influencerRules?.refereeFirstTransaction?.cap ? "is-invalid" : ""
+            }`}
+            {...register("influencerRules.refereeFirstTransaction.cap", {
+              valueAsNumber: true,
+              min: { value: 0, message: "Must be ≥ 0" },
+            })}
+          />
+          {errors?.influencerRules?.refereeFirstTransaction?.cap && (
+            <span className="invalid-feedback">
+              {errors.influencerRules.refereeFirstTransaction.cap.message}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
  * UserTypeModal
  *
  * Allows an admin to change a user's type and — when the type is
@@ -150,6 +243,11 @@ const UserTypeModal = ({ modal, closeModal, onSubmit, formData, setFormData }) =
           isActive: false,
           rewardAmount: 0,
         },
+        refereeFirstTransaction: {
+          isActive: false,
+          discountPercentage: 10,
+          cap: 200,
+        },
       },
     },
   });
@@ -179,6 +277,11 @@ const UserTypeModal = ({ modal, closeModal, onSubmit, formData, setFormData }) =
           kycCompletion: {
             isActive: formData.influencerRules?.kycCompletion?.isActive ?? false,
             rewardAmount: formData.influencerRules?.kycCompletion?.rewardAmount ?? 0,
+          },
+          refereeFirstTransaction: {
+            isActive: formData.influencerRules?.refereeFirstTransaction?.isActive ?? false,
+            discountPercentage: formData.influencerRules?.refereeFirstTransaction?.discountPercentage ?? 10,
+            cap: formData.influencerRules?.refereeFirstTransaction?.cap ?? 200,
           },
         },
       });
@@ -220,6 +323,15 @@ const UserTypeModal = ({ modal, closeModal, onSubmit, formData, setFormData }) =
           rewardAmount: Number.isNaN(Number(rules.kycCompletion?.rewardAmount))
             ? 0
             : Number(rules.kycCompletion?.rewardAmount),
+        },
+        refereeFirstTransaction: {
+          isActive: Boolean(rules.refereeFirstTransaction?.isActive),
+          discountPercentage: Number.isNaN(Number(rules.refereeFirstTransaction?.discountPercentage))
+            ? 10
+            : Number(rules.refereeFirstTransaction?.discountPercentage),
+          cap: Number.isNaN(Number(rules.refereeFirstTransaction?.cap))
+            ? 200
+            : Number(rules.refereeFirstTransaction?.cap),
         },
       };
     }
@@ -329,6 +441,12 @@ const UserTypeModal = ({ modal, closeModal, onSubmit, formData, setFormData }) =
                   <RuleCard
                     ruleKey="kycCompletion"
                     label="KYC Completion Bonus"
+                    register={register}
+                    errors={errors}
+                    watch={watch}
+                  />
+
+                  <RefereeRuleCard
                     register={register}
                     errors={errors}
                     watch={watch}

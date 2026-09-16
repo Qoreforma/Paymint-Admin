@@ -133,6 +133,7 @@ const UserList = () => {
       firstBillPayment: { isActive: false, rewardAmount: 0 },
       transactionVolume: { isActive: false, rewardAmount: 0, targetVolume: 0 },
       kycCompletion: { isActive: false, rewardAmount: 0 },
+      refereeFirstTransaction: { isActive: false, discountPercentage: 10, cap: 200 },
     },
   });
 
@@ -209,6 +210,11 @@ const UserList = () => {
             kycCompletion: {
               isActive: item?.influencerRules?.kycCompletion?.isActive ?? false,
               rewardAmount: item?.influencerRules?.kycCompletion?.rewardAmount ?? 0,
+            },
+            refereeFirstTransaction: {
+              isActive: item?.influencerRules?.refereeFirstTransaction?.isActive ?? false,
+              discountPercentage: item?.influencerRules?.refereeFirstTransaction?.discountPercentage ?? 10,
+              cap: item?.influencerRules?.refereeFirstTransaction?.cap ?? 200,
             },
           },
         });

@@ -383,6 +383,11 @@ const UserDetailsPage = () => {
         isActive: user?.data?.user?.influencerRules?.kycCompletion?.isActive ?? false,
         rewardAmount: user?.data?.user?.influencerRules?.kycCompletion?.rewardAmount ?? 0,
       },
+      refereeFirstTransaction: {
+        isActive: user?.data?.user?.influencerRules?.refereeFirstTransaction?.isActive ?? false,
+        discountPercentage: user?.data?.user?.influencerRules?.refereeFirstTransaction?.discountPercentage ?? 10,
+        cap: user?.data?.user?.influencerRules?.refereeFirstTransaction?.cap ?? 200,
+      },
     },
   };
 
