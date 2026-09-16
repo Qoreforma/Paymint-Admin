@@ -1,0 +1,450 @@
+/* ============================================================
+   EMAIL CAMPAIGNS & PERFORMANCE STYLESHEET
+   ============================================================ */
+
+/* ── PAGE HEADER ─────────────────────────────────────────── */
+.campaign-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-light, #e5eaf3);
+}
+
+@media (min-width: 768px) {
+  .campaign-page-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.campaign-header-title h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.campaign-header-title p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-bottom: 0;
+  max-width: 680px;
+  line-height: 1.5;
+}
+
+.campaign-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.campaign-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  padding: 0.45rem 0.9rem !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease-in-out !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+
+.campaign-btn-primary {
+  background: var(--brand-primary, #0f3dac) !important;
+  border: 1px solid var(--brand-primary, #0f3dac) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(15, 61, 172, 0.25) !important;
+}
+
+.campaign-btn-primary:hover {
+  background: var(--brand-dark, #0a2d82) !important;
+  border-color: var(--brand-dark, #0a2d82) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 61, 172, 0.35) !important;
+}
+
+.campaign-btn-outline {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+.campaign-btn-outline:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+/* ── SWEEP BANNER ────────────────────────────────────────── */
+.campaign-sweep-card {
+  background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+  border: 1px solid #bbf7d0 !important;
+  border-radius: 12px !important;
+  padding: 1.1rem 1.35rem !important;
+  margin-bottom: 1.5rem !important;
+  box-shadow: 0 2px 10px rgba(22, 163, 74, 0.06) !important;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 992px) {
+  .campaign-sweep-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.campaign-sweep-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #bbf7d0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.campaign-sweep-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #166534;
+}
+
+.campaign-sweep-desc {
+  font-size: 0.8125rem;
+  color: #475569;
+  margin-top: 0.35rem;
+  line-height: 1.5;
+}
+
+/* ── METRIC STAT CARDS ───────────────────────────────────── */
+.campaign-stat-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease-in-out;
+}
+
+.campaign-stat-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(15, 61, 172, 0.08);
+  border-color: #cbd5e1;
+}
+
+.campaign-stat-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 0.4rem;
+}
+
+.campaign-stat-number {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.15;
+  margin-bottom: 0.45rem;
+}
+
+.campaign-stat-number small {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-left: 0.35rem;
+}
+
+.campaign-progress-bar {
+  height: 7px;
+  background-color: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 0.5rem 0 0.4rem 0;
+}
+
+.campaign-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0f3dac 0%, #3b82f6 100%);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.campaign-stat-meta {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+  line-height: 1.4;
+}
+
+/* ── SECTION CARDS & DATABASE GRID ──────────────────────── */
+.campaign-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.campaign-section-title h5 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0;
+}
+
+.campaign-audience-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.campaign-audience-card:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 4px 14px rgba(15, 61, 172, 0.08);
+}
+
+/* ── CAMPAIGNS TABLE CARD & UNIFIED TOOLBAR ──────────────── */
+.campaign-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+  overflow: visible !important;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 5;
+}
+
+.campaign-table-header {
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+@media (min-width: 992px) {
+  .campaign-table-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.campaign-table-header-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.campaign-table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.campaign-search-input-wrap {
+  position: relative;
+  min-width: 240px;
+}
+
+.campaign-search-input-wrap .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.campaign-search-input {
+  width: 100%;
+  padding: 0.42rem 0.75rem 0.42rem 2.1rem !important;
+  font-size: 0.8125rem !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  background: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.campaign-search-input:focus {
+  border-color: var(--brand-primary, #0f3dac) !important;
+  box-shadow: 0 0 0 3px rgba(15, 61, 172, 0.1) !important;
+  outline: none;
+}
+
+.campaign-filter-tabs {
+  display: inline-flex;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.campaign-filter-tab {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #475569;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.campaign-filter-tab:hover {
+  color: #0f172a;
+}
+
+.campaign-filter-tab.active {
+  background: #ffffff;
+  color: var(--brand-primary, #0f3dac);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ── EMPTY STATES ────────────────────────────────────────── */
+.campaign-empty-state {
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+  background: #ffffff;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.campaign-empty-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.campaign-empty-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.35rem;
+}
+
+.campaign-empty-text {
+  font-size: 0.85rem;
+  color: #64748b;
+  max-width: 440px;
+  margin: 0 auto 1.25rem auto;
+  line-height: 1.5;
+}
+
+/* ── TABLE ROWS & HEADERS ────────────────────────────────── */
+.campaign-table {
+  margin-bottom: 0 !important;
+  width: 100%;
+}
+
+.campaign-table thead th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 0.85rem 1rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  vertical-align: middle !important;
+}
+
+.campaign-table tbody td {
+  padding: 0.9rem 1rem !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  vertical-align: middle !important;
+  font-size: 0.8125rem;
+}
+
+.campaign-table tbody tr:hover td {
+  background-color: #f8fafc !important;
+}
+
+/* ── MODAL ENHANCEMENTS ──────────────────────────────────── */
+.campaign-modal-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.1rem;
+  margin-bottom: 1.25rem;
+}
+
+.campaign-slice-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: border-color 0.15s;
+}
+
+.campaign-slice-row:hover {
+  border-color: #cbd5e1;
+}
+
+.campaign-tag-chip {
+  padding: 0.25rem 0.6rem !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #334155 !important;
+  cursor: pointer !important;
+  transition: all 0.12s ease !important;
+}
+
+.campaign-tag-chip:hover {
+  border-color: var(--brand-primary, #0f3dac) !important;
+  color: var(--brand-primary, #0f3dac) !important;
+  background: #f0f7ff !important;
+}

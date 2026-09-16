@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import Content from "../../../../layout/content/Content";
 import Head from "../../../../layout/head/Head";
+import "./campaigns.css";
 import {
   Block,
   BlockBetween,
@@ -531,117 +532,111 @@ const CampaignsPage = () => {
     <>
       <Head title="Email Campaigns & Content Editor"></Head>
       <Content>
-        {/* Page Header */}
-        <BlockHead size="sm">
-          <BlockBetween>
-            <BlockHeadContent>
-              <BlockTitle page>Email Campaigns & Performance</BlockTitle>
-              <BlockDes className="text-soft">
-                Multi-database campaign engine. Slice quotas across JSON datasets, customize email copy with banners & dynamic tags, and monitor conversion ROI.
-              </BlockDes>
-            </BlockHeadContent>
-            <BlockHeadContent>
-              <div className="toggle-wrap nk-block-tools-toggle d-flex flex-wrap gap-2">
-                <Button
-                  color="light"
-                  outline
-                  size="sm"
-                  onClick={() => setShowCharts(!showCharts)}
-                  className="d-flex align-items-center gap-1"
+        {/* Modern Page Header */}
+        <div className="campaign-page-header">
+          <div className="campaign-header-title">
+            <h2>Email Campaigns & Performance</h2>
+            <p>
+              Multi-database campaign engine. Slice quotas across JSON datasets, customize email copy with banners & dynamic tags, and monitor conversion ROI.
+            </p>
+          </div>
+          <div className="campaign-header-actions">
+            <button
+              type="button"
+              onClick={() => setShowCharts(!showCharts)}
+              className="campaign-btn campaign-btn-outline"
+            >
+              <Icon name={showCharts ? "eye-off" : "bar-chart"} />
+              <span>{showCharts ? "Hide Chart" : "Show Comparison Chart"}</span>
+            </button>
+
+            <UncontrolledDropdown>
+              <DropdownToggle
+                tag="button"
+                className="campaign-btn campaign-btn-outline"
+              >
+                <Icon name="setting" />
+                <span>Data Cleanup</span>
+                <Icon name="chevron-down" className="ms-1" style={{ fontSize: "10px" }} />
+              </DropdownToggle>
+              <DropdownMenu end style={{ zIndex: 1060 }}>
+                <DropdownItem
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Are you sure you want to reset contact history for ALL datasets? All contacts will be marked uncontacted and available for new campaigns."
+                      )
+                    ) {
+                      resetAudience("all");
+                    }
+                  }}
                 >
-                  <Icon name={showCharts ? "eye-off" : "bar-chart"} />
-                  <span>{showCharts ? "Hide Chart" : "Show Comparison Chart"}</span>
-                </Button>
-
-                <UncontrolledDropdown>
-                  <DropdownToggle tag="a" className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1">
-                    <Icon name="setting" />
-                    <span>Data Cleanup</span>
-                  </DropdownToggle>
-                  <DropdownMenu end>
-                    <DropdownItem
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Are you sure you want to reset contact history for ALL datasets? All contacts will be marked uncontacted and available for new campaigns."
-                          )
-                        ) {
-                          resetAudience("all");
-                        }
-                      }}
-                    >
-                      <Icon name="reload" className="me-2 text-warning" />
-                      <span>Reset All Contacted History</span>
-                    </DropdownItem>
-                    <DropdownItem
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Purge recipient delivery logs for all completed & cancelled campaigns? This frees database storage while preserving your campaign summary metrics."
-                          )
-                        ) {
-                          pruneRecipients("completed");
-                        }
-                      }}
-                    >
-                      <Icon name="trash" className="me-2 text-danger" />
-                      <span>Prune Completed Recipient Logs</span>
-                    </DropdownItem>
-                  </DropdownMenu>
-                </UncontrolledDropdown>
-
-                <Button
-                  color="secondary"
-                  outline
-                  size="sm"
-                  onClick={() => syncSources()}
-                  disabled={isSyncing}
-                  className="d-flex align-items-center gap-1"
+                  <Icon name="reload" className="me-2 text-warning" />
+                  <span>Reset All Contacted History</span>
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Purge recipient delivery logs for all completed & cancelled campaigns? This frees database storage while preserving your campaign summary metrics."
+                      )
+                    ) {
+                      pruneRecipients("completed");
+                    }
+                  }}
                 >
-                  <Icon name="reload" />
-                  <span>{isSyncing ? "Syncing..." : "Sync JSON Databases"}</span>
-                </Button>
+                  <Icon name="trash" className="me-2 text-danger" />
+                  <span>Prune Completed Recipient Logs</span>
+                </DropdownItem>
+              </DropdownMenu>
+            </UncontrolledDropdown>
 
-                <Button
-                  color="primary"
-                  size="sm"
-                  onClick={openCreateModal}
-                  className="d-flex align-items-center gap-1"
-                >
-                  <Icon name="plus" />
-                  <span>Create Campaign</span>
-                </Button>
-              </div>
-            </BlockHeadContent>
-          </BlockBetween>
-        </BlockHead>
+            <button
+              type="button"
+              onClick={() => syncSources()}
+              disabled={isSyncing}
+              className="campaign-btn campaign-btn-outline"
+            >
+              <Icon name="reload" className={isSyncing ? "spinner-border spinner-border-sm" : ""} />
+              <span>{isSyncing ? "Syncing..." : "Sync JSON Databases"}</span>
+            </button>
 
-        {/* Top Metric Cards */}
-        <Block>
+            <button
+              type="button"
+              onClick={openCreateModal}
+              className="campaign-btn campaign-btn-primary"
+            >
+              <Icon name="plus" />
+              <span>Create Campaign</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Top Metric & Quota Section */}
+        <div className="mb-4">
           {/* Nightly 11:30 PM Quota Sweep Banner */}
-          <div className="alert alert-pro alert-primary mb-4 p-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+          <div className="campaign-sweep-card">
             <div className="d-flex align-items-center gap-3">
-              <div className="alert-icon" style={{ fontSize: "28px" }}>
+              <div className="campaign-sweep-icon">
                 🌙
               </div>
               <div>
-                <div className="fw-bold fs-14px text-primary d-flex align-items-center gap-2 flex-wrap">
+                <div className="campaign-sweep-title">
                   <span>Nightly 11:30 PM Quota Sweep</span>
-                  <Badge color="success" className="fs-11px">Auto-Scheduled (23:30 WAT)</Badge>
-                  <Badge color="light" className="border text-dark fs-11px">50 Safety Reserve Kept for OTPs</Badge>
+                  <Badge color="success" className="px-2 py-1 fs-11px">Auto-Scheduled (23:30 WAT)</Badge>
+                  <Badge color="light" className="border text-dark px-2 py-1 fs-11px">50 Safety Reserve Kept for OTPs</Badge>
                 </div>
-                <div className="fs-12px text-soft mt-1">
+                <div className="campaign-sweep-desc">
                   🚀 Dedicated Brevo: <strong>{dailyStats?.dedicatedSentToday || 0} / {dailyStats?.dedicatedLimit || 300}</strong> (100% Campaign) &bull; 
                   🛡️ Primary Platform Brevo: <strong>{dailyStats?.totalBrevoSentToday || 0} / {dailyStats?.accountLimit || 300}</strong> (Tx OTPs: {dailyStats?.transactionalSentToday || 0}, Primary Campaign: {dailyStats?.primarySentToday || 0}) &bull; 
                   Unused Sweepable: <strong className="text-success">{dailyStats?.sweepEligibleQuota ?? 0} bonus emails</strong>
                 </div>
               </div>
             </div>
-            <div className="d-flex align-items-center gap-2">
-              <Button
-                color="primary"
-                size="sm"
-                outline
+            <div>
+              <button
+                type="button"
+                className="campaign-btn campaign-btn-outline border-success text-success"
                 onClick={() => {
                   if (
                     window.confirm(
@@ -655,28 +650,26 @@ const CampaignsPage = () => {
               >
                 <Icon name="play" className="me-1" />
                 <span>{isSweeping ? "Sweeping..." : "Run Sweep Now"}</span>
-              </Button>
+              </button>
             </div>
           </div>
 
-          <Row className="g-3 mb-4">
+          <Row className="g-3">
             {/* Brevo Daily Quota Card */}
             <Col sm="6" lg="3">
-              <Card className="card-bordered">
-                <CardBody className="p-3">
+              <div className="campaign-stat-box">
+                <div>
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="sub-text">Daily Sending Capacity</span>
-                    <Badge color="success">Dual Brevo (500/d)</Badge>
+                    <span className="campaign-stat-label">Daily Sending Capacity</span>
+                    <Badge color="success" className="fs-10px">Dual Brevo (500/d)</Badge>
                   </div>
-                  <div className="h4 mb-1">
-                    {dailyStats?.sentToday || 0}{" "}
-                    <small className="text-muted fw-normal">
-                      / {dailyStats?.dailyLimit || 500} sent
-                    </small>
+                  <div className="campaign-stat-number">
+                    {dailyStats?.sentToday || 0}
+                    <small>/ {dailyStats?.dailyLimit || 500} sent</small>
                   </div>
-                  <div className="progress" style={{ height: "6px" }}>
+                  <div className="campaign-progress-bar">
                     <div
-                      className="progress-bar bg-primary"
+                      className="campaign-progress-fill"
                       style={{
                         width: `${Math.min(
                           100,
@@ -687,115 +680,115 @@ const CampaignsPage = () => {
                       }}
                     />
                   </div>
-                  <div className="d-flex justify-content-between text-soft mt-1 fs-11px">
-                    <span>🚀 Dedicated: {dailyStats?.dedicatedSentToday || 0}/300</span>
-                    <span>🛡️ Primary: {dailyStats?.primarySentToday || 0}/200</span>
-                  </div>
-                </CardBody>
-              </Card>
+                </div>
+                <div className="campaign-stat-meta d-flex justify-content-between">
+                  <span>🚀 Dedicated: {dailyStats?.dedicatedSentToday || 0}/300</span>
+                  <span>🛡️ Primary: {dailyStats?.primarySentToday || 0}/200</span>
+                </div>
+              </div>
             </Col>
 
             {/* Total Databases / Contacts */}
             <Col sm="6" lg="3">
-              <Card className="card-bordered">
-                <CardBody className="p-3">
+              <div className="campaign-stat-box">
+                <div>
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="sub-text">Contact Databases</span>
-                    <Badge color="success">{audiences.length} Sources</Badge>
+                    <span className="campaign-stat-label">Contact Databases</span>
+                    <Badge color="info" className="fs-10px">{audiences.length} Sources</Badge>
                   </div>
-                  <div className="h4 mb-1">
-                    {totalUncontacted}{" "}
-                    <small className="text-muted fw-normal">uncontacted / {totalAudienceContacts} total</small>
+                  <div className="campaign-stat-number">
+                    {totalUncontacted}
+                    <small>fresh / {totalAudienceContacts} total</small>
                   </div>
-                  <p className="text-soft fs-12px mb-0">
-                    Source: Backend <code>src/data/*.json</code>
-                  </p>
-                </CardBody>
-              </Card>
+                </div>
+                <div className="campaign-stat-meta">
+                  Source: Backend <code className="bg-light text-dark px-1 py-0.5 rounded">src/data/*.json</code>
+                </div>
+              </div>
             </Col>
 
             {/* Campaigns Run */}
             <Col sm="6" lg="3">
-              <Card className="card-bordered">
-                <CardBody className="p-3">
+              <div className="campaign-stat-box">
+                <div>
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="sub-text">Total Campaigns</span>
-                    <Badge color="primary">{campaigns.length}</Badge>
+                    <span className="campaign-stat-label">Total Campaigns</span>
+                    <Badge color="primary" className="fs-10px">{campaigns.length} Total</Badge>
                   </div>
-                  <div className="h4 mb-1">
-                    {campaigns.filter((c) => ["sending", "queued"].includes(c.status)).length}{" "}
-                    <small className="text-muted fw-normal">active / {campaigns.length} total</small>
+                  <div className="campaign-stat-number">
+                    {campaigns.filter((c) => ["sending", "queued"].includes(c.status)).length}
+                    <small>active / {campaigns.length} total</small>
                   </div>
-                  <p className="text-soft fs-12px mb-0">Micro-batch throttle via Brevo</p>
-                </CardBody>
-              </Card>
+                </div>
+                <div className="campaign-stat-meta">
+                  Micro-batch throttle via Brevo
+                </div>
+              </div>
             </Col>
 
             {/* Conversions & Volume */}
             <Col sm="6" lg="3">
-              <Card className="card-bordered">
-                <CardBody className="p-3">
+              <div className="campaign-stat-box">
+                <div>
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="sub-text">Attributed ROI & Volume</span>
-                    <Badge color="success">Verified</Badge>
+                    <span className="campaign-stat-label">Attributed ROI & Volume</span>
+                    <Badge color="success" className="fs-10px">Verified</Badge>
                   </div>
-                  <div className="h4 mb-1 text-success">
-                    {totalConversions.signups} users{" "}
-                    <small className="text-muted fw-normal">({totalConversions.txs} trades)</small>
+                  <div className="campaign-stat-number text-success">
+                    {totalConversions.signups}{" "}
+                    <small className="text-muted fw-normal">users ({totalConversions.txs} trades)</small>
                   </div>
-                  <p className="text-soft fs-12px mb-0">
-                    ₦{totalConversions.vol.toLocaleString()} total trade volume
-                  </p>
-                </CardBody>
-              </Card>
+                </div>
+                <div className="campaign-stat-meta fw-medium text-dark">
+                  ₦{totalConversions.vol.toLocaleString()} total trade volume
+                </div>
+              </div>
             </Col>
           </Row>
-        </Block>
+        </div>
 
         {/* Visual Comparison Bar Chart Card */}
         {showCharts && datasetComparisonChart && audiences.length > 0 && (
-          <Block className="mb-4">
-            <Card className="card-bordered">
-              <CardBody className="p-3">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                    <h6 className="mb-0">Cross-Database Performance Comparison</h6>
-                    <small className="text-soft">
-                      Compare contacts, sends, opens, clicks, and conversions across your JSON datasets
-                    </small>
-                  </div>
-                  <Badge color="light" className="border">
-                    {audiences.length} Datasets Tracked
-                  </Badge>
+          <div className="card card-bordered mb-4">
+            <CardBody className="p-3">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <h6 className="mb-0 fw-bold">Cross-Database Performance Comparison</h6>
+                  <small className="text-soft">
+                    Compare contacts, sends, opens, clicks, and conversions across your JSON datasets
+                  </small>
                 </div>
-                <div style={{ height: "260px" }}>
-                  <Bar
-                    data={datasetComparisonChart}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: { position: "top" },
-                        tooltip: { mode: "index", intersect: false },
-                      },
-                      scales: {
-                        x: { grid: { display: false } },
-                        y: { beginAtZero: true, grid: { color: "#f1f5f9" } },
-                      },
-                    }}
-                  />
-                </div>
-              </CardBody>
-            </Card>
-          </Block>
+                <Badge color="light" className="border">
+                  {audiences.length} Datasets Tracked
+                </Badge>
+              </div>
+              <div style={{ height: "260px" }}>
+                <Bar
+                  data={datasetComparisonChart}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { position: "top" },
+                      tooltip: { mode: "index", intersect: false },
+                    },
+                    scales: {
+                      x: { grid: { display: false } },
+                      y: { beginAtZero: true, grid: { color: "#f1f5f9" } },
+                    },
+                  }}
+                />
+              </div>
+            </CardBody>
+          </div>
         )}
 
         {/* Audience Databases Grid */}
-        <Block className="mb-4">
-          <div className="d-flex justify-content-between align-items-center mb-2">
-            <h5 className="mb-0">Email Databases & Cleanup ({audiences.length})</h5>
+        <div className="mb-4">
+          <div className="campaign-section-title">
+            <h5>Email Databases & Cleanup ({audiences.length})</h5>
             <span className="text-soft fs-12px">
-              Backend storage: <code>src/data/*.json</code>
+              Backend storage: <code className="bg-light text-dark px-1.5 py-0.5 rounded">src/data/*.json</code>
             </span>
           </div>
 
@@ -804,118 +797,125 @@ const CampaignsPage = () => {
               <LoadingSpinner />
             </div>
           ) : audiences.length === 0 ? (
-            <Card className="card-bordered p-4 text-center">
-              <p className="text-soft mb-2">No audience databases found in <code>src/data/</code>.</p>
-              <div>
-                <Button color="primary" size="sm" onClick={() => syncSources()} disabled={isSyncing}>
-                  <Icon name="reload" className="me-1" />
-                  Sync Databases Now
-                </Button>
+            <div className="card card-bordered p-4 text-center bg-white rounded-3">
+              <div className="campaign-empty-icon-box mx-auto">
+                <Icon name="folder" />
               </div>
-            </Card>
+              <div className="campaign-empty-title">No audience databases found</div>
+              <p className="campaign-empty-text">
+                Place your customer audience JSON files in <code>src/data/</code> on the backend and click sync to index contacts.
+              </p>
+              <div>
+                <button
+                  type="button"
+                  className="campaign-btn campaign-btn-primary"
+                  onClick={() => syncSources()}
+                  disabled={isSyncing}
+                >
+                  <Icon name="reload" className={isSyncing ? "spinner-border spinner-border-sm me-1" : "me-1"} />
+                  <span>{isSyncing ? "Syncing..." : "Sync Databases Now"}</span>
+                </button>
+              </div>
+            </div>
           ) : (
             <Row className="g-3">
               {audiences.map((aud) => (
                 <Col sm="6" md="4" lg="3" key={aud._id}>
-                  <Card className="card-bordered h-100">
-                    <CardBody className="p-3 d-flex flex-column justify-content-between">
-                      <div>
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <h6 className="card-title mb-0 text-truncate" title={aud.name}>
-                            {aud.name}
-                          </h6>
-                          <UncontrolledDropdown>
-                            <DropdownToggle tag="a" className="btn btn-icon btn-trigger btn-sm">
-                              <Icon name="more-h" />
-                            </DropdownToggle>
-                            <DropdownMenu end>
-                              <DropdownItem
-                                onClick={() => {
-                                  if (
-                                    window.confirm(
-                                      `Reset contact history for "${aud.name}"? Contacts will be marked uncontacted and available for new campaigns.`
-                                    )
-                                  ) {
-                                    resetAudience(aud._id);
-                                  }
-                                }}
-                              >
-                                <Icon name="reload" className="me-2 text-warning" />
-                                <span>Reset Contacts to Uncontacted</span>
-                              </DropdownItem>
-                              <DropdownItem
-                                className="text-danger"
-                                onClick={() => {
-                                  if (
-                                    window.confirm(
-                                      `Delete "${aud.name}" and its indexed contacts from database? (JSON file in src/data/ remains safe)`
-                                    )
-                                  ) {
-                                    deleteAudience(aud._id);
-                                  }
-                                }}
-                              >
-                                <Icon name="trash" className="me-2" />
-                                <span>Delete from DB</span>
-                              </DropdownItem>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </div>
-
-                        <div className="d-flex align-items-baseline gap-2 mb-2">
-                          <span className="h4 mb-0 text-primary">
-                            {aud.uncontactedCount ?? aud.activeCount}
-                          </span>
-                          <span className="text-soft fs-12px">fresh / {aud.totalContacts} total</span>
-                        </div>
-
-                        <div className="d-flex justify-content-between text-soft fs-11px border-top pt-2">
-                          <span>Bounced: {aud.bouncedCount || 0}</span>
-                          <span>Unsub: {aud.unsubscribedCount || 0}</span>
-                          <Badge color="light" className="text-lowercase fs-10px border">
-                            {aud.filename}
-                          </Badge>
-                        </div>
+                  <div className="campaign-audience-card">
+                    <div>
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <h6 className="card-title mb-0 text-truncate fw-bold text-dark" title={aud.name}>
+                          {aud.name}
+                        </h6>
+                        <UncontrolledDropdown>
+                          <DropdownToggle tag="button" className="btn btn-icon btn-trigger btn-sm">
+                            <Icon name="more-h" />
+                          </DropdownToggle>
+                          <DropdownMenu end style={{ zIndex: 1060 }}>
+                            <DropdownItem
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    `Reset contact history for "${aud.name}"? Contacts will be marked uncontacted and available for new campaigns.`
+                                  )
+                                ) {
+                                  resetAudience(aud._id);
+                                }
+                              }}
+                            >
+                              <Icon name="reload" className="me-2 text-warning" />
+                              <span>Reset Contacts to Uncontacted</span>
+                            </DropdownItem>
+                            <DropdownItem
+                              className="text-danger"
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    `Delete "${aud.name}" and its indexed contacts from database? (JSON file in src/data/ remains safe)`
+                                  )
+                                ) {
+                                  deleteAudience(aud._id);
+                                }
+                              }}
+                            >
+                              <Icon name="trash" className="me-2" />
+                              <span>Delete from DB</span>
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </UncontrolledDropdown>
                       </div>
 
-                      <div className="mt-3 pt-2 border-top text-soft fs-11px d-flex justify-content-between align-items-center">
-                        <span>Synced: {formatDateWithTime(aud.lastSyncedAt)}</span>
+                      <div className="d-flex align-items-baseline gap-2 mb-2">
+                        <span className="h4 mb-0 text-primary fw-bold">
+                          {aud.uncontactedCount ?? aud.activeCount}
+                        </span>
+                        <span className="text-soft fs-12px">fresh / {aud.totalContacts} total</span>
                       </div>
-                    </CardBody>
-                  </Card>
+
+                      <div className="d-flex justify-content-between text-soft fs-11px border-top pt-2">
+                        <span>Bounced: {aud.bouncedCount || 0}</span>
+                        <span>Unsub: {aud.unsubscribedCount || 0}</span>
+                        <Badge color="light" className="text-lowercase fs-10px border">
+                          {aud.filename}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-2 border-top text-soft fs-11px d-flex justify-content-between align-items-center">
+                      <span>Synced: {formatDateWithTime(aud.lastSyncedAt)}</span>
+                    </div>
+                  </div>
                 </Col>
               ))}
             </Row>
           )}
-        </Block>
+        </div>
 
-        {/* Campaigns List with Status Filter & Search */}
-        <Block>
-          <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-            <h5 className="mb-0">Campaigns & Attribution Performance</h5>
+        {/* Campaigns List Card with Unified Filter Toolbar (Eliminating Overlap & Misplaced Z-Index) */}
+        <div className="campaign-table-card">
+          <div className="campaign-table-header">
+            <h5 className="campaign-table-header-title">Campaigns & Attribution Performance</h5>
 
-            <div className="d-flex flex-wrap align-items-center gap-2">
-              <div className="form-control-wrap" style={{ minWidth: "220px" }}>
-                <div className="form-icon form-icon-left">
-                  <Icon name="search" />
-                </div>
+            <div className="campaign-table-toolbar">
+              {/* Search Bar */}
+              <div className="campaign-search-input-wrap">
+                <Icon name="search" className="search-icon" />
                 <input
                   type="text"
-                  className="form-control form-control-sm"
+                  className="campaign-search-input"
                   placeholder="Filter campaigns..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
 
-              <div className="btn-group btn-group-sm">
+              {/* Status Filter Tabs */}
+              <div className="campaign-filter-tabs">
                 {["all", "sending", "completed", "paused", "cancelled"].map((st) => (
                   <button
                     key={st}
                     type="button"
-                    className={`btn btn-sm ${
-                      statusFilter === st ? "btn-primary" : "btn-outline-light text-dark"
-                    }`}
+                    className={`campaign-filter-tab ${statusFilter === st ? "active" : ""}`}
                     onClick={() => setStatusFilter(st)}
                   >
                     {st.charAt(0).toUpperCase() + st.slice(1)}
@@ -923,223 +923,238 @@ const CampaignsPage = () => {
                 ))}
               </div>
 
-              <Button color="light" size="sm" outline onClick={() => refetchCampaigns()}>
+              {/* Refresh Button */}
+              <button
+                type="button"
+                className="campaign-btn campaign-btn-outline"
+                onClick={() => refetchCampaigns()}
+              >
                 <Icon name="reload" className="me-1" />
-                Refresh
-              </Button>
+                <span>Refresh</span>
+              </button>
             </div>
           </div>
 
-          <Card className="card-bordered">
-            <div className="card-inner p-0">
-              {loadingCampaigns ? (
-                <div className="text-center py-5">
-                  <LoadingSpinner />
-                </div>
-              ) : filteredCampaigns.length === 0 ? (
-                <div className="text-center py-5 text-soft">
-                  <Icon name="mail" style={{ fontSize: "40px", color: "#cbd5e1" }} />
-                  <p className="mt-2 mb-3">
-                    {campaigns.length === 0
-                      ? "No email campaigns created yet."
-                      : "No campaigns matching your filter."}
-                  </p>
-                  {campaigns.length === 0 && (
-                    <Button color="primary" size="sm" onClick={openCreateModal}>
-                      <Icon name="plus" className="me-1" />
-                      Create First Campaign
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <Table responsive className="table-tranx mb-0">
-                  <thead className="bg-light">
-                    <tr className="tb-tnx-head">
-                      <th>Campaign & Subject</th>
-                      <th>Sources Sliced</th>
-                      <th>Progress / Sent</th>
-                      <th>Status</th>
-                      <th>Brevo Metrics</th>
-                      <th>Conversions</th>
-                      <th className="text-end">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCampaigns.map((camp) => {
-                      const total = camp.totalRecipients || 0;
-                      const sent = camp.sentCount || 0;
-                      const progressPct = total > 0 ? Math.round((sent / total) * 100) : 0;
-                      const openPct = sent > 0 ? Math.round(((camp.openedCount || 0) / sent) * 100) : 0;
-                      const clickPct = sent > 0 ? Math.round(((camp.clickedCount || 0) / sent) * 100) : 0;
-
-                      return (
-                        <tr key={camp._id} className="tb-tnx-item">
-                          <td>
-                            <div className="d-flex align-items-center gap-1 flex-wrap">
-                              <span className="fw-bold text-dark">{camp.name}</span>
-                              {camp.sendingAccount === "primary" ? (
-                                <Badge color="light" className="border text-primary fs-10px">
-                                  🛡️ Primary (200/d)
-                                </Badge>
-                              ) : (
-                                <Badge color="light" className="border text-success fs-10px">
-                                  🚀 Dedicated (300/d)
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="text-soft fs-12px text-truncate" style={{ maxWidth: "260px" }}>
-                              {camp.subject}
-                            </div>
-                            <div className="text-soft fs-11px mt-1">
-                              Created: {formatDateWithTime(camp.createdAt)}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1" style={{ maxWidth: "200px" }}>
-                              {camp.allocations?.map((a, i) => (
-                                <Badge key={i} color="light" className="text-dark fs-11px border">
-                                  {a.audienceName || "Source"}: {a.requestedCount}
-                                </Badge>
-                              ))}
-                            </div>
-                          </td>
-                          <td style={{ minWidth: "150px" }}>
-                            <div className="d-flex justify-content-between fs-12px mb-1">
-                              <span className="fw-medium">{sent} / {total}</span>
-                              <span className="text-soft">{progressPct}%</span>
-                            </div>
-                            <div className="progress" style={{ height: "6px" }}>
-                              <div
-                                className={`progress-bar ${
-                                  camp.status === "completed" ? "bg-success" : "bg-primary"
-                                }`}
-                                style={{ width: `${progressPct}%` }}
-                              />
-                            </div>
-                            {camp.failedCount > 0 && (
-                              <div className="text-danger fs-11px mt-1">
-                                {camp.failedCount} delivery errors
-                              </div>
-                            )}
-                          </td>
-                          <td>{getStatusBadge(camp.status)}</td>
-                          <td>
-                            <div className="fs-12px">
-                              <span className="text-success fw-medium">
-                                {camp.deliveredCount || 0}
-                              </span>{" "}
-                              delivered
-                            </div>
-                            <div className="text-soft fs-11px">
-                              Opens: {camp.openedCount || 0} ({openPct}%)
-                            </div>
-                            <div className="text-soft fs-11px">
-                              Clicks: {camp.clickedCount || 0} ({clickPct}%)
-                            </div>
-                          </td>
-                          <td>
-                            <div className="fs-12px fw-medium text-primary">
-                              {camp.signupsCount || 0} signups
-                            </div>
-                            <div className="text-soft fs-11px">
-                              {camp.firstTransactionsCount || 0} trades
-                            </div>
-                            {(camp.totalTransactionVolume || 0) > 0 && (
-                              <div className="text-success fs-11px fw-medium">
-                                ₦{camp.totalTransactionVolume.toLocaleString()}
-                              </div>
-                            )}
-                          </td>
-                          <td className="text-end">
-                            <UncontrolledDropdown>
-                              <DropdownToggle tag="a" className="btn btn-icon btn-trigger">
-                                <Icon name="more-h" />
-                              </DropdownToggle>
-                              <DropdownMenu end>
-                                <DropdownItem onClick={() => openEditModal(camp)}>
-                                  <Icon name="edit" className="me-2 text-primary" />
-                                  <span>Edit Content & Settings</span>
-                                </DropdownItem>
-
-                                <DropdownItem
-                                  onClick={() => {
-                                    setSelectedCampaignForAttr(camp);
-                                    setAttributionModalOpen(true);
-                                  }}
-                                >
-                                  <Icon name="reports-alt" className="me-2" />
-                                  <span>View Attribution & ROI</span>
-                                </DropdownItem>
-
-                                {["sending", "queued"].includes(camp.status) && (
-                                  <DropdownItem
-                                    onClick={() =>
-                                      controlCampaign({ id: camp._id, action: "pause" })
-                                    }
-                                  >
-                                    <Icon name="pause" className="me-2" />
-                                    <span>Pause Delivery</span>
-                                  </DropdownItem>
-                                )}
-
-                                {camp.status === "paused" && (
-                                  <DropdownItem
-                                    onClick={() =>
-                                      controlCampaign({ id: camp._id, action: "resume" })
-                                    }
-                                  >
-                                    <Icon name="play" className="me-2" />
-                                    <span>Resume Delivery</span>
-                                  </DropdownItem>
-                                )}
-
-                                {["sending", "queued", "paused"].includes(camp.status) && (
-                                  <DropdownItem
-                                    className="text-danger"
-                                    onClick={() => {
-                                      if (
-                                        window.confirm(
-                                          "Are you sure you want to cancel this campaign? Remaining unsent recipients will not be sent."
-                                        )
-                                      ) {
-                                        controlCampaign({ id: camp._id, action: "cancel" });
-                                      }
-                                    }}
-                                  >
-                                    <Icon name="cross-circle" className="me-2" />
-                                    <span>Cancel Campaign</span>
-                                  </DropdownItem>
-                                )}
-
-                                {["completed", "cancelled"].includes(camp.status) && (
-                                  <DropdownItem
-                                    className="text-danger"
-                                    onClick={() => {
-                                      if (
-                                        window.confirm(
-                                          "Purge detailed recipient delivery logs for this campaign? (Summary stats and attribution ROI are preserved)"
-                                        )
-                                      ) {
-                                        pruneRecipients(camp._id);
-                                      }
-                                    }}
-                                  >
-                                    <Icon name="trash" className="me-2" />
-                                    <span>Purge Recipient Logs</span>
-                                  </DropdownItem>
-                                )}
-                              </DropdownMenu>
-                            </UncontrolledDropdown>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </Table>
+          {/* Card Body: Spinner, Empty State, or Data Table */}
+          {loadingCampaigns ? (
+            <div className="text-center py-5">
+              <LoadingSpinner />
+            </div>
+          ) : filteredCampaigns.length === 0 ? (
+            <div className="campaign-empty-state">
+              <div className="campaign-empty-icon-box">
+                <Icon name="mail" />
+              </div>
+              <div className="campaign-empty-title">
+                {campaigns.length === 0
+                  ? "No email campaigns created yet"
+                  : "No campaigns matching your filter"}
+              </div>
+              <p className="campaign-empty-text">
+                {campaigns.length === 0
+                  ? "Create multi-source recipient slices, customize email copy with banners & dynamic tags, and monitor trade conversion ROI."
+                  : "Try adjusting your search keyword or switching between All, Sending, or Completed tabs."}
+              </p>
+              {campaigns.length === 0 && (
+                <button
+                  type="button"
+                  className="campaign-btn campaign-btn-primary"
+                  onClick={openCreateModal}
+                >
+                  <Icon name="plus" />
+                  <span>Create First Campaign</span>
+                </button>
               )}
             </div>
-          </Card>
-        </Block>
+          ) : (
+            <div className="table-responsive">
+              <Table className="campaign-table">
+                <thead>
+                  <tr>
+                    <th>Campaign & Subject</th>
+                    <th>Sources Sliced</th>
+                    <th>Progress / Sent</th>
+                    <th>Status</th>
+                    <th>Brevo Metrics</th>
+                    <th>Conversions</th>
+                    <th className="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCampaigns.map((camp) => {
+                    const total = camp.totalRecipients || 0;
+                    const sent = camp.sentCount || 0;
+                    const progressPct = total > 0 ? Math.round((sent / total) * 100) : 0;
+                    const openPct = sent > 0 ? Math.round(((camp.openedCount || 0) / sent) * 100) : 0;
+                    const clickPct = sent > 0 ? Math.round(((camp.clickedCount || 0) / sent) * 100) : 0;
+
+                    return (
+                      <tr key={camp._id}>
+                        <td>
+                          <div className="d-flex align-items-center gap-1 flex-wrap">
+                            <span className="fw-bold text-dark">{camp.name}</span>
+                            {camp.sendingAccount === "primary" ? (
+                              <Badge color="light" className="border text-primary fs-10px">
+                                🛡️ Primary (200/d)
+                              </Badge>
+                            ) : (
+                              <Badge color="light" className="border text-success fs-10px">
+                                🚀 Dedicated (300/d)
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-soft fs-12px text-truncate" style={{ maxWidth: "260px" }}>
+                            {camp.subject}
+                          </div>
+                          <div className="text-soft fs-11px mt-1">
+                            Created: {formatDateWithTime(camp.createdAt)}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="d-flex flex-wrap gap-1" style={{ maxWidth: "200px" }}>
+                            {camp.allocations?.map((a, i) => (
+                              <Badge key={i} color="light" className="text-dark fs-11px border">
+                                {a.audienceName || "Source"}: {a.requestedCount}
+                              </Badge>
+                            ))}
+                          </div>
+                        </td>
+                        <td style={{ minWidth: "150px" }}>
+                          <div className="d-flex justify-content-between fs-12px mb-1">
+                            <span className="fw-medium">{sent} / {total}</span>
+                            <span className="text-soft">{progressPct}%</span>
+                          </div>
+                          <div className="progress" style={{ height: "6px" }}>
+                            <div
+                              className={`progress-bar ${
+                                camp.status === "completed" ? "bg-success" : "bg-primary"
+                              }`}
+                              style={{ width: `${progressPct}%` }}
+                            />
+                          </div>
+                          {camp.failedCount > 0 && (
+                            <div className="text-danger fs-11px mt-1">
+                              {camp.failedCount} delivery errors
+                            </div>
+                          )}
+                        </td>
+                        <td>{getStatusBadge(camp.status)}</td>
+                        <td>
+                          <div className="fs-12px">
+                            <span className="text-success fw-medium">
+                              {camp.deliveredCount || 0}
+                            </span>{" "}
+                            delivered
+                          </div>
+                          <div className="text-soft fs-11px">
+                            Opens: {camp.openedCount || 0} ({openPct}%)
+                          </div>
+                          <div className="text-soft fs-11px">
+                            Clicks: {camp.clickedCount || 0} ({clickPct}%)
+                          </div>
+                        </td>
+                        <td>
+                          <div className="fs-12px fw-medium text-primary">
+                            {camp.signupsCount || 0} signups
+                          </div>
+                          <div className="text-soft fs-11px">
+                            {camp.firstTransactionsCount || 0} trades
+                          </div>
+                          {(camp.totalTransactionVolume || 0) > 0 && (
+                            <div className="text-success fs-11px fw-medium">
+                              ₦{camp.totalTransactionVolume.toLocaleString()}
+                            </div>
+                          )}
+                        </td>
+                        <td className="text-end">
+                          <UncontrolledDropdown>
+                            <DropdownToggle tag="button" className="btn btn-icon btn-trigger">
+                              <Icon name="more-h" />
+                            </DropdownToggle>
+                            <DropdownMenu end style={{ zIndex: 1060 }}>
+                              <DropdownItem onClick={() => openEditModal(camp)}>
+                                <Icon name="edit" className="me-2 text-primary" />
+                                <span>Edit Content & Settings</span>
+                              </DropdownItem>
+
+                              <DropdownItem
+                                onClick={() => {
+                                  setSelectedCampaignForAttr(camp);
+                                  setAttributionModalOpen(true);
+                                }}
+                              >
+                                <Icon name="reports-alt" className="me-2" />
+                                <span>View Attribution & ROI</span>
+                              </DropdownItem>
+
+                              {["sending", "queued"].includes(camp.status) && (
+                                <DropdownItem
+                                  onClick={() =>
+                                    controlCampaign({ id: camp._id, action: "pause" })
+                                  }
+                                >
+                                  <Icon name="pause" className="me-2" />
+                                  <span>Pause Delivery</span>
+                                </DropdownItem>
+                              )}
+
+                              {camp.status === "paused" && (
+                                <DropdownItem
+                                  onClick={() =>
+                                    controlCampaign({ id: camp._id, action: "resume" })
+                                  }
+                                >
+                                  <Icon name="play" className="me-2" />
+                                  <span>Resume Delivery</span>
+                                </DropdownItem>
+                              )}
+
+                              {["sending", "queued", "paused"].includes(camp.status) && (
+                                <DropdownItem
+                                  className="text-danger"
+                                  onClick={() => {
+                                    if (
+                                      window.confirm(
+                                        "Are you sure you want to cancel this campaign? Remaining unsent recipients will not be sent."
+                                      )
+                                    ) {
+                                      controlCampaign({ id: camp._id, action: "cancel" });
+                                    }
+                                  }}
+                                >
+                                  <Icon name="cross-circle" className="me-2" />
+                                  <span>Cancel Campaign</span>
+                                </DropdownItem>
+                              )}
+
+                              {["completed", "cancelled"].includes(camp.status) && (
+                                <DropdownItem
+                                  className="text-danger"
+                                  onClick={() => {
+                                    if (
+                                      window.confirm(
+                                        "Purge detailed recipient delivery logs for this campaign? (Summary stats and attribution ROI are preserved)"
+                                      )
+                                    ) {
+                                      pruneRecipients(camp._id);
+                                    }
+                                  }}
+                                >
+                                  <Icon name="trash" className="me-2" />
+                                  <span>Purge Recipient Logs</span>
+                                </DropdownItem>
+                              )}
+                            </DropdownMenu>
+                          </UncontrolledDropdown>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            </div>
+          )}
+        </div>
 
         {/* Modal: Create Campaign & Multi-Source Slicer */}
         <Modal
@@ -1267,7 +1282,7 @@ const CampaignsPage = () => {
                   return (
                     <div
                       key={aud._id}
-                      className="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border"
+                      className="campaign-slice-row"
                     >
                       <div className="d-flex align-items-center gap-2">
                         <input
@@ -1389,7 +1404,7 @@ const CampaignsPage = () => {
                   <div className="d-flex flex-wrap gap-1">
                     <button
                       type="button"
-                      className="btn btn-xs btn-outline-primary"
+                      className="campaign-tag-chip"
                       onClick={() => insertTag("{{logo}}")}
                       title="Inserts PayMint Logo Image"
                     >
@@ -1397,7 +1412,7 @@ const CampaignsPage = () => {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-xs btn-outline-primary"
+                      className="campaign-tag-chip"
                       onClick={() => insertTag("{{headerBanner}}")}
                       title="Inserts Header Banner Image"
                     >
@@ -1405,7 +1420,7 @@ const CampaignsPage = () => {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-xs btn-outline-primary"
+                      className="campaign-tag-chip"
                       onClick={() => insertTag("{{footerBanner}}")}
                       title="Inserts Footer Banner Image"
                     >
@@ -1413,42 +1428,42 @@ const CampaignsPage = () => {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-xs btn-outline-secondary"
+                      className="campaign-tag-chip"
                       onClick={() => insertTag("{{firstName}}")}
                     >
                       + {"{{firstName}}"}
                     </button>
                     <button
                       type="button"
-                      className="btn btn-xs btn-outline-secondary"
+                      className="campaign-tag-chip"
                       onClick={() => insertTag("{{lastName}}")}
                     >
                       + {"{{lastName}}"}
                     </button>
                     <button
                       type="button"
-                      className="btn btn-xs btn-outline-secondary"
+                      className="campaign-tag-chip"
                       onClick={() => insertTag("{{email}}")}
                     >
                       + {"{{email}}"}
                     </button>
                     <button
                       type="button"
-                      className="btn btn-xs btn-outline-info"
+                      className="campaign-tag-chip"
                       onClick={() => insertTag("{{website}}")}
                     >
                       + {"{{website}}"}
                     </button>
                     <button
                       type="button"
-                      className="btn btn-xs btn-outline-info"
+                      className="campaign-tag-chip"
                       onClick={() => insertTag("{{playStore}}")}
                     >
                       + {"{{playStore}}"}
                     </button>
                     <button
                       type="button"
-                      className="btn btn-xs btn-outline-info"
+                      className="campaign-tag-chip"
                       onClick={() => insertTag("{{appStore}}")}
                     >
                       + {"{{appStore}}"}
@@ -1679,52 +1694,66 @@ const CampaignsPage = () => {
                 <div className="d-flex flex-wrap gap-1">
                   <button
                     type="button"
-                    className="btn btn-xs btn-outline-primary"
+                    className="campaign-tag-chip"
                     onClick={() => insertEditTag("{{logo}}")}
                   >
                     + {"{{logo}}"}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-xs btn-outline-primary"
+                    className="campaign-tag-chip"
                     onClick={() => insertEditTag("{{headerBanner}}")}
                   >
                     + {"{{headerBanner}}"}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-xs btn-outline-primary"
+                    className="campaign-tag-chip"
                     onClick={() => insertEditTag("{{footerBanner}}")}
                   >
                     + {"{{footerBanner}}"}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-xs btn-outline-secondary"
+                    className="campaign-tag-chip"
                     onClick={() => insertEditTag("{{firstName}}")}
                   >
                     + {"{{firstName}}"}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-xs btn-outline-secondary"
+                    className="campaign-tag-chip"
                     onClick={() => insertEditTag("{{lastName}}")}
                   >
                     + {"{{lastName}}"}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-xs btn-outline-secondary"
+                    className="campaign-tag-chip"
                     onClick={() => insertEditTag("{{email}}")}
                   >
                     + {"{{email}}"}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-xs btn-outline-info"
+                    className="campaign-tag-chip"
                     onClick={() => insertEditTag("{{website}}")}
                   >
                     + {"{{website}}"}
+                  </button>
+                  <button
+                    type="button"
+                    className="campaign-tag-chip"
+                    onClick={() => insertEditTag("{{playStore}}")}
+                  >
+                    + {"{{playStore}}"}
+                  </button>
+                  <button
+                    type="button"
+                    className="campaign-tag-chip"
+                    onClick={() => insertEditTag("{{appStore}}")}
+                  >
+                    + {"{{appStore}}"}
                   </button>
                 </div>
               </div>
