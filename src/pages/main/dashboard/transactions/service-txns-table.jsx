@@ -41,7 +41,7 @@ import LoadingSpinner from "../../../components/spinner";
 import Search from "../tables/Search";
 import SortToolTip from "../tables/SortTooltip";
 import { FilterOptions } from "../tables/filter-select";
-import { ServicesFilterOptions } from "./static-data";
+import { ServicesFilterOptions, getServiceFilterOptions } from "./static-data";
 import { ServicesStatsCard } from "./stats-card";
 import UpdateStatusModal from "./modals/update-status";
 import ReverseModal from "./modals/reverse-transaction";
@@ -180,6 +180,11 @@ export const ServiceTransactionTable = ({
   const period = searchParams.get("period") ?? "custom";
   const startDate = searchParams.get("startDate") ?? "";
   const endDate = searchParams.get("endDate") ?? "";
+  const provider = searchParams.get("provider") ?? "";
+  const service = searchParams.get("service") ?? "";
+  const serviceType = searchParams.get("serviceType") ?? "";
+  const channel = searchParams.get("channel") ?? "";
+  const search = searchParams.get("search") ?? "";
 
   const { data: serviceTxnsOverview, isLoading: fetchingOverview } = useGetServiceTransactionsOverview(
     period,
@@ -381,6 +386,39 @@ export const ServiceTransactionTable = ({
     });
   };
 
+  const serviceLabel = (() => {
+    const t = (type || purpose || "").toLowerCase();
+    if (t.includes("data") || t.includes("airtime")) return "Network";
+    if (t.includes("elect")) return "DisCo";
+    if (t.includes("cable") || t.includes("tv")) return "Operator";
+    if (t.includes("bet")) return "Platform";
+    if (t.includes("edu")) return "Board";
+    return "Service";
+  })();
+
+  const filterOptions = getServiceFilterOptions(type, purpose);
+  const hasActiveFilterPills = Boolean(
+    provider || service || serviceType || channel || search || hasDateFilter,
+  );
+
+  const removeFilter = (key) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.delete(key);
+      newParams.set("page", "1");
+      return newParams;
+    });
+  };
+
+  const clearAllFilters = () => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams();
+      if (prev.get("limit")) newParams.set("limit", prev.get("limit"));
+      newParams.set("page", "1");
+      return newParams;
+    });
+  };
+
   useEffect(() => {
     reset(formData);
   }, [formData, reset]);
@@ -565,7 +603,7 @@ export const ServiceTransactionTable = ({
                   </li>
                   <li className="btn-toolbar-sep"></li>
                   <li>
-                    <FilterOptions options={ServicesFilterOptions} showDate />
+                    <FilterOptions options={filterOptions} showDate />
                   </li>
                   <li>
                     <UncontrolledDropdown>
@@ -583,6 +621,99 @@ export const ServiceTransactionTable = ({
               <Search onSearch={onSearch} setonSearch={setonSearch} placeholder="reference" />
             </div>
           </div>
+          {hasActiveFilterPills && (
+            <div className="card-inner py-2 px-4 bg-lighter border-bottom d-flex flex-wrap align-items-center gap-2">
+              <span className="text-muted fs-12px fw-medium me-1">
+                <Icon name="filter" className="me-1" /> Active Filters:
+              </span>
+              {provider && (
+                <Badge color="primary" className="badge-dim d-inline-flex align-items-center gap-1 py-1 px-2">
+                  <span>Provider: <strong>{provider}</strong></span>
+                  <button
+                    type="button"
+                    className="border-0 bg-transparent p-0 ms-1 text-primary d-inline-flex align-items-center"
+                    onClick={() => removeFilter("provider")}
+                    title="Remove provider filter"
+                  >
+                    <Icon name="cross-sm" />
+                  </button>
+                </Badge>
+              )}
+              {service && (
+                <Badge color="info" className="badge-dim d-inline-flex align-items-center gap-1 py-1 px-2">
+                  <span>{serviceLabel}: <strong>{service}</strong></span>
+                  <button
+                    type="button"
+                    className="border-0 bg-transparent p-0 ms-1 text-info d-inline-flex align-items-center"
+                    onClick={() => removeFilter("service")}
+                    title="Remove service filter"
+                  >
+                    <Icon name="cross-sm" />
+                  </button>
+                </Badge>
+              )}
+              {serviceType && (
+                <Badge color="info" className="badge-dim d-inline-flex align-items-center gap-1 py-1 px-2">
+                  <span>Type: <strong>{serviceType}</strong></span>
+                  <button
+                    type="button"
+                    className="border-0 bg-transparent p-0 ms-1 text-info d-inline-flex align-items-center"
+                    onClick={() => removeFilter("serviceType")}
+                    title="Remove service type filter"
+                  >
+                    <Icon name="cross-sm" />
+                  </button>
+                </Badge>
+              )}
+              {channel && (
+                <Badge color="secondary" className="badge-dim d-inline-flex align-items-center gap-1 py-1 px-2">
+                  <span>Channel: <strong>{channel.toUpperCase()}</strong></span>
+                  <button
+                    type="button"
+                    className="border-0 bg-transparent p-0 ms-1 text-secondary d-inline-flex align-items-center"
+                    onClick={() => removeFilter("channel")}
+                    title="Remove channel filter"
+                  >
+                    <Icon name="cross-sm" />
+                  </button>
+                </Badge>
+              )}
+              {search && (
+                <Badge color="light" className="badge-dim d-inline-flex align-items-center gap-1 py-1 px-2">
+                  <span>Search: <strong>{search}</strong></span>
+                  <button
+                    type="button"
+                    className="border-0 bg-transparent p-0 ms-1 text-dark d-inline-flex align-items-center"
+                    onClick={() => removeFilter("search")}
+                    title="Remove search filter"
+                  >
+                    <Icon name="cross-sm" />
+                  </button>
+                </Badge>
+              )}
+              {hasDateFilter && (
+                <Badge color="warning" className="badge-dim d-inline-flex align-items-center gap-1 py-1 px-2">
+                  <span>Date: <strong>{formatDateDisplay(startDate)} - {formatDateDisplay(endDate)}</strong></span>
+                  <button
+                    type="button"
+                    className="border-0 bg-transparent p-0 ms-1 text-warning d-inline-flex align-items-center"
+                    onClick={resetDateFilter}
+                    title="Remove date filter"
+                  >
+                    <Icon name="cross-sm" />
+                  </button>
+                </Badge>
+              )}
+              <Button
+                color="link"
+                size="sm"
+                className="btn-link text-danger text-decoration-none py-0 px-1 ms-auto fs-12px"
+                onClick={clearAllFilters}
+              >
+                Clear all
+              </Button>
+            </div>
+          )}
           <div className="card-inner-group">
             <div className="card-inner p-0">
               {isLoading ? (

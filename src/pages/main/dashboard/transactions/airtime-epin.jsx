@@ -16,6 +16,8 @@ const AirtimeEpinTransactionsPage = () => {
   const startDate = searchParams.get("startDate") ?? "";
   const endDate = searchParams.get("endDate") ?? "";
   const channel = searchParams.get("channel") ?? "";
+  const provider = searchParams.get("provider") ?? "";
+  const service = searchParams.get("service") ?? "";
 
   const { isLoading, data, error } = useGetAllTransactions(
     currentPage,
@@ -27,6 +29,8 @@ const AirtimeEpinTransactionsPage = () => {
     endDate,
     "",
     "airtime_epin",
+    provider,
+    service,
   );
 
   return (

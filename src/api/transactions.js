@@ -86,22 +86,52 @@ export const useGetWithdrawalTransactions = (page, limit, status, search, type, 
 };
 
 // Get Service Transactions
-export const useGetAllTransactions = (page, limit, status, search, channel, startDate, endDate, userId, txnType) => {
+export const useGetAllTransactions = (
+  page,
+  limit,
+  status,
+  search,
+  channel,
+  startDate,
+  endDate,
+  userId,
+  txnType,
+  provider,
+  service,
+  serviceType,
+) => {
   const statusTerm = status ? `&status=${status}` : "";
   const searchTerm = search ? `&search=${search}` : "";
   const channelTerm = channel ? `&channel=${channel}` : "";
   const startDateTerm = startDate ? `&startDate=${startDate}` : "";
   const endDateTerm = endDate ? `&endDate=${endDate}` : "";
   const userIdTerm = userId ? `&userId=${userId}` : "";
+  const providerTerm = provider ? `&provider=${encodeURIComponent(provider)}` : "";
+  const serviceTerm = service ? `&service=${encodeURIComponent(service)}` : "";
+  const serviceTypeTerm = serviceType ? `&serviceType=${encodeURIComponent(serviceType)}` : "";
   const txnTypeTerm = txnType ? `/${txnType}` : "";
 
   return useQuery(
-    ["getAllTransaction", page, limit, status, search, channel, startDate, endDate, userId],
+    [
+      "getAllTransaction",
+      page,
+      limit,
+      status,
+      search,
+      channel,
+      startDate,
+      endDate,
+      userId,
+      txnType,
+      provider,
+      service,
+      serviceType,
+    ],
     async () => {
       const request = await instance
         .get(
           BACKEND_URLS.transaction +
-            `${txnTypeTerm}?page=${page}&limit=${limit}${statusTerm}${searchTerm}${channelTerm}${startDateTerm}${endDateTerm}${userIdTerm}`,
+            `${txnTypeTerm}?page=${page}&limit=${limit}${statusTerm}${searchTerm}${channelTerm}${startDateTerm}${endDateTerm}${userIdTerm}${providerTerm}${serviceTerm}${serviceTypeTerm}`,
         )
         .then((res) => res?.data)
         .catch((err) => {

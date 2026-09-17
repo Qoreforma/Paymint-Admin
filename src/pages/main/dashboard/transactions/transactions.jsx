@@ -16,6 +16,9 @@ const TransactionsPage = () => {
   const endDate = searchParams.get("endDate") ?? "";
   const search = searchParams.get("search") ?? "";
   const channel = searchParams.get("channel") ?? "";
+  const provider = searchParams.get("provider") ?? "";
+  const service = searchParams.get("service") ?? "";
+  const serviceType = searchParams.get("serviceType") ?? "";
 
   const { isLoading, data, error } = useGetAllTransactions(
     currentPage,
@@ -25,6 +28,11 @@ const TransactionsPage = () => {
     channel,
     startDate,
     endDate,
+    "",
+    "",
+    provider,
+    service,
+    serviceType,
   );
 
   return (
