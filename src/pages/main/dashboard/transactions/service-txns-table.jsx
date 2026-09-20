@@ -426,16 +426,6 @@ export const ServiceTransactionTable = ({
     reset(formData);
   }, [formData, reset]);
 
-  // Keep modal details in sync when background query refetches
-  useEffect(() => {
-    if (view.details && editedId && data?.transactions?.length) {
-      const updatedItem = data.transactions.find((t) => t._id === editedId);
-      if (updatedItem) {
-        onEditClick(editedId);
-      }
-    }
-  }, [data, view.details, editedId]);
-
   //scroll off when sidebar shows
   useEffect(() => {
     view.add ? document.body.classList.add("toggle-shown") : document.body.classList.remove("toggle-shown");
