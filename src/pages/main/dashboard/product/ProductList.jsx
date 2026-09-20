@@ -33,6 +33,7 @@ import { formatter } from "../../../../utils/Utils";
 import LoadingSpinner from "../../../components/spinner";
 import {
   useGetAllProducts,
+  useGetProductFilterOptions,
   useToggleProductHot,
   useToggleProductStatus,
   useUpdateProduct,
@@ -43,7 +44,33 @@ import { useGetProviders, useGetServiceTypes } from "../../../../api/service-pro
 import { useGetServices } from "../../../../api/services";
 
 // ─── Constants ─────────────────────────────────────────────────────────────
-const DATA_TYPES = ["SME", "GIFTING", "DIRECT", "CORPORATE GIFTING", "AWOOF"];
+const DATA_TYPES = [
+  "SME",
+  "SME2",
+  "GIFTING",
+  "DIRECT",
+  "AWOOF DATA",
+  "CORPORATE GIFTING",
+  "DIRECT COUPON",
+  "SOCIAL",
+  "NIGHT",
+  "WEEKEND",
+  "BROADBAND",
+  "ALWAYSON",
+  "SPECIAL",
+];
+const DATA_CATEGORIES = [
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
+  "night",
+  "social",
+  "broadband",
+  "alwayson",
+  "weekend",
+  "other",
+];
 const VALIDITY_OPTIONS = [
   { label: "1 Day", value: "1" },
   { label: "7 Days", value: "7" },
@@ -340,10 +367,21 @@ const ProductDetailModal = ({ isOpen, toggle, product, onEdit }) => {
             </div>
           )}
 
+          {(product.category || product.attributes?.category) && (
+            <div className="col-sm-6">
+              <div className="border-bottom pb-2">
+                <span className="text-muted small d-block">Data Category</span>
+                <span className="fw-medium text-dark text-capitalize">
+                  {product.category || product.attributes?.category}
+                </span>
+              </div>
+            </div>
+          )}
+
           {product.productType && (
             <div className="col-sm-6">
               <div className="border-bottom pb-2">
-                <span className="text-muted small d-block">Category / Product Type</span>
+                <span className="text-muted small d-block">Product Type</span>
                 <span className="fw-medium text-dark">{product.productType}</span>
               </div>
             </div>
@@ -397,6 +435,8 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
       serviceCode?.includes("data") ||
       name?.includes("data") ||
       !!product.attributes?.dataType ||
+      !!product.attributes?.category ||
+      !!product.category ||
       !!product.dataSizeDisplay
     );
   }, [product]);
@@ -409,6 +449,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
     description: "",
     dataSizeDisplay: "",
     dataType: "",
+    category: "",
     validity: "",
     validityPeriod: "",
     isHot: false,
@@ -425,7 +466,8 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
         providerAmount: product.providerAmount || "",
         description: product.description || "",
         dataSizeDisplay: product.dataSizeDisplay || "",
-        dataType: product.attributes?.dataType || "",
+        dataType: product.attributes?.dataType || product.productType || "",
+        category: product.category || product.attributes?.category || "",
         validity: product.validity || "",
         validityPeriod: product.attributes?.validityPeriod || "",
         isHot: !!product.isHot,
@@ -459,9 +501,16 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
     if (isDataProduct) {
       payload.dataSizeDisplay = formData.dataSizeDisplay;
       payload.validity = formData.validity;
+      if (formData.category) {
+        payload.category = formData.category;
+      }
+      if (formData.dataType) {
+        payload.productType = formData.dataType;
+      }
       payload.attributes = {
         ...product.attributes,
         dataType: formData.dataType,
+        category: formData.category,
         validityPeriod: formData.validityPeriod,
       };
     }
@@ -551,7 +600,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
             {/* Data-Specific Fields */}
             {isDataProduct && (
               <>
-                <div className="col-md-3">
+                <div className="col-md-4">
                   <label className="form-label fw-bold small">Data Size (e.g. 1GB, 2.5GB)</label>
                   <input
                     type="text"
@@ -563,7 +612,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                   />
                 </div>
 
-                <div className="col-md-3">
+                <div className="col-md-4">
                   <label className="form-label fw-bold small">Data Type</label>
                   <select
                     name="dataType"
@@ -572,6 +621,9 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                     onChange={handleChange}
                   >
                     <option value="">Select Data Type</option>
+                    {formData.dataType && !DATA_TYPES.includes(formData.dataType) && (
+                      <option value={formData.dataType}>{formData.dataType}</option>
+                    )}
                     {DATA_TYPES.map((dt) => (
                       <option key={dt} value={dt}>
                         {dt}
@@ -580,7 +632,27 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                   </select>
                 </div>
 
-                <div className="col-md-3">
+                <div className="col-md-4">
+                  <label className="form-label fw-bold small">Category</label>
+                  <select
+                    name="category"
+                    className="form-select text-capitalize"
+                    value={formData.category}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select Category</option>
+                    {formData.category && !DATA_CATEGORIES.includes(formData.category.toLowerCase()) && (
+                      <option value={formData.category}>{formData.category}</option>
+                    )}
+                    {DATA_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="col-md-6">
                   <label className="form-label fw-bold small">Validity (Days)</label>
                   <input
                     type="text"
@@ -593,7 +665,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                   />
                 </div>
 
-                <div className="col-md-3">
+                <div className="col-md-6">
                   <label className="form-label fw-bold small">Validity Period</label>
                   <select
                     name="validityPeriod"
@@ -695,6 +767,7 @@ const ProductList = () => {
     serviceTypeId: "",
     serviceId: "",
     dataType: "",
+    category: "",
     validity: "",
     dataSize: "",
     isHot: "all",
@@ -720,6 +793,7 @@ const ProductList = () => {
     serviceTypeId: filters.serviceTypeId,
     serviceId: filters.serviceId,
     dataType: filters.dataType,
+    category: filters.category,
     validity: filters.validity,
     dataSize: filters.dataSize,
     isHot: filters.isHot,
@@ -731,6 +805,17 @@ const ProductList = () => {
   const { data: providersData } = useGetProviders(1, 200);
   const { data: serviceTypesData } = useGetServiceTypes();
   const { data: servicesData } = useGetServices();
+  const { data: filterOptionsData } = useGetProductFilterOptions();
+
+  const availableDataTypes = useMemo(() => {
+    const apiTypes = filterOptionsData?.data?.dataTypes || [];
+    return Array.from(new Set([...DATA_TYPES, ...apiTypes]));
+  }, [filterOptionsData]);
+
+  const availableCategories = useMemo(() => {
+    const apiCats = filterOptionsData?.data?.categories || [];
+    return Array.from(new Set([...DATA_CATEGORIES, ...apiCats]));
+  }, [filterOptionsData]);
 
   const products = data?.data?.products ?? [];
   const pagination = data?.data?.pagination ?? {};
@@ -1154,14 +1239,45 @@ const ProductList = () => {
                         {filters.dataType || "Data Type"}
                         <Icon name="chevron-down" className="ms-1" />
                       </DropdownToggle>
-                      <DropdownMenu container="body" style={{ zIndex: 1060 }}>
+                      <DropdownMenu container="body" style={{ maxHeight: 260, overflowY: "auto", zIndex: 1060 }}>
                         <DropdownItem onClick={() => setFilter("dataType", "")} className={!filters.dataType ? "fw-bold" : ""}>
                           All Data Types
                         </DropdownItem>
                         <DropdownItem divider />
-                        {DATA_TYPES.map((dt) => (
+                        {availableDataTypes.map((dt) => (
                           <DropdownItem key={dt} onClick={() => setFilter("dataType", dt)} className={filters.dataType === dt ? "fw-bold text-primary" : ""}>
                             {dt}
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
+
+                    {/* Category */}
+                    <UncontrolledDropdown>
+                      <DropdownToggle
+                        tag="button"
+                        className={`btn btn-sm ${filters.category ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                        id="filter-category-toggle"
+                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      >
+                        <Icon name="layers" className="me-1" />
+                        {filters.category
+                          ? filters.category.charAt(0).toUpperCase() + filters.category.slice(1)
+                          : "Category"}
+                        <Icon name="chevron-down" className="ms-1" />
+                      </DropdownToggle>
+                      <DropdownMenu container="body" style={{ maxHeight: 260, overflowY: "auto", zIndex: 1060 }}>
+                        <DropdownItem onClick={() => setFilter("category", "")} className={!filters.category ? "fw-bold" : ""}>
+                          All Categories
+                        </DropdownItem>
+                        <DropdownItem divider />
+                        {availableCategories.map((cat) => (
+                          <DropdownItem
+                            key={cat}
+                            onClick={() => setFilter("category", cat)}
+                            className={filters.category === cat ? "fw-bold text-primary" : ""}
+                          >
+                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
                           </DropdownItem>
                         ))}
                       </DropdownMenu>
@@ -1232,7 +1348,7 @@ const ProductList = () => {
                         className="btn btn-sm btn-outline-danger"
                         style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8, flexShrink: 0 }}
                         onClick={() => {
-                          setFilters({ search: "", providerId: [], serviceTypeId: "", serviceId: "", dataType: "", validity: "", dataSize: "", isHot: "all", status: "all", sortBy: "createdAt", sortOrder: "desc" });
+                          setFilters({ search: "", providerId: [], serviceTypeId: "", serviceId: "", dataType: "", category: "", validity: "", dataSize: "", isHot: "all", status: "all", sortBy: "createdAt", sortOrder: "desc" });
                           setPendingSearch("");
                           setSearchParams((sp) => { sp.set("page", 1); return sp; });
                         }}
@@ -1253,6 +1369,7 @@ const ProductList = () => {
                         if (key === "serviceTypeId") label = `Type: ${serviceTypeOptions.find((st) => st.value === val)?.label ?? val}`;
                         if (key === "serviceId") label = `Service: ${serviceOptions.find((s) => s.value === val)?.label ?? val}`;
                         if (key === "dataType") label = `Data Type: ${val}`;
+                        if (key === "category") label = `Category: ${val.charAt(0).toUpperCase() + val.slice(1)}`;
                         if (key === "dataSize") label = `Size: ${val}`;
                         if (key === "validity") label = `Validity: ${VALIDITY_OPTIONS.find((v) => v.value === val)?.label ?? val}`;
                         if (key === "isHot") label = val === "true" ? "🔥 Hot Only" : "Regular Only";
@@ -1636,12 +1753,26 @@ const ProductList = () => {
                                     {serviceType.name}
                                   </span>
                                 )}
-                                {item.attributes?.dataType && (
+                                {(item.attributes?.dataType || item.productType) && (
                                   <span
                                     className="badge"
                                     style={{ background: "#ecfdf5", color: "#059669", fontSize: 10 }}
                                   >
-                                    {item.attributes.dataType}
+                                    {item.attributes?.dataType || item.productType}
+                                  </span>
+                                )}
+                                {(item.category || item.attributes?.category) && (
+                                  <span
+                                    className="badge"
+                                    style={{
+                                      background: "#fef3c7",
+                                      color: "#b45309",
+                                      fontSize: 10,
+                                      fontWeight: 600,
+                                      textTransform: "capitalize",
+                                    }}
+                                  >
+                                    {item.category || item.attributes?.category}
                                   </span>
                                 )}
                               </div>

@@ -43,7 +43,33 @@ import LoadingSpinner from "../../../components/spinner";
 import AddProductModal from "./modals/add-product";
 
 // ─── Constants ────────────────────────────────────────────────
-const DATA_TYPES_PP = ["SME", "GIFTING", "DIRECT", "CORPORATE GIFTING", "AWOOF"];
+const DATA_TYPES_PP = [
+  "SME",
+  "SME2",
+  "GIFTING",
+  "DIRECT",
+  "AWOOF DATA",
+  "CORPORATE GIFTING",
+  "DIRECT COUPON",
+  "SOCIAL",
+  "NIGHT",
+  "WEEKEND",
+  "BROADBAND",
+  "ALWAYSON",
+  "SPECIAL",
+];
+const DATA_CATEGORIES_PP = [
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
+  "night",
+  "social",
+  "broadband",
+  "alwayson",
+  "weekend",
+  "other",
+];
 const VALIDITY_OPTIONS_PP = [
   "1 day", "7 days", "14 days", "30 days", "1 month", "2 months",
   "3 months", "6 months", "1 year", "weekly", "monthly", "yearly",
@@ -119,19 +145,20 @@ const ServiceProvidersProducts = () => {
   const [filterStatus,  setFilterStatus]  = useState("all");   // all | active | inactive
   const [filterHot,     setFilterHot]     = useState("all");   // all | hot | regular
   const [filterType,    setFilterType]    = useState("");
+  const [filterCategory,setFilterCategory]= useState("");
   const [filterValidity,setFilterValidity]= useState("");
   const [filterSize,    setFilterSize]    = useState("");
 
   const resetFilters = () => {
     setPendingSearch(""); setSearch("");
     setFilterStatus("all"); setFilterHot("all");
-    setFilterType(""); setFilterValidity(""); setFilterSize("");
+    setFilterType(""); setFilterCategory(""); setFilterValidity(""); setFilterSize("");
     setSearchParams((sp) => { sp.set("page", 1); return sp; });
   };
 
   const hasActiveFilters =
     search || filterStatus !== "all" || filterHot !== "all" ||
-    filterType || filterValidity || filterSize;
+    filterType || filterCategory || filterValidity || filterSize;
 
   const allProducts = useMemo(() => products?.data ?? [], [products]);
 
@@ -153,6 +180,10 @@ const ServiceProvidersProducts = () => {
         const dt = (item.attributes?.dataType || item.productType || "").toUpperCase();
         if (dt !== filterType.toUpperCase()) return false;
       }
+      if (filterCategory) {
+        const cat = (item.category || item.attributes?.category || "").toLowerCase();
+        if (cat !== filterCategory.toLowerCase()) return false;
+      }
       if (filterValidity) {
         const v = (item.validity || item.attributes?.validityPeriod || "").toLowerCase();
         if (!v.includes(filterValidity.toLowerCase())) return false;
@@ -163,7 +194,7 @@ const ServiceProvidersProducts = () => {
       }
       return true;
     });
-  }, [allProducts, search, filterStatus, filterHot, filterType, filterValidity, filterSize]);
+  }, [allProducts, search, filterStatus, filterHot, filterType, filterCategory, filterValidity, filterSize]);
 
   // Paginate filtered list client-side
   const paginatedProducts = useMemo(() => {
@@ -174,7 +205,7 @@ const ServiceProvidersProducts = () => {
   // ── Form / Edit state ─────────────────────────────────────
   const [formData, setFormData] = useState({
     name: "", amount: "", provider_amount: "",
-    dataSizeDisplay: "", validityPeriod: "", validity: "", dataType: "",
+    dataSizeDisplay: "", validityPeriod: "", validity: "", dataType: "", category: "",
   });
 
   const [view, setView] = useState({
@@ -185,7 +216,7 @@ const ServiceProvidersProducts = () => {
     setView({ add: t==="add", details: t==="details", edit: t==="edit", products: t==="products" });
 
   const resetForm = () =>
-    setFormData({ name:"", amount:"", provider_amount:"", dataSizeDisplay:"", validityPeriod:"", validity:"", dataType:"" });
+    setFormData({ name:"", amount:"", provider_amount:"", dataSizeDisplay:"", validityPeriod:"", validity:"", dataType:"", category:"" });
 
   const onFormSubmit = (form) => {
     updateProduct({
@@ -194,7 +225,14 @@ const ServiceProvidersProducts = () => {
       providerAmount: form.provider_amount,
       dataSizeDisplay: form.dataSizeDisplay,
       validity: form.validity,
-      attributes: { dataType: form.dataType, validityPeriod: form.validityPeriod },
+      category: form.category,
+      productType: form.dataType,
+      attributes: {
+        ...(allProducts.find((p) => p._id === editId)?.attributes || {}),
+        dataType: form.dataType,
+        category: form.category,
+        validityPeriod: form.validityPeriod,
+      },
     });
     setView({ add: false, details: false, edit: false, products: false });
     resetForm();
@@ -210,7 +248,8 @@ const ServiceProvidersProducts = () => {
           dataSizeDisplay: item?.dataSizeDisplay,
           validity: item?.validity,
           validityPeriod: item?.attributes?.validityPeriod,
-          dataType: item?.attributes?.dataType,
+          dataType: item?.attributes?.dataType || item?.productType || "",
+          category: item?.category || item?.attributes?.category || "",
         });
       }
     });
@@ -325,7 +364,7 @@ const ServiceProvidersProducts = () => {
                   {filterType || "Data Type"}
                   <Icon name="chevron-down" className="ms-1" />
                 </DropdownToggle>
-                <DropdownMenu style={{ zIndex: 1060 }}>
+                <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", zIndex: 1060 }}>
                   <DropdownItem
                     onClick={() => { setFilterType(""); paginate(1); }}
                     className={!filterType ? "fw-bold" : ""}
@@ -340,6 +379,38 @@ const ServiceProvidersProducts = () => {
                       className={filterType === dt ? "fw-bold text-primary" : ""}
                     >
                       {dt}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </UncontrolledDropdown>
+
+              {/* Category */}
+              <UncontrolledDropdown>
+                <DropdownToggle
+                  tag="button"
+                  className={`btn btn-sm ${filterCategory ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                  style={{ padding: "8px 14px", fontSize: 13, fontWeight: 500, borderRadius: 8, height: 40 }}
+                  id="pp-filter-category"
+                >
+                  <Icon name="layers" className="me-1" />
+                  {filterCategory ? (filterCategory.charAt(0).toUpperCase() + filterCategory.slice(1)) : "Category"}
+                  <Icon name="chevron-down" className="ms-1" />
+                </DropdownToggle>
+                <DropdownMenu style={{ maxHeight: 260, overflowY: "auto", zIndex: 1060 }}>
+                  <DropdownItem
+                    onClick={() => { setFilterCategory(""); paginate(1); }}
+                    className={!filterCategory ? "fw-bold" : ""}
+                  >
+                    All Categories
+                  </DropdownItem>
+                  <DropdownItem divider />
+                  {DATA_CATEGORIES_PP.map((cat) => (
+                    <DropdownItem
+                      key={cat}
+                      onClick={() => { setFilterCategory(cat); paginate(1); }}
+                      className={filterCategory === cat ? "fw-bold text-primary" : ""}
+                    >
+                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
                     </DropdownItem>
                   ))}
                 </DropdownMenu>
@@ -500,6 +571,30 @@ const ServiceProvidersProducts = () => {
                                   />
                                   <span className="title d-none d-md-inline">{item.name}</span>
                                 </span>
+                                <div className="d-flex flex-wrap gap-1 mt-1">
+                                  {(item.attributes?.dataType || item.productType) && (
+                                    <span
+                                      className="badge"
+                                      style={{ background: "#ecfdf5", color: "#059669", fontSize: 10 }}
+                                    >
+                                      {item.attributes?.dataType || item.productType}
+                                    </span>
+                                  )}
+                                  {(item.category || item.attributes?.category) && (
+                                    <span
+                                      className="badge"
+                                      style={{
+                                        background: "#fef3c7",
+                                        color: "#b45309",
+                                        fontSize: 10,
+                                        fontWeight: 600,
+                                        textTransform: "capitalize",
+                                      }}
+                                    >
+                                      {item.category || item.attributes?.category}
+                                    </span>
+                                  )}
+                                </div>
                               </DataTableRow>
                               <DataTableRow>
                                 <span>{item.dataSizeDisplay || "—"}</span>
@@ -696,6 +791,56 @@ const ServiceProvidersProducts = () => {
                             {...register("validity")}
                             defaultValue={formData.validity}
                           />
+                        </div>
+                      </div>
+                    </Col>
+                    <Col md="12">
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="pp-data-type">
+                          Data Type
+                        </label>
+                        <div className="form-control-wrap">
+                          <select
+                            id="pp-data-type"
+                            className="form-select"
+                            {...register("dataType")}
+                            defaultValue={formData.dataType}
+                          >
+                            <option value="">Select Data Type</option>
+                            {formData.dataType && !DATA_TYPES_PP.includes(formData.dataType) && (
+                              <option value={formData.dataType}>{formData.dataType}</option>
+                            )}
+                            {DATA_TYPES_PP.map((dt) => (
+                              <option key={dt} value={dt}>
+                                {dt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </Col>
+                    <Col md="12">
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="pp-category">
+                          Category
+                        </label>
+                        <div className="form-control-wrap">
+                          <select
+                            id="pp-category"
+                            className="form-select text-capitalize"
+                            {...register("category")}
+                            defaultValue={formData.category}
+                          >
+                            <option value="">Select Category</option>
+                            {formData.category && !DATA_CATEGORIES_PP.includes(formData.category.toLowerCase()) && (
+                              <option value={formData.category}>{formData.category}</option>
+                            )}
+                            {DATA_CATEGORIES_PP.map((cat) => (
+                              <option key={cat} value={cat}>
+                                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                     </Col>

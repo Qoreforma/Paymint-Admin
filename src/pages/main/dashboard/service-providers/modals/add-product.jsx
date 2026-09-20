@@ -59,12 +59,26 @@ const AddProductModal = ({ modal, closeModal, formData, isEdit }) => {
   }, [productTypes]);
 
   const product_data_options = useMemo(() => {
-    if (productDataTypes) {
+    if (productDataTypes && productDataTypes?.data?.length > 0) {
       return productDataTypes?.data?.map((item) => ({ label: item, value: item }));
     } else {
-      return [];
+      return [
+        "SME",
+        "SME2",
+        "GIFTING",
+        "DIRECT",
+        "AWOOF DATA",
+        "CORPORATE GIFTING",
+        "DIRECT COUPON",
+        "SOCIAL",
+        "NIGHT",
+        "WEEKEND",
+        "BROADBAND",
+        "ALWAYSON",
+        "SPECIAL",
+      ].map((item) => ({ label: item, value: item }));
     }
-  }, [productTypes]);
+  }, [productDataTypes]);
 
   const onSubmit = (data) => {
     const dataToSend = {
@@ -76,7 +90,8 @@ const AddProductModal = ({ modal, closeModal, formData, isEdit }) => {
       type: data.type.value,
     };
 
-    addProduct(dataToSend?.type === "data" ? dataToSend : { ...dataToSend, product_type: data.product_type.value });
+    const productTypeValue = data.product_type?.value || data.product_type;
+    addProduct(productTypeValue ? { ...dataToSend, product_type: productTypeValue } : dataToSend);
   };
 
   const types = watch("type");

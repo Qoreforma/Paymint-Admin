@@ -322,5 +322,5 @@ export const useDeleteReview = (reviewId, productId) => {
   );
 };
 
-export { useGetProductTypes, useGetProductDataTypes } from "../generics";
+export { useGetProductTypes, useGetProductDataTypes, useGetProductCategories } from "../generics";
 

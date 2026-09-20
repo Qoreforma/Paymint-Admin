@@ -45,12 +45,26 @@ const AddProductModal = ({ modal, closeModal, formData, isEdit }) => {
   console.log(productTypes);
 
   const product_data_options = useMemo(() => {
-    if (productDataTypes) {
+    if (productDataTypes && productDataTypes?.data?.length > 0) {
       return productDataTypes?.data?.map((item) => ({ label: item, value: item }));
     } else {
-      return [];
+      return [
+        "SME",
+        "SME2",
+        "GIFTING",
+        "DIRECT",
+        "AWOOF DATA",
+        "CORPORATE GIFTING",
+        "DIRECT COUPON",
+        "SOCIAL",
+        "NIGHT",
+        "WEEKEND",
+        "BROADBAND",
+        "ALWAYSON",
+        "SPECIAL",
+      ].map((item) => ({ label: item, value: item }));
     }
-  }, [productTypes]);
+  }, [productDataTypes]);
 
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadedImages, setUploadedImages] = useState([]);

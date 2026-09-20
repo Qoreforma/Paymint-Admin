@@ -83,6 +83,25 @@ export const useGetProductDataTypes = () => {
   );
 };
 
+export const useGetProductCategories = () => {
+  return useQuery(
+    ["product-categories"],
+    async () => {
+      try {
+        const response = await instance.get("/products/types/categories");
+        return response.data;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+    {
+      retry: 1,
+      retryDelay: 3000,
+      refetchOnWindowFocus: false,
+    }
+  );
+};
+
 export const useGetBanks = () => {
   return useQuery(["banks"], async () => {
     try {
