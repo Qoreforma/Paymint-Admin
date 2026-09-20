@@ -14,7 +14,7 @@ import {
   NavItem,
   NavLink,
 } from "reactstrap";
-import { useGetAllTransactions } from "../../../../api/transactions";
+import { useGetAllTransactions, useRequeryTransaction } from "../../../../api/transactions";
 import {
   Block,
   Button,
@@ -89,6 +89,7 @@ export const TransactionTable = ({ purpose, userId, showStats }) => {
   const [statusToUpdate, setStatusToUpdate] = useState("");
   const [onSearch, setonSearch] = useState(false);
   const [filters, setfilters] = useState({});
+  const { mutate: requeryTransaction, isLoading: isRequerying } = useRequeryTransaction();
   const {
     register,
     handleSubmit,
@@ -162,6 +163,8 @@ export const TransactionTable = ({ purpose, userId, showStats }) => {
         }
 
         setFormData({
+          _id: item?.id || item?._id,
+          id: item?.id || item?._id,
           reference: item?.reference,
           amount: item?.amount,
           type: item?.type,
@@ -442,6 +445,21 @@ export const TransactionTable = ({ purpose, userId, showStats }) => {
                                           <span>View</span>
                                         </DropdownItem>
                                       </li>
+                                      {(item?.status === "pending" || item?.status === "processing") && (
+                                        <li>
+                                          <DropdownItem
+                                            tag="a"
+                                            href="#requery"
+                                            onClick={(ev) => {
+                                              ev.preventDefault();
+                                              requeryTransaction(item?.id || item?._id);
+                                            }}
+                                          >
+                                            <Icon name="reload"></Icon>
+                                            <span>Requery Provider</span>
+                                          </DropdownItem>
+                                        </li>
+                                      )}
                                       {item?.status === "pending" && (
                                         <>
                                           <li>
@@ -539,8 +557,27 @@ export const TransactionTable = ({ purpose, userId, showStats }) => {
               }}
             ></Icon>
           </a>
-          <div className="nk-modal-head">
-            <h4 className="nk-modal-title title">Transaction Details</h4>
+          <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div className="nk-modal-head">
+              <h4 className="nk-modal-title title">Transaction Details</h4>
+            </div>
+            {(formData?.status === "pending" || formData?.status === "processing") && (
+              <div>
+                <Button
+                  color="primary"
+                  size="sm"
+                  className="btn-dim d-inline-flex align-items-center gap-1"
+                  disabled={isRequerying}
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    requeryTransaction(formData?.id || formData?._id);
+                  }}
+                >
+                  <Icon name="reload" className={isRequerying ? "icon-spin" : ""} />
+                  <span>{isRequerying ? "Requerying..." : "Requery Provider"}</span>
+                </Button>
+              </div>
+            )}
           </div>
           <div className="nk-tnx-details mt-sm-3">
             <Row className="gy-2">

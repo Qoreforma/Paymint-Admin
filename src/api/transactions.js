@@ -252,6 +252,40 @@ export const useReverseTransaction = (transactionID) => {
   );
 };
 
+export const useRequeryTransaction = (initialTransactionID) => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (transactionID) => {
+      const id = transactionID || initialTransactionID;
+      return toast.promise(
+        instance
+          .post(`/transactions/${id}/retry`)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err?.response?.data || err;
+          }),
+        {
+          success: (data) => data?.message || "Requery completed successfully",
+          loading: "Requerying provider...",
+          error: (error) => error?.message || "Requery failed",
+        },
+        {
+          style: {
+            minWidth: "180px",
+          },
+        },
+      );
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["getAllTransaction"]);
+        queryClient.invalidateQueries(["getWalletTransactions"]);
+        queryClient.invalidateQueries(["getServiceTransactionsOverview"]);
+      },
+    },
+  );
+};
+
 export const useUpdateTransaction = (transactionID, status) => {
   const queryClient = useQueryClient();
   return useMutation(

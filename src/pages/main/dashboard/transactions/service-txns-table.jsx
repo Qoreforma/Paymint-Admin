@@ -14,7 +14,7 @@ import {
   NavItem,
   NavLink,
 } from "reactstrap";
-import { useGetServiceTransactionsOverview } from "../../../../api/transactions";
+import { useGetServiceTransactionsOverview, useRequeryTransaction } from "../../../../api/transactions";
 import {
   Block,
   Button,
@@ -221,6 +221,7 @@ export const ServiceTransactionTable = ({
   const [statusToUpdate, setStatusToUpdate] = useState("");
   const [onSearch, setonSearch] = useState(false);
   const [filters, setfilters] = useState({});
+  const { mutate: requeryTransaction, isLoading: isRequerying } = useRequeryTransaction();
   const {
     register,
     handleSubmit,
@@ -302,6 +303,8 @@ export const ServiceTransactionTable = ({
         }
 
         setFormData({
+          _id: item?._id,
+          id: item?._id,
           reference: item?.reference,
           amount: item?.amount,
           type: item?.type,
@@ -422,6 +425,16 @@ export const ServiceTransactionTable = ({
   useEffect(() => {
     reset(formData);
   }, [formData, reset]);
+
+  // Keep modal details in sync when background query refetches
+  useEffect(() => {
+    if (view.details && editedId && data?.transactions?.length) {
+      const updatedItem = data.transactions.find((t) => t._id === editedId);
+      if (updatedItem) {
+        onEditClick(editedId);
+      }
+    }
+  }, [data, view.details, editedId]);
 
   //scroll off when sidebar shows
   useEffect(() => {
@@ -882,6 +895,21 @@ export const ServiceTransactionTable = ({
                                           <span>View</span>
                                         </DropdownItem>
                                       </li>
+                                      {(item?.status === "pending" || item?.status === "processing") && hasPermission("transactions.update") && (
+                                        <li>
+                                          <DropdownItem
+                                            tag="a"
+                                            href="#requery"
+                                            onClick={(ev) => {
+                                              ev.preventDefault();
+                                              requeryTransaction(item?._id);
+                                            }}
+                                          >
+                                            <Icon name="reload"></Icon>
+                                            <span>Requery Provider</span>
+                                          </DropdownItem>
+                                        </li>
+                                      )}
                                       {item?.status === "pending" && hasPermission("transactions.update") && (
                                         <>
                                           <li>
@@ -979,16 +1007,32 @@ export const ServiceTransactionTable = ({
               }}
             ></Icon>
           </a>
-          <div className="d-flex">
+          <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div className="nk-modal-head">
               <h4 className="nk-modal-title title">Transaction Details</h4>
             </div>
+            {(formData?.status === "pending" || formData?.status === "processing") && hasPermission("transactions.update") && (
+              <div>
+                <Button
+                  color="primary"
+                  size="sm"
+                  className="btn-dim d-inline-flex align-items-center gap-1"
+                  disabled={isRequerying}
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    requeryTransaction(editedId || formData?._id || formData?.id);
+                  }}
+                >
+                  <Icon name="reload" className={isRequerying ? "icon-spin" : ""} />
+                  <span>{isRequerying ? "Requerying..." : "Requery Provider"}</span>
+                </Button>
+              </div>
+            )}
             <p
               style={{
-                margin: "0 auto",
                 fontSize: "24px",
               }}
-              className="fw-bold text-primary"
+              className="fw-bold text-primary mb-0 ms-auto"
             >
               Total:{" "}
               {formatter("NGN").format(
