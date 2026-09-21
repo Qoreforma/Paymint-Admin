@@ -151,6 +151,31 @@ export const useSyncProviderProducts = (id) => {
   );
 };
 
+export const useDeleteProviderProducts = (id) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    () => {
+      try {
+        const response = toast.promise(instance.delete(BACKEND_URLS.providers + `/${id}/products`), {
+          success: (data) => data.message || "All products deleted successfully",
+          loading: "Deleting products...",
+          error: (error) => error?.response?.data?.message || "Failed to delete products.",
+        });
+        return response;
+      } catch (error) {
+        console.error(error);
+        Promise.reject(error);
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["Providers"]);
+      },
+    },
+  );
+};
+
 export const useUpdateProviders = (id) => {
   const queryClient = useQueryClient();
 

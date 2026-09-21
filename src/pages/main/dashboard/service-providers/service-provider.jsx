@@ -8,6 +8,7 @@ import {
   useToggleProviders,
   useUpdateProviders,
   useToggleProviderServiceType,
+  useDeleteProviderProducts,
 } from "../../../../api/service-providers";
 import {
   Block,
@@ -55,6 +56,7 @@ const ServiceProviders = () => {
 
   const { isLoading, data: providers } = useGetProviders(currentPage, itemsPerPage);
   const { mutate: syncProviderProducts } = useSyncProviderProducts(editId);
+  const { mutate: deleteProviderProducts } = useDeleteProviderProducts(editId);
   const { mutate: updateStatus } = useToggleProviders(editId);
   const { mutate: deleteProvider } = useDeleteProviders(editId);
   const { mutate: updateProvider } = useUpdateProviders(editId);
@@ -524,21 +526,44 @@ const ServiceProviders = () => {
                                         </DropdownItem>
                                       </li>
                                       {item?.hasSync && hasPermission("system.sync_providers") && (
-                                        <li>
-                                          <DropdownItem
-                                            tag="a"
-                                            href="#"
-                                            onClick={(ev) => {
-                                              ev.preventDefault();
-                                              ev.stopPropagation();
-                                              setEditedId(item._id);
-                                              syncProviderProducts({ forceUpdate: true });
-                                            }}
-                                          >
-                                            <Icon name="update"></Icon>
-                                            <span>Sync Products</span>
-                                          </DropdownItem>
-                                        </li>
+                                        <>
+                                          <li>
+                                            <DropdownItem
+                                              tag="a"
+                                              href="#"
+                                              onClick={(ev) => {
+                                                ev.preventDefault();
+                                                ev.stopPropagation();
+                                                setEditedId(item._id);
+                                                syncProviderProducts({ forceUpdate: true });
+                                              }}
+                                            >
+                                              <Icon name="update"></Icon>
+                                              <span>Sync Products</span>
+                                            </DropdownItem>
+                                          </li>
+                                          <li>
+                                            <DropdownItem
+                                              tag="a"
+                                              href="#"
+                                              onClick={(ev) => {
+                                                ev.preventDefault();
+                                                ev.stopPropagation();
+                                                if (window.confirm("Are you sure you want to delete all products for this provider? This action cannot be undone and will empty all service types.")) {
+                                                  setEditedId(item._id);
+                                                  // Use setTimeout to ensure state is updated before mutation is called if needed, but following existing pattern
+                                                  setTimeout(() => {
+                                                    deleteProviderProducts();
+                                                  }, 0);
+                                                }
+                                              }}
+                                              className="text-danger"
+                                            >
+                                              <Icon name="trash"></Icon>
+                                              <span>Clear All Products</span>
+                                            </DropdownItem>
+                                          </li>
+                                        </>
                                       )}
                                     </ul>
                                   </DropdownMenu>
