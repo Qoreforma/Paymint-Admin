@@ -36,13 +36,13 @@ export const DataTableHead = ({ ...props }) => {
   return <div className="nk-tb-item nk-tb-head">{props.children}</div>;
 };
 
-export const DataTableRow = ({ className, size, ...props }) => {
+export const DataTableRow = ({ className, size, style, ...props }) => {
   const rowClass = classNames({
     "nk-tb-col": true,
     [`${className}`]: className,
     [`tb-col-${size}`]: size,
   });
-  return <div className={rowClass}>{props.children}</div>;
+  return <div className={rowClass} style={style}>{props.children}</div>;
 };
 
 export const DataTableItem = ({ className, onClick, style, ...props }) => {

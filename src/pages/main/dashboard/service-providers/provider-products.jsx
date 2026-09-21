@@ -523,7 +523,7 @@ const ServiceProvidersProducts = () => {
                           <DataTableRow>
                             <span>S/N</span>
                           </DataTableRow>
-                          <DataTableRow>
+                          <DataTableRow style={{ width: 250, minWidth: 250 }}>
                             <span>Name</span>
                           </DataTableRow>
                           <DataTableRow>
@@ -562,7 +562,7 @@ const ServiceProvidersProducts = () => {
                               <DataTableRow>
                                 <span>{globalIdx}</span>
                               </DataTableRow>
-                              <DataTableRow>
+                              <DataTableRow style={{ width: 250, minWidth: 250 }}>
                                 <span className="tb-product">
                                   <img
                                     src={item.logo ? item.logo : NoIcon}

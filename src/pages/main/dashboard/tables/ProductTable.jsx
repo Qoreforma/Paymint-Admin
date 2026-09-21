@@ -190,7 +190,7 @@ const ProductTable = ({ title = "All Products", tableData, loading, itemsPerPage
                 </DataTableRow>
 
                 {/* TABLE HEADING */}
-                <DataTableRow>
+                <DataTableRow style={{ width: 250, minWidth: 250 }}>
                   <span className="sub-text">Name</span>
                 </DataTableRow>
                 <DataTableRow>
@@ -229,7 +229,7 @@ const ProductTable = ({ title = "All Products", tableData, loading, itemsPerPage
                   <DataTableRow size="sm" className="nk-tb-col-check">
                     <p>{idx + 1}.</p>
                   </DataTableRow>
-                  <DataTableRow>
+                  <DataTableRow style={{ width: 250, minWidth: 250 }}>
                     <span className="tb-product">
                       <img
                         src={
