@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Modal, ModalBody, ModalHeader, ModalFooter } from "reactstrap";
+import { Modal, ModalBody, ModalHeader, ModalFooter, Spinner } from "reactstrap";
 import { Button, Col, Row } from "../../../../components/Component";
 import { useAddTreasuryEntry } from "../../../../api/treasury";
 import toast from "react-hot-toast";
-import LoadingSpinner from "../../../components/spinner";
 
 const AddEntryModal = ({ isOpen, toggle }) => {
   const [type, setType] = useState("EXPENSE");
@@ -166,11 +165,29 @@ const AddEntryModal = ({ isOpen, toggle }) => {
         </form>
       </ModalBody>
       <ModalFooter className="bg-light">
-        <Button color="light" onClick={toggle}>
+        <Button color="light" onClick={toggle} disabled={isLoading}>
           Cancel
         </Button>
-        <Button color="primary" onClick={handleSave} disabled={isLoading}>
-          {isLoading ? <LoadingSpinner size="sm" /> : "Save Entry"}
+        <Button
+          color="primary"
+          onClick={handleSave}
+          disabled={isLoading}
+          style={{
+            minWidth: "115px",
+            height: "38px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {isLoading ? (
+            <>
+              <Spinner size="sm" color="light" className="me-1" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            "Save Entry"
+          )}
         </Button>
       </ModalFooter>
     </Modal>

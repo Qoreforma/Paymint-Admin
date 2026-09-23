@@ -1162,6 +1162,7 @@ const CampaignsPage = () => {
           toggle={() => setCreateModalOpen(!createModalOpen)}
           size="lg"
           backdrop="static"
+          className="campaign-create-modal"
         >
           <ModalHeader toggle={() => setCreateModalOpen(false)}>
             Create Campaign & Email Content
@@ -1169,62 +1170,54 @@ const CampaignsPage = () => {
           <ModalBody>
             <form onSubmit={handleCreateSubmit}>
               {/* Campaign Details */}
-              <div className="row g-3 mb-3">
-                <Col md="6">
-                  <label className="form-label fw-bold">Campaign Name</label>
+              <div className="campaign-form-grid">
+                <div className="campaign-form-field">
+                  <label>Campaign Name</label>
                   <input
                     type="text"
-                    className="form-control"
                     placeholder="e.g. Crypto & Giftcard Q4 Re-engagement"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                   />
-                </Col>
-                <Col md="6">
-                  <label className="form-label fw-bold">Sender Name</label>
+                </div>
+                <div className="campaign-form-field">
+                  <label>Sender Name</label>
                   <input
                     type="text"
-                    className="form-control"
                     placeholder="e.g. PayMint"
                     value={formData.senderName}
                     onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
                     required
                   />
-                </Col>
-                <Col md="6">
-                  <label className="form-label fw-bold d-flex align-items-center gap-1">
-                    <span>Sending Account / Brevo Channel</span>
-                    <Badge color={formData.sendingAccount === "dedicated" ? "success" : "primary"} className="fs-10px">
+                </div>
+                <div className="campaign-form-field">
+                  <label style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    Sending Account / Brevo Channel
+                    <Badge color={formData.sendingAccount === "dedicated" ? "success" : "primary"} style={{ fontSize: "10px" }}>
                       {formData.sendingAccount === "dedicated" ? "Dedicated (300/day)" : "Platform Shared (200/day)"}
                     </Badge>
                   </label>
                   <select
-                    className="form-select"
                     value={formData.sendingAccount}
                     onChange={(e) => {
                       const acc = e.target.value;
-                      setFormData({
-                        ...formData,
-                        sendingAccount: acc,
-                        dailyLimit: acc === "primary" ? 200 : 300,
-                      });
+                      setFormData({ ...formData, sendingAccount: acc, dailyLimit: acc === "primary" ? 200 : 300 });
                     }}
                   >
                     <option value="dedicated">🚀 Dedicated Campaign Brevo (Account 2 - Full 300/day Isolated)</option>
                     <option value="primary">🛡️ Primary Platform Brevo (Account 1 - 200/day + Night Sweep)</option>
                   </select>
-                  <small className="text-soft">
+                  <div className="field-hint">
                     {formData.sendingAccount === "dedicated"
                       ? "Uses Account 2 credentials (100% reserved for campaigns, zero risk to transactional OTPs)."
                       : "Uses Primary Brevo account (200 daytime cap + 11:30 PM sweep, preserves 50 OTP reserve)."}
-                  </small>
-                </Col>
-                <Col md="6">
-                  <label className="form-label fw-bold">Daily Throttling Limit</label>
+                  </div>
+                </div>
+                <div className="campaign-form-field">
+                  <label>Daily Throttling Limit</label>
                   <input
                     type="number"
-                    className="form-control"
                     value={formData.dailyLimit}
                     min="1"
                     max="10000"
@@ -1236,30 +1229,29 @@ const CampaignsPage = () => {
                     }
                     required
                   />
-                  <small className="text-soft">
+                  <div className="field-hint">
                     {formData.sendingAccount === "dedicated" ? "Recommended limit: 300 / day" : "Recommended limit: 200 / day"}
-                  </small>
-                </Col>
-                <Col md="12">
-                  <label className="form-label fw-bold">Email Subject</label>
+                  </div>
+                </div>
+                <div className="campaign-form-field full-width">
+                  <label>Email Subject</label>
                   <input
                     type="text"
-                    className="form-control"
                     placeholder="e.g. Trade Crypto & Gift Cards on PayMint with Zero Fees"
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     required
                   />
-                </Col>
+                </div>
               </div>
 
               {/* Multi-Source Database Slicing Box */}
-              <div className="card card-bordered p-3 mb-3 bg-light">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h6 className="mb-0">
-                    <Icon name="layers" className="me-1 text-primary" />
+              <div className="campaign-db-section">
+                <div className="campaign-db-section-header">
+                  <p className="campaign-db-section-title">
+                    <Icon name="layers" style={{ color: "#0f3dac" }} />
                     Select Recipient Slices from Databases
-                  </h6>
+                  </p>
                   <Button
                     color="primary"
                     size="sm"
@@ -1272,7 +1264,7 @@ const CampaignsPage = () => {
                     {isPreviewing ? "Calculating..." : "Preview Deduplication & Slices"}
                   </Button>
                 </div>
-                <p className="text-soft fs-12px mb-3">
+                <p className="campaign-db-section-desc">
                   Specify how many contacts to slice from each database. Uncontacted contacts are prioritized. Duplicate emails across databases and unsubscribes are automatically filtered out.
                 </p>
 
@@ -1357,18 +1349,17 @@ const CampaignsPage = () => {
               </div>
 
               {/* Email Content Section with Banners & Live Preview */}
-              <div className="card card-bordered p-3 mb-3">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h6 className="mb-0">
-                    <Icon name="mail" className="me-1 text-primary" />
+              <div className="campaign-email-section">
+                <div className="campaign-email-section-header">
+                  <p className="campaign-email-section-title">
+                    <Icon name="mail" style={{ color: "#0f3dac" }} />
                     Email Message Content & Banners
-                  </h6>
+                  </p>
                   {/* Template Quick Select */}
-                  <div className="d-flex align-items-center gap-1">
-                    <span className="fs-11px text-soft">Template:</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ fontSize: "11px", color: "#6b7280" }}>Template:</span>
                     <select
-                      className="form-select form-select-sm"
-                      style={{ width: "auto" }}
+                      style={{ padding: "4px 8px", fontSize: "12px", border: "1px solid #d1d5db", borderRadius: "6px", background: "#fff" }}
                       onChange={(e) => {
                         const tpl = EMAIL_TEMPLATES[e.target.value];
                         if (tpl) {
@@ -1385,8 +1376,8 @@ const CampaignsPage = () => {
                 </div>
 
                 {/* Banner Status Chips */}
-                <div className="d-flex flex-wrap gap-2 align-items-center p-2 mb-2 bg-light rounded fs-12px">
-                  <span className="fw-bold text-dark">Active Banners:</span>
+                <div className="campaign-banner-status-bar">
+                  <span style={{ fontWeight: 700, color: "#374151" }}>Active Banners:</span>
                   <Badge color={banners?.logoUrl ? "success" : "light"} className="border">
                     {banners?.logoUrl ? "✓ Logo Set" : "Logo Not Configured"}
                   </Badge>
@@ -1399,9 +1390,9 @@ const CampaignsPage = () => {
                 </div>
 
                 {/* Tag insertion chips */}
-                <div className="mb-2">
-                  <div className="fs-11px text-soft mb-1">Click a tag to insert into your email copy:</div>
-                  <div className="d-flex flex-wrap gap-1">
+                <div>
+                  <div className="campaign-tag-chips-label">Click a tag to insert into your email copy:</div>
+                  <div className="campaign-tag-chips-row">
                     <button
                       type="button"
                       className="campaign-tag-chip"
@@ -1472,76 +1463,69 @@ const CampaignsPage = () => {
                 </div>
 
                 {/* Editor vs Live Preview Tabs */}
-                <Nav tabs className="mb-2">
-                  <NavItem>
-                    <NavLink
-                      className={editorTab === "edit" ? "active" : ""}
-                      onClick={() => setEditorTab("edit")}
-                      style={{ cursor: "pointer", padding: "6px 14px", fontSize: "13px" }}
-                    >
-                      <Icon name="code" className="me-1" />
-                      Edit HTML / Content
-                    </NavLink>
-                  </NavItem>
-                  <NavItem>
-                    <NavLink
-                      className={editorTab === "preview" ? "active" : ""}
-                      onClick={() => setEditorTab("preview")}
-                      style={{ cursor: "pointer", padding: "6px 14px", fontSize: "13px" }}
-                    >
-                      <Icon name="eye" className="me-1" />
-                      Live Email Preview
-                    </NavLink>
-                  </NavItem>
-                </Nav>
+                <div className="campaign-editor-tabs">
+                  <button
+                    type="button"
+                    className={`campaign-editor-tab${editorTab === "edit" ? " active" : ""}`}
+                    onClick={() => setEditorTab("edit")}
+                  >
+                    <Icon name="code" />
+                    Edit HTML / Content
+                  </button>
+                  <button
+                    type="button"
+                    className={`campaign-editor-tab${editorTab === "preview" ? " active" : ""}`}
+                    onClick={() => setEditorTab("preview")}
+                  >
+                    <Icon name="eye" />
+                    Live Email Preview
+                  </button>
+                </div>
 
-                <TabContent activeTab={editorTab}>
-                  <TabPane tabId="edit">
+                {editorTab === "edit" ? (
+                  <div>
                     <textarea
-                      className="form-control"
-                      rows="9"
-                      style={{ fontFamily: "monospace", fontSize: "13px" }}
+                      className="campaign-html-editor"
                       value={formData.htmlContent}
                       onChange={(e) => setFormData({ ...formData, htmlContent: e.target.value })}
                       required
                     />
-                  </TabPane>
-                  <TabPane tabId="preview">
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      background: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "8px",
+                      padding: "16px",
+                      maxHeight: "260px",
+                      overflowY: "auto",
+                    }}
+                  >
                     <div
                       style={{
-                        background: "#f8fafc",
+                        background: "#ffffff",
                         border: "1px solid #e2e8f0",
                         borderRadius: "8px",
-                        padding: "24px",
-                        maxHeight: "380px",
-                        overflowY: "auto",
+                        padding: "20px",
+                        maxWidth: "560px",
+                        margin: "0 auto",
+                        boxShadow: "0 1px 3px 0 rgba(0,0,0,0.08)",
                       }}
-                    >
-                      <div
-                        style={{
-                          background: "#ffffff",
-                          border: "1px solid #e2e8f0",
-                          borderRadius: "8px",
-                          padding: "30px",
-                          maxWidth: "600px",
-                          margin: "0 auto",
-                          boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
-                        }}
-                        dangerouslySetInnerHTML={{
-                          __html: renderPreviewHtml(formData.htmlContent),
-                        }}
-                      />
-                    </div>
-                  </TabPane>
-                </TabContent>
+                      dangerouslySetInnerHTML={{
+                        __html: renderPreviewHtml(formData.htmlContent),
+                      }}
+                    />
+                  </div>
+                )}
 
-                <small className="text-soft mt-2 d-block fs-11px">
+                <div style={{ fontSize: "11px", color: "#6b7280", marginTop: "0.5rem" }}>
                   A compliant 1-click unsubscribe footer and conversion tracking tags (
                   <code>pm_cid</code>, <code>pm_src</code>) are automatically attached to all links.
-                </small>
+                </div>
               </div>
 
-              <div className="d-flex justify-content-end gap-2 mt-4">
+              <div className="campaign-modal-footer">
                 <Button color="light" type="button" onClick={() => setCreateModalOpen(false)}>
                   Cancel
                 </Button>
@@ -1559,6 +1543,7 @@ const CampaignsPage = () => {
           toggle={() => setEditModalOpen(!editModalOpen)}
           size="lg"
           backdrop="static"
+          className="campaign-edit-modal"
         >
           <ModalHeader toggle={() => setEditModalOpen(false)}>
             Edit Campaign Content & Settings

@@ -370,12 +370,15 @@ export const ServiceTransactionTable = ({
 
   const formatDateDisplay = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    const cleanDate = dateString.includes("T") ? dateString : `${dateString}T00:00:00`;
+    const date = new Date(cleanDate);
+    return isNaN(date.getTime())
+      ? dateString
+      : date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
   };
 
   const resetDateFilter = () => {
@@ -492,7 +495,9 @@ export const ServiceTransactionTable = ({
                 >
                   <Icon name="calendar" className="me-1" />
                   <span>
-                    {formatDateDisplay(startDate)} - {formatDateDisplay(endDate)}
+                    {startDate === endDate || !endDate
+                      ? formatDateDisplay(startDate)
+                      : `${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`}
                   </span>
                 </div>
               )}
@@ -696,7 +701,14 @@ export const ServiceTransactionTable = ({
               )}
               {hasDateFilter && (
                 <Badge color="warning" className="badge-dim d-inline-flex align-items-center gap-1 py-1 px-2">
-                  <span>Date: <strong>{formatDateDisplay(startDate)} - {formatDateDisplay(endDate)}</strong></span>
+                  <span>
+                    Date:{" "}
+                    <strong>
+                      {startDate === endDate || !endDate
+                        ? formatDateDisplay(startDate)
+                        : `${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`}
+                    </strong>
+                  </span>
                   <button
                     type="button"
                     className="border-0 bg-transparent p-0 ms-1 text-warning d-inline-flex align-items-center"
@@ -1060,7 +1072,16 @@ export const ServiceTransactionTable = ({
               )}
               <Col size={4}>
                 <span className="sub-text">Cashback</span>
-                <span className="caption-text">{formatter("NGN").format(formData?.cashback || formData?.meta?.cashbackAmount || formData?.meta?.amountSaved || 0)}</span>
+                <span className="caption-text text-success fw-bold">
+                  {formatter("NGN").format(
+                    formData?.cashback ||
+                    formData?.meta?.cashbackAmount ||
+                    formData?.meta?.cashbackInfo?.amount ||
+                    formData?.meta?.chargeInfo?.cashbackAmount ||
+                    formData?.meta?.amountSaved ||
+                    0
+                  )}
+                </span>
               </Col>
               <Col size={4}>
                 <span className="sub-text">Total Amount</span>

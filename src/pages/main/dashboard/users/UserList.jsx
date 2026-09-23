@@ -71,6 +71,7 @@ const userSortOptions = [
   { label: "Lowest Wallet Balance", field: "balance", order: "asc" },
   { label: "Name (A-Z)", field: "firstname", order: "asc" },
   { label: "Name (Z-A)", field: "firstname", order: "desc" },
+  { label: "App Version", field: "appVersion", order: "desc" },
 ];
 
 const UserList = () => {
@@ -96,6 +97,7 @@ const UserList = () => {
   const sortOrder = searchParams.get("sortOrder") || "desc";
   const userType = searchParams.get("userType") || "";
   const bvnVerified = searchParams.get("bvnVerified") || "";
+  const versionFilter = searchParams.get("versionFilter") || "";
 
   const { isLoading, data: users } = useGetAllUsers(
     currentPage,
@@ -109,6 +111,7 @@ const UserList = () => {
     period,
     userType,
     bvnVerified,
+    versionFilter,
   );
   const { isLoading: fetchingStat, data: userStat } = useGetUserStat(period, startDate, endDate);
   const { mutate: financeUser } = useFinanceUser(userId);
@@ -312,15 +315,26 @@ const UserList = () => {
     }
   }, []);
 
-  const bvnStatusColor = useCallback((isValidated, isVerified) => {
-    if (isValidated && isVerified) {
-      return "success";
-    } else if (isValidated || isVerified) {
-      return "warning";
+  const getBvnStatus = useCallback((userItem) => {
+    const isVerified = Boolean(
+      userItem?.bvnVerified ||
+      userItem?.xixapayCustomerId ||
+      userItem?.xixapayKyc?.status === "verified"
+    );
+    const isValidated = Boolean(
+      userItem?.bvnValidated ||
+      isVerified ||
+      userItem?.hasBvn
+    );
+
+    if (isVerified) {
+      return { label: "Yes", color: "success", title: "BVN Verified" };
+    } else if (isValidated) {
+      return { label: "Yes", color: "warning", title: "BVN Validated in DB" };
     } else {
-      return "danger";
+      return { label: "No", color: "danger", title: "BVN Not Provided" };
     }
-  });
+  }, []);
 
   return (
     <React.Fragment>
@@ -415,7 +429,7 @@ const UserList = () => {
                               State: user?.state,
                               Country: user?.country,
                               "Account Status": user?.status,
-                              "BVN Verified": user?.bvnVerified ? "Yes" : "No",
+                              "BVN Verified": getBvnStatus(user).label,
                               "Date Joined": formatDateWithHyphen(user?.createdAt),
                             })) ?? [],
                             "user_data.csv",
@@ -608,7 +622,7 @@ const UserList = () => {
                                 <DropdownToggle tag="a" className="btn btn-trigger btn-icon dropdown-toggle">
                                   <Icon name="setting"></Icon>
                                 </DropdownToggle>
-                                <DropdownMenu end className="dropdown-menu-xs">
+                                <DropdownMenu end className="dropdown-menu-md dropdown-menu-sort">
                                   <SortToolTip sortOptions={userSortOptions} />
                                 </DropdownMenu>
                               </UncontrolledDropdown>
@@ -696,6 +710,16 @@ const UserList = () => {
                     <DataTableRow size="sm">
                       <span className="tb-tnx-head bg-white text-secondary">BVN</span>
                     </DataTableRow>
+                    <DataTableRow size="sm">
+                      <span
+                        className="tb-tnx-head bg-white text-secondary d-inline-flex align-items-center"
+                        style={{ cursor: "pointer", userSelect: "none" }}
+                        onClick={() => handleSort("appVersion")}
+                        title="Click to sort by App Version"
+                      >
+                        App Version {renderSortIcon("appVersion")}
+                      </span>
+                    </DataTableRow>
                     <DataTableRow size="md">
                       <span
                         className="tb-tnx-head bg-white text-secondary d-inline-flex align-items-center"
@@ -774,15 +798,35 @@ const UserList = () => {
                           </span>
                         </DataTableRow>
                         <DataTableRow size="sm">
-                          <span
-                            className={`dot bg-${bvnStatusColor(item?.bvnValidated, item?.bvnVerified)} d-sm-none`}
-                          />
-                          <Badge
-                            className="badge-sm badge-dot has-bg d-none d-sm-inline-flex "
-                            color={bvnStatusColor(item?.bvnValidated, item?.bvnVerified)}
-                          >
-                            <span className="ccap ">{item?.bvnVerified ? "Yes" : "No"}</span>
-                          </Badge>
+                          {(() => {
+                            const bvnInfo = getBvnStatus(item);
+                            return (
+                              <>
+                                <span
+                                  className={`dot bg-${bvnInfo.color} d-sm-none`}
+                                  title={bvnInfo.title}
+                                />
+                                <Badge
+                                  className="badge-sm badge-dot has-bg d-none d-sm-inline-flex"
+                                  color={bvnInfo.color}
+                                  title={bvnInfo.title}
+                                >
+                                  <span className="ccap">{bvnInfo.label}</span>
+                                </Badge>
+                              </>
+                            );
+                          })()}
+                        </DataTableRow>
+                        <DataTableRow size="sm">
+                          {item?.appVersion ? (
+                            <Badge className="badge-sm badge-dim" color="info">
+                              v{item.appVersion}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted" style={{ fontSize: "12px" }}>
+                              No Version
+                            </span>
+                          )}
                         </DataTableRow>
                         <DataTableRow size={"md"}>
                           <span className={`dot bg-${statusColor(item.status)} d-sm-none`}></span>

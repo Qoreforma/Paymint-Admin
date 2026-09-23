@@ -49,6 +49,7 @@ const SortToolTip = ({ sortOptions = null }) => {
                 <DropdownItem
                   tag="a"
                   href="#dropdownitem"
+                  title={opt.label}
                   onClick={(ev) => {
                     ev.preventDefault();
                     changeSort(opt.field, opt.order);

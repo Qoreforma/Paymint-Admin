@@ -15,6 +15,7 @@ export const useGetAllUsers = (
   period = "",
   userType = "",
   bvnVerified = "",
+  versionFilter = "",
 ) => {
   const params = new URLSearchParams();
   if (currentPage) params.append("page", currentPage);
@@ -28,6 +29,7 @@ export const useGetAllUsers = (
   if (period && period !== "all") params.append("period", period);
   if (userType) params.append("userType", userType);
   if (bvnVerified) params.append("bvnVerified", bvnVerified);
+  if (versionFilter) params.append("versionFilter", versionFilter);
 
   const queryString = params.toString();
 
@@ -45,6 +47,7 @@ export const useGetAllUsers = (
       period,
       userType,
       bvnVerified,
+      versionFilter,
     ],
     async () => {
       const request = await instance

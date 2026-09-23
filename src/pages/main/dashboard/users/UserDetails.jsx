@@ -425,7 +425,7 @@ const UserDetailsPage = () => {
       <Content>
         <BlockHead size="sm">
           <BlockBetween>
-            <BlockBetween className={"w-max-550px w-80"}>
+            <div className="d-flex align-items-center flex-wrap gap-4">
               <BlockHeadContent>
                 <BlockDes className="text-soft">
                   <p>User Details</p>
@@ -435,13 +435,36 @@ const UserDetailsPage = () => {
                 </BlockTitle>
               </BlockHeadContent>
 
-              <BlockHeadContent className={""}>
+              <BlockHeadContent>
                 <BlockDes className="text-soft">
                   <p>Wallet Balance</p>
                 </BlockDes>
                 <BlockTitle>{formatter("NGN").format(user?.data?.wallet?.mainBalance ?? 0)}</BlockTitle>
               </BlockHeadContent>
-            </BlockBetween>
+
+              <BlockHeadContent>
+                <BlockDes className="text-soft">
+                  <p className="d-flex align-items-center gap-1">
+                    Bonus / Cashback
+                    <span className="badge badge-dim bg-success-dim text-success rounded-pill px-1.5 py-0" style={{ fontSize: "9px" }}>Cashback</span>
+                  </p>
+                </BlockDes>
+                <BlockTitle className="text-success">
+                  {formatter("NGN").format(user?.data?.wallet?.bonusBalance ?? 0)}
+                </BlockTitle>
+              </BlockHeadContent>
+
+              {typeof user?.data?.wallet?.commissionBalance === "number" && user?.data?.wallet?.commissionBalance > 0 && (
+                <BlockHeadContent>
+                  <BlockDes className="text-soft">
+                    <p>Commission Balance</p>
+                  </BlockDes>
+                  <BlockTitle className="text-primary">
+                    {formatter("NGN").format(user?.data?.wallet?.commissionBalance ?? 0)}
+                  </BlockTitle>
+                </BlockHeadContent>
+              )}
+            </div>
             <BlockHeadContent>
               <Button color="light" outline className="bg-white d-none d-sm-inline-flex" onClick={() => navigate(-1)}>
                 <Icon name="arrow-left"></Icon>

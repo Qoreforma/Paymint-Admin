@@ -25,70 +25,60 @@ export function WalletStatsSection({ data }) {
 
 export function WalletBalances({ data }) {
   return (
-    <Row className="g-3">
+    <Row className="g-3 align-items-stretch">
       <Col md={6}>
-        <Card className="h-100">
-          <div className="card-inner" style={{ padding: "20px" }}>
-            <div className="d-flex align-items-center gap-3">
-              <div
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 12,
-                  background: "rgba(15, 61, 172, 0.1)",
-                  color: "#0f3dac",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 22,
-                  flexShrink: 0,
-                }}
-              >
-                <Icon name="sign-kobo" />
-              </div>
-              <div>
-                <div className="text-muted text-uppercase fw-bold" style={{ fontSize: 11, letterSpacing: "0.5px" }}>
-                  Wallet Balances
-                </div>
-                <div className="fw-bold text-dark mt-1" style={{ fontSize: 20 }}>
-                  {formatter("NGN").format(data?.amount || 0)}
-                </div>
-              </div>
+        <div
+          className="exec-wallet-stat-card"
+          style={{
+            padding: "22px 24px",
+            minHeight: "88px",
+          }}
+        >
+          <div
+            className="exec-stat-icon"
+            style={{
+              background: "rgba(15, 61, 172, 0.1)",
+              color: "#0f3dac",
+            }}
+          >
+            <Icon name="sign-kobo" />
+          </div>
+          <div>
+            <div className="exec-stat-label">
+              Wallet Balances
+            </div>
+            <div className="exec-stat-value">
+              {formatter("NGN").format(data?.amount || 0)}
             </div>
           </div>
-        </Card>
+        </div>
       </Col>
       <Col md={6}>
-        <Card className="h-100">
-          <div className="card-inner" style={{ padding: "20px" }}>
-            <div className="d-flex align-items-center gap-3">
-              <div
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 12,
-                  background: "rgba(59, 130, 246, 0.1)",
-                  color: "#2563eb",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 22,
-                  flexShrink: 0,
-                }}
-              >
-                <Icon name="users" />
-              </div>
-              <div>
-                <div className="text-muted text-uppercase fw-bold" style={{ fontSize: 11, letterSpacing: "0.5px" }}>
-                  Total Users
-                </div>
-                <div className="fw-bold text-dark mt-1" style={{ fontSize: 20 }}>
-                  {(data?.users || 0).toLocaleString()}
-                </div>
-              </div>
+        <div
+          className="exec-wallet-stat-card"
+          style={{
+            padding: "22px 24px",
+            minHeight: "88px",
+          }}
+        >
+          <div
+            className="exec-stat-icon"
+            style={{
+              background: "rgba(59, 130, 246, 0.1)",
+              color: "#2563eb",
+            }}
+          >
+            <Icon name="users" />
+          </div>
+          <div>
+            <div className="exec-stat-label">
+              Total Users
+            </div>
+            <div className="exec-stat-value">
+              {(data?.users || 0).toLocaleString()}
             </div>
           </div>
-        </Card>
+        </div>
       </Col>
     </Row>
   );

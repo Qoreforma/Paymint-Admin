@@ -125,6 +125,18 @@ const Details = ({ user, isLoading }) => {
               <span className="profile-ud-value">{formatDateWithHyphen(user?.data?.user?.createdAt)}</span>
             </div>
           </div>
+          <div className="profile-ud-item">
+            <div className="profile-ud wider">
+              <span className="profile-ud-label">App Version</span>
+              <span className="profile-ud-value">
+                {user?.data?.user?.appVersion ? (
+                  <Badge color="info">v{user?.data?.user?.appVersion}</Badge>
+                ) : (
+                  <span className="text-soft">No Version</span>
+                )}
+              </span>
+            </div>
+          </div>
 
           <div className="profile-ud-item">
             <div className="profile-ud wider">
@@ -164,10 +176,28 @@ const Details = ({ user, isLoading }) => {
             <div className="profile-ud wider">
               <span className="profile-ud-label">Wallet Balance</span>
               <span className={`profile-ud-value text-capitalize`}>
-                {formatter("NGN").format(user?.data?.wallet?.mainBalance)}
+                {formatter("NGN").format(user?.data?.wallet?.mainBalance ?? 0)}
               </span>
             </div>
           </div>
+          <div className="profile-ud-item">
+            <div className="profile-ud wider">
+              <span className="profile-ud-label">Bonus / Cashback Balance</span>
+              <span className="profile-ud-value text-capitalize text-success fw-bold">
+                {formatter("NGN").format(user?.data?.wallet?.bonusBalance ?? 0)}
+              </span>
+            </div>
+          </div>
+          {typeof user?.data?.wallet?.commissionBalance === "number" && (
+            <div className="profile-ud-item">
+              <div className="profile-ud wider">
+                <span className="profile-ud-label">Commission Balance</span>
+                <span className="profile-ud-value text-capitalize">
+                  {formatter("NGN").format(user?.data?.wallet?.commissionBalance ?? 0)}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </Block>
 
@@ -357,65 +387,73 @@ const Details = ({ user, isLoading }) => {
             </div>
           </div>
 
-          <div className="profile-ud-item">
-            <div className="profile-ud wider">
-              <span className="profile-ud-label">BVN Verified</span>
+          {(() => {
+            const isBvnVerified = Boolean(
+              user?.data?.user?.bvnVerified ||
+              user?.data?.user?.xixapayCustomerId ||
+              user?.data?.user?.xixapayKyc?.status === "verified"
+            );
+            const isBvnValidated = Boolean(
+              user?.data?.user?.bvnValidated ||
+              isBvnVerified ||
+              user?.data?.user?.hasBvn
+            );
+            const canViewBvn = Boolean(
+              (isBvnVerified || isBvnValidated || user?.data?.user?.hasBvn) &&
+              hasPermission("users.view_bvn")
+            );
 
-              <span className="profile-ud-value ccap">
-                <Badge
-                  className="badge-sm badge-dot has-bg d-none d-sm-inline-flex "
-                  color={statusColor(user?.data?.user?.bvnVerified)}
-                >
-                  <span className="ccap ">{user?.data?.user?.bvnVerified ? "Yes" : "No"}</span>
-                </Badge>
-              </span>
-            </div>
-          </div>
+            return (
+              <>
+                <div className="profile-ud-item">
+                  <div className="profile-ud wider">
+                    <span className="profile-ud-label">BVN Verified</span>
+                    <span className="profile-ud-value ccap">
+                      <Badge
+                        className="badge-sm badge-dot has-bg d-none d-sm-inline-flex "
+                        color={statusColor(isBvnVerified)}
+                      >
+                        <span className="ccap ">{isBvnVerified ? "Yes" : "No"}</span>
+                      </Badge>
+                    </span>
+                  </div>
+                </div>
 
-          <div className="profile-ud-item">
-            <div className="profile-ud wider">
-              <span className="profile-ud-label">BVN Validated</span>
+                <div className="profile-ud-item">
+                  <div className="profile-ud wider">
+                    <span className="profile-ud-label">BVN Validated</span>
+                    <span className="profile-ud-value ccap">
+                      <Badge
+                        className="badge-sm badge-dot has-bg d-none d-sm-inline-flex "
+                        color={statusColor(isBvnValidated)}
+                      >
+                        <span className="ccap ">{isBvnValidated ? "Yes" : "No"}</span>
+                      </Badge>
+                    </span>
+                  </div>
+                </div>
 
-              <span className="profile-ud-value ccap">
-                <Badge
-                  className="badge-sm badge-dot has-bg d-none d-sm-inline-flex "
-                  color={statusColor(user?.data?.user?.bvnValidated)}
-                >
-                  <span className="ccap ">{user?.data?.user?.bvnValidated ? "Yes" : "No"}</span>
-                </Badge>
-              </span>
-            </div>
-          </div>
-
-          {/* <div className="profile-ud-item">
-            <div className="profile-ud wider">
-              <span className="profile-ud-label">Blacklisted</span>
-              <span
-                className={`profile-ud-value ccap ${user?.data?.user?.is_blacklisted ? "text-success" : "text-danger"}`}
-              >
-                {user?.data?.user?.is_blacklisted ? "Yes" : "No"}
-              </span>
-            </div>
-          </div> */}
-
-          {user?.data?.user?.bvnVerified && hasPermission("users.view_bvn") && (
-            <div className="profile-ud-item">
-              <div className="profile-ud wider">
-                <span className="profile-ud-label">View User BVN</span>
-                <span className="profile-ud-value ccap">
-                  <Button
-                    onClick={() => {
-                      setShowViewBVN(true);
-                    }}
-                    size={"sm"}
-                    color={"primary"}
-                  >
-                    View
-                  </Button>
-                </span>
-              </div>
-            </div>
-          )}
+                {canViewBvn && (
+                  <div className="profile-ud-item">
+                    <div className="profile-ud wider">
+                      <span className="profile-ud-label">View User BVN</span>
+                      <span className="profile-ud-value ccap">
+                        <Button
+                          onClick={() => {
+                            setShowViewBVN(true);
+                          }}
+                          size={"sm"}
+                          color={"primary"}
+                        >
+                          View
+                        </Button>
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </Block>
 

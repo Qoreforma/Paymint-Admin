@@ -147,7 +147,13 @@ const WalletTxnTable = ({ type, data, isLoading, showStats, hideFilter = false }
           fee: item?.fee,
 
           totalAmount: item?.total_amount,
-          cashback: item?.cashback || item?.cashbackAmount || 0,
+          cashback:
+            item?.cashback ||
+            item?.cashbackAmount ||
+            item?.meta?.cashbackAmount ||
+            item?.meta?.cashbackInfo?.amount ||
+            item?.meta?.chargeInfo?.cashbackAmount ||
+            0,
           proof: item?.proof,
           profit: item?.profit,
         });

@@ -179,7 +179,13 @@ export const TransactionTable = ({ purpose, userId, showStats }) => {
           fullName: `${item?.user?.firstname} ${item?.user?.lastname}`,
           email: item?.user?.email,
           phone: `${item?.user?.phone_code}${item?.user?.phone}`,
-          cashback: item?.cashback || item?.cashbackAmount || 0,
+          cashback:
+            item?.cashback ||
+            item?.cashbackAmount ||
+            item?.meta?.cashbackAmount ||
+            item?.meta?.cashbackInfo?.amount ||
+            item?.meta?.chargeInfo?.cashbackAmount ||
+            0,
           meta: item?.meta,
           date: item?.created_at,
           profit: item?.profit,

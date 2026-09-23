@@ -415,12 +415,274 @@
   margin-bottom: 1.25rem;
 }
 
+/* ── CAMPAIGN MODAL LAYOUT FIX ───────────────────────────── */
+/* Force XL width and scrollable body so content never squishes */
+.campaign-create-modal .modal-dialog,
+.campaign-edit-modal .modal-dialog {
+  max-width: 760px !important;
+  width: 95vw !important;
+  margin: 1.75rem auto !important;
+}
+
+.campaign-create-modal .modal-content,
+.campaign-edit-modal .modal-content {
+  border-radius: 14px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 90vh !important;
+}
+
+.campaign-create-modal .modal-header,
+.campaign-edit-modal .modal-header {
+  padding: 1.15rem 1.5rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  flex-shrink: 0 !important;
+}
+
+.campaign-create-modal .modal-header .modal-title,
+.campaign-edit-modal .modal-header .modal-title {
+  font-size: 1.1rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.campaign-create-modal .modal-body,
+.campaign-edit-modal .modal-body {
+  padding: 1.25rem 1.5rem !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.campaign-create-modal .modal-body::-webkit-scrollbar,
+.campaign-edit-modal .modal-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.campaign-create-modal .modal-body::-webkit-scrollbar-thumb,
+.campaign-edit-modal .modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+/* Form grid inside modal */
+.campaign-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.campaign-form-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+.campaign-form-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.35rem;
+}
+
+.campaign-form-field input,
+.campaign-form-field select,
+.campaign-form-field textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.campaign-form-field input:focus,
+.campaign-form-field select:focus,
+.campaign-form-field textarea:focus {
+  border-color: #0f3dac;
+  box-shadow: 0 0 0 3px rgba(15, 61, 172, 0.1);
+}
+
+.campaign-form-field .field-hint {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+
+/* Database slice section */
+.campaign-db-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.1rem;
+}
+
+.campaign-db-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.campaign-db-section-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.campaign-db-section-desc {
+  font-size: 0.775rem;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+  line-height: 1.45;
+}
+
+/* Email content section */
+.campaign-email-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.1rem;
+}
+
+.campaign-email-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.campaign-email-section-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.campaign-banner-status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  background: #f1f5f9;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  font-size: 0.775rem;
+}
+
+.campaign-tag-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.campaign-tag-chips-label {
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin-bottom: 0.3rem;
+}
+
+/* Editor tabs */
+.campaign-editor-tabs {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 0.75rem;
+  gap: 0.25rem;
+}
+
+.campaign-editor-tab {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: -1px;
+}
+
+.campaign-editor-tab.active {
+  color: #0f3dac;
+  border-bottom-color: #0f3dac;
+  background: transparent;
+}
+
+.campaign-editor-tab:hover:not(.active) {
+  color: #374151;
+}
+
+/* HTML editor textarea */
+.campaign-html-editor {
+  width: 100%;
+  height: 200px;
+  padding: 0.65rem 0.75rem;
+  font-family: 'Courier New', Consolas, monospace !important;
+  font-size: 12.5px !important;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #e2e8f0;
+  resize: vertical;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.campaign-html-editor:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Modal footer actions */
+.campaign-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 0.5rem;
+}
+
+/* ── SLICE ROW ────────────────────────────────────────────── */
 .campaign-slice-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.65rem 0.85rem;
-  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 0.45rem;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -431,6 +693,7 @@
   border-color: #cbd5e1;
 }
 
+/* ── TAG CHIPS ────────────────────────────────────────────── */
 .campaign-tag-chip {
   padding: 0.25rem 0.6rem !important;
   font-size: 0.72rem !important;
@@ -441,6 +704,7 @@
   color: #334155 !important;
   cursor: pointer !important;
   transition: all 0.12s ease !important;
+  white-space: nowrap;
 }
 
 .campaign-tag-chip:hover {

@@ -29,6 +29,15 @@ export const userFilterOptions = [
       { label: "Not BVN Verified", value: "false" },
     ],
   },
+  {
+    name: "versionFilter",
+    options: [
+      { label: "All Versions", value: "" },
+      { label: "Latest Version", value: "latest" },
+      { label: "Old Version", value: "old" },
+      { label: "No Version", value: "none" },
+    ],
+  },
 ];
 
 export const TransactionType = [

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button, Icon, Col, Row } from "../../../../components/Component";
 import DatePicker from "react-datepicker";
@@ -9,9 +9,30 @@ const DateRangeFilter = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [rangeDate, setRangeDate] = useState({
-    start: searchParams.get("startDate") ? new Date(searchParams.get("startDate")) : null,
-    end: searchParams.get("endDate") ? new Date(searchParams.get("endDate")) : null,
+    start: searchParams.get("startDate")
+      ? new Date(
+          searchParams.get("startDate").includes("T")
+            ? searchParams.get("startDate")
+            : `${searchParams.get("startDate")}T00:00:00`
+        )
+      : null,
+    end: searchParams.get("endDate")
+      ? new Date(
+          searchParams.get("endDate").includes("T")
+            ? searchParams.get("endDate")
+            : `${searchParams.get("endDate")}T00:00:00`
+        )
+      : null,
   });
+
+  useEffect(() => {
+    const s = searchParams.get("startDate");
+    const e = searchParams.get("endDate");
+    setRangeDate({
+      start: s ? new Date(s.includes("T") ? s : `${s}T00:00:00`) : null,
+      end: e ? new Date(e.includes("T") ? e : `${e}T00:00:00`) : null,
+    });
+  }, [searchParams]);
 
   const onRangeChange = (dates) => {
     const [start, end] = dates;
