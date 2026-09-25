@@ -29,16 +29,15 @@ export const ProviderFilterOptions = {
   label: "Provider",
   options: [
     { value: "", label: "All Providers" },
-    { value: "airvend", label: "Airvend" },
-    { value: "vtpass", label: "VTpass" },
-    { value: "clubkonnect", label: "Clubkonnect" },
-    { value: "buypower", label: "BuyPower" },
-    { value: "shago", label: "Shago" },
+    { value: "safehaven", label: "SafeHaven" },
+    { value: "xixapay", label: "Xixapay" },
     { value: "pairgate", label: "Pairgate" },
+    { value: "clubkonnect", label: "Clubkonnect" },
     { value: "coolsub", label: "CoolSub" },
     { value: "bilalsadasub", label: "BilalSadaSub" },
+    { value: "vtpass", label: "VTpass" },
+    { value: "nigeriasmm", label: "Nigeria SMM" },
     { value: "monnify", label: "Monnify" },
-    { value: "safehaven", label: "SafeHaven" },
   ],
 };
 
@@ -133,13 +132,22 @@ export const ServiceTypeFilterOptions = {
   ],
 };
 
-export const getServiceFilterOptions = (type, purpose) => {
+export const getServiceFilterOptions = (type, purpose, customProviderOptions) => {
   const currentType = (type || purpose || "").toLowerCase();
+
+  const providerFilter =
+    customProviderOptions && customProviderOptions.length > 0
+      ? {
+          name: "provider",
+          label: "Provider",
+          options: customProviderOptions,
+        }
+      : ProviderFilterOptions;
 
   const options = [
     ServicesFilterOptions[0], // status
     ServicesFilterOptions[1], // channel
-    ProviderFilterOptions, // provider
+    providerFilter, // provider
   ];
 
   if (currentType.includes("data") || currentType.includes("airtime")) {

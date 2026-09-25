@@ -424,63 +424,90 @@ const UserDetailsPage = () => {
 
       <Content>
         <BlockHead size="sm">
-          <BlockBetween>
-            <div className="d-flex align-items-center flex-wrap gap-4">
-              <BlockHeadContent>
-                <BlockDes className="text-soft">
-                  <p>User Details</p>
-                </BlockDes>
-                <BlockTitle page>
+          <BlockBetween className="align-items-start align-items-lg-center flex-wrap gap-3">
+            <BlockHeadContent>
+              <BlockDes className="text-soft">
+                <p className="fs-12px text-uppercase fw-bold text-muted mb-1">User Details</p>
+              </BlockDes>
+              <div className="d-flex align-items-center gap-2">
+                <BlockTitle page className="mb-0">
                   {user?.data?.user?.firstname} {user?.data?.user?.lastname}
                 </BlockTitle>
-              </BlockHeadContent>
-
-              <BlockHeadContent>
-                <BlockDes className="text-soft">
-                  <p>Wallet Balance</p>
-                </BlockDes>
-                <BlockTitle>{formatter("NGN").format(user?.data?.wallet?.mainBalance ?? 0)}</BlockTitle>
-              </BlockHeadContent>
-
-              <BlockHeadContent>
-                <BlockDes className="text-soft">
-                  <p className="d-flex align-items-center gap-1">
-                    Bonus / Cashback
-                    <span className="badge badge-dim bg-success-dim text-success rounded-pill px-1.5 py-0" style={{ fontSize: "9px" }}>Cashback</span>
-                  </p>
-                </BlockDes>
-                <BlockTitle className="text-success">
-                  {formatter("NGN").format(user?.data?.wallet?.bonusBalance ?? 0)}
-                </BlockTitle>
-              </BlockHeadContent>
-
-              {typeof user?.data?.wallet?.commissionBalance === "number" && user?.data?.wallet?.commissionBalance > 0 && (
-                <BlockHeadContent>
-                  <BlockDes className="text-soft">
-                    <p>Commission Balance</p>
-                  </BlockDes>
-                  <BlockTitle className="text-primary">
-                    {formatter("NGN").format(user?.data?.wallet?.commissionBalance ?? 0)}
-                  </BlockTitle>
-                </BlockHeadContent>
-              )}
-            </div>
-            <BlockHeadContent>
-              <Button color="light" outline className="bg-white d-none d-sm-inline-flex" onClick={() => navigate(-1)}>
-                <Icon name="arrow-left"></Icon>
-                <span>Back</span>
-              </Button>
-              <a
-                href="#back"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  navigate(-1);
-                }}
-                className="btn btn-icon btn-outline-light bg-white d-inline-flex d-sm-none"
-              >
-                <Icon name="arrow-left"></Icon>
-              </a>
+                {user?.data?.user?.status && (
+                  <span
+                    className={`badge badge-sm badge-dim rounded-pill ${
+                      user?.data?.user?.status === "active"
+                        ? "bg-success-dim text-success"
+                        : "bg-warning-dim text-warning"
+                    }`}
+                  >
+                    {user?.data?.user?.status}
+                  </span>
+                )}
+              </div>
             </BlockHeadContent>
+
+            <div className="user-header-actions-wrap">
+              <div className="user-header-balances">
+                <div className="user-balance-card user-balance-card-main">
+                  <div className="ubc-icon">
+                    <Icon name="wallet" />
+                  </div>
+                  <div className="ubc-details">
+                    <span className="ubc-label">Wallet Balance</span>
+                    <span className="ubc-amount">
+                      {formatter("NGN").format(user?.data?.wallet?.mainBalance ?? 0)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="user-balance-card user-balance-card-bonus">
+                  <div className="ubc-icon">
+                    <Icon name="coins" />
+                  </div>
+                  <div className="ubc-details">
+                    <div className="ubc-label">
+                      <span>Bonus / Cashback</span>
+                      <span className="ubc-badge">Cashback</span>
+                    </div>
+                    <span className="ubc-amount text-success">
+                      {formatter("NGN").format(user?.data?.wallet?.bonusBalance ?? 0)}
+                    </span>
+                  </div>
+                </div>
+
+                {typeof user?.data?.wallet?.commissionBalance === "number" && user?.data?.wallet?.commissionBalance > 0 && (
+                  <div className="user-balance-card user-balance-card-commission">
+                    <div className="ubc-icon">
+                      <Icon name="growth" />
+                    </div>
+                    <div className="ubc-details">
+                      <span className="ubc-label">Commission Balance</span>
+                      <span className="ubc-amount text-primary">
+                        {formatter("NGN").format(user?.data?.wallet?.commissionBalance ?? 0)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <BlockHeadContent>
+                <Button color="light" outline className="bg-white d-none d-sm-inline-flex" onClick={() => navigate(-1)}>
+                  <Icon name="arrow-left"></Icon>
+                  <span>Back</span>
+                </Button>
+                <a
+                  href="#back"
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    navigate(-1);
+                  }}
+                  className="btn btn-icon btn-outline-light bg-white d-inline-flex d-sm-none"
+                >
+                  <Icon name="arrow-left"></Icon>
+                </a>
+              </BlockHeadContent>
+            </div>
           </BlockBetween>
           {/* <p>Basic info, like your name and address, that you use on Nio Platform.</p> */}
         </BlockHead>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -42,6 +42,7 @@ import Search from "../tables/Search";
 import SortToolTip from "../tables/SortTooltip";
 import { FilterOptions } from "../tables/filter-select";
 import { ServicesFilterOptions, getServiceFilterOptions } from "./static-data";
+import { useGetProviders } from "../../../../api/service-providers";
 import { ServicesStatsCard } from "./stats-card";
 import UpdateStatusModal from "./modals/update-status";
 import ReverseModal from "./modals/reverse-transaction";
@@ -113,8 +114,10 @@ export const getProviderDisplay = (item) => {
     "coolsub",
     "bilalsadasub",
     "vtpass",
-    "shago",
     "safehaven",
+    "savehaven",
+    "xixapay",
+    "nigeriasmm",
     "monnify",
     "flutterwave",
     "paystack",
@@ -402,7 +405,24 @@ export const ServiceTransactionTable = ({
     return "Service";
   })();
 
-  const filterOptions = getServiceFilterOptions(type, purpose);
+  const { data: providersData } = useGetProviders(1, 200);
+
+  const dynamicProviderOptions = useMemo(() => {
+    const list = providersData?.data || [];
+    if (!list || list.length === 0) return null;
+    return [
+      { value: "", label: "All Providers" },
+      ...list.map((p) => ({
+        value: p.code || p.name.toLowerCase(),
+        label: p.name,
+      })),
+    ];
+  }, [providersData]);
+
+  const filterOptions = useMemo(
+    () => getServiceFilterOptions(type, purpose, dynamicProviderOptions),
+    [type, purpose, dynamicProviderOptions],
+  );
   const hasActiveFilterPills = Boolean(
     provider || service || serviceType || channel || search || hasDateFilter,
   );

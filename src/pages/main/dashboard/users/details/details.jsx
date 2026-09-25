@@ -388,16 +388,8 @@ const Details = ({ user, isLoading }) => {
           </div>
 
           {(() => {
-            const isBvnVerified = Boolean(
-              user?.data?.user?.bvnVerified ||
-              user?.data?.user?.xixapayCustomerId ||
-              user?.data?.user?.xixapayKyc?.status === "verified"
-            );
-            const isBvnValidated = Boolean(
-              user?.data?.user?.bvnValidated ||
-              isBvnVerified ||
-              user?.data?.user?.hasBvn
-            );
+            const isBvnVerified = Boolean(user?.data?.user?.bvnVerified);
+            const isBvnValidated = Boolean(user?.data?.user?.bvnValidated);
             const canViewBvn = Boolean(
               (isBvnVerified || isBvnValidated || user?.data?.user?.hasBvn) &&
               hasPermission("users.view_bvn")

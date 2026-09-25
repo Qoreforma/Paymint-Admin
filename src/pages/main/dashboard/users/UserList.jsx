@@ -316,23 +316,12 @@ const UserList = () => {
   }, []);
 
   const getBvnStatus = useCallback((userItem) => {
-    const isVerified = Boolean(
-      userItem?.bvnVerified ||
-      userItem?.xixapayCustomerId ||
-      userItem?.xixapayKyc?.status === "verified"
-    );
-    const isValidated = Boolean(
-      userItem?.bvnValidated ||
-      isVerified ||
-      userItem?.hasBvn
-    );
-
-    if (isVerified) {
-      return { label: "Yes", color: "success", title: "BVN Verified" };
-    } else if (isValidated) {
-      return { label: "Yes", color: "warning", title: "BVN Validated in DB" };
+    if (userItem?.bvnVerified) {
+      return { label: "Verified", color: "success", title: "BVN Verified" };
+    } else if (userItem?.bvnValidated) {
+      return { label: "Validated", color: "warning", title: "BVN Validated in DB" };
     } else {
-      return { label: "No", color: "danger", title: "BVN Not Provided" };
+      return { label: "Unverified", color: "danger", title: "BVN Not Verified" };
     }
   }, []);
 
@@ -429,7 +418,8 @@ const UserList = () => {
                               State: user?.state,
                               Country: user?.country,
                               "Account Status": user?.status,
-                              "BVN Verified": getBvnStatus(user).label,
+                              "BVN Status": getBvnStatus(user).label,
+                              "Bank Accounts": user?.bankAccountsCount ?? 0,
                               "Date Joined": formatDateWithHyphen(user?.createdAt),
                             })) ?? [],
                             "user_data.csv",
@@ -711,6 +701,9 @@ const UserList = () => {
                       <span className="tb-tnx-head bg-white text-secondary">BVN</span>
                     </DataTableRow>
                     <DataTableRow size="sm">
+                      <span className="tb-tnx-head bg-white text-secondary">Bank Account</span>
+                    </DataTableRow>
+                    <DataTableRow size="sm">
                       <span
                         className="tb-tnx-head bg-white text-secondary d-inline-flex align-items-center"
                         style={{ cursor: "pointer", userSelect: "none" }}
@@ -814,6 +807,20 @@ const UserList = () => {
                                   <span className="ccap">{bvnInfo.label}</span>
                                 </Badge>
                               </>
+                            );
+                          })()}
+                        </DataTableRow>
+                        <DataTableRow size="sm">
+                          {(() => {
+                            const count = item?.bankAccountsCount ?? 0;
+                            return count > 0 ? (
+                              <Badge className="badge-sm badge-dim" color="primary">
+                                {count} {count === 1 ? "Account" : "Accounts"}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted" style={{ fontSize: "12px" }}>
+                                0 Accounts
+                              </span>
                             );
                           })()}
                         </DataTableRow>

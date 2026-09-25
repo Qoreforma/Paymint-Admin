@@ -419,9 +419,16 @@
 /* Force XL width and scrollable body so content never squishes */
 .campaign-create-modal .modal-dialog,
 .campaign-edit-modal .modal-dialog {
-  max-width: 760px !important;
-  width: 95vw !important;
-  margin: 1.75rem auto !important;
+  max-width: 1080px !important;
+  width: 92vw !important;
+  margin: 1.5rem auto !important;
+}
+
+@media (min-width: 1400px) {
+  .campaign-create-modal .modal-dialog,
+  .campaign-edit-modal .modal-dialog {
+    max-width: 1140px !important;
+  }
 }
 
 .campaign-create-modal .modal-content,
@@ -432,7 +439,7 @@
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
-  max-height: 90vh !important;
+  max-height: 92vh !important;
 }
 
 .campaign-create-modal .modal-header,
@@ -642,27 +649,70 @@
   color: #374151;
 }
 
+/* Template Selector Controls */
+.campaign-template-selector-box {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.campaign-template-select {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #1e293b;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  min-width: 320px;
+  max-width: 480px;
+}
+
+.campaign-template-select:focus {
+  border-color: #0f3dac;
+  box-shadow: 0 0 0 3px rgba(15, 61, 172, 0.12);
+}
+
+.campaign-template-desc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  margin-top: 0.4rem;
+}
+
 /* HTML editor textarea */
 .campaign-html-editor {
   width: 100%;
-  height: 200px;
-  padding: 0.65rem 0.75rem;
-  font-family: 'Courier New', Consolas, monospace !important;
-  font-size: 12.5px !important;
+  height: 280px;
+  min-height: 220px;
+  padding: 0.75rem 0.85rem;
+  font-family: 'Consolas', 'Fira Code', Monaco, 'Courier New', monospace !important;
+  font-size: 13px !important;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   background: #0f172a;
-  color: #e2e8f0;
+  color: #f1f5f9;
   resize: vertical;
-  line-height: 1.5;
+  line-height: 1.6;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   box-sizing: border-box;
 }
 
 .campaign-html-editor:focus {
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 /* Modal footer actions */
