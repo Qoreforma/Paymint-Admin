@@ -51,6 +51,7 @@ import AssetsTable from "../assets/table";
 import { usePermission } from "../../../../utils/usePermission";
 import SendAnnouncementModal from "./SendAnnouncement";
 import { useCreateAnnouncement } from "../../../../api/announcement";
+import "./UserDetails.css";
 
 const UserDetailsPage = () => {
   const { hasPermission } = usePermission();
@@ -424,7 +425,7 @@ const UserDetailsPage = () => {
 
       <Content>
         <BlockHead size="sm">
-          <BlockBetween className="align-items-start align-items-lg-center flex-wrap gap-3">
+          <BlockBetween>
             <BlockHeadContent>
               <BlockDes className="text-soft">
                 <p className="fs-12px text-uppercase fw-bold text-muted mb-1">User Details</p>
@@ -447,83 +448,69 @@ const UserDetailsPage = () => {
               </div>
             </BlockHeadContent>
 
-            <div className="user-header-actions-wrap">
-              <div className="user-header-balances">
-                <div className="user-balance-card user-balance-card-main">
-                  <div className="ubc-icon">
-                    <Icon name="wallet" />
-                  </div>
-                  <div className="ubc-details">
-                    <span className="ubc-label">Wallet Balance</span>
-                    <span className="ubc-amount">
-                      {formatter("NGN").format(user?.data?.wallet?.mainBalance ?? 0)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="user-balance-card user-balance-card-bonus">
-                  <div className="ubc-icon">
-                    <Icon name="coins" />
-                  </div>
-                  <div className="ubc-details">
-                    <div className="ubc-label">
-                      <span>Bonus / Cashback</span>
-                      <span className="ubc-badge">Cashback</span>
-                    </div>
-                    <span className="ubc-amount text-success">
-                      {formatter("NGN").format(user?.data?.wallet?.bonusBalance ?? 0)}
-                    </span>
-                  </div>
-                </div>
-
-                {typeof user?.data?.wallet?.commissionBalance === "number" && user?.data?.wallet?.commissionBalance > 0 && (
-                  <div className="user-balance-card user-balance-card-commission">
-                    <div className="ubc-icon">
-                      <Icon name="growth" />
-                    </div>
-                    <div className="ubc-details">
-                      <span className="ubc-label">Commission Balance</span>
-                      <span className="ubc-amount text-primary">
-                        {formatter("NGN").format(user?.data?.wallet?.commissionBalance ?? 0)}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <BlockHeadContent>
-                <Button color="light" outline className="bg-white d-none d-sm-inline-flex" onClick={() => navigate(-1)}>
-                  <Icon name="arrow-left"></Icon>
-                  <span>Back</span>
-                </Button>
-                <a
-                  href="#back"
-                  onClick={(ev) => {
-                    ev.preventDefault();
-                    navigate(-1);
-                  }}
-                  className="btn btn-icon btn-outline-light bg-white d-inline-flex d-sm-none"
-                >
-                  <Icon name="arrow-left"></Icon>
-                </a>
-              </BlockHeadContent>
-            </div>
+            <BlockHeadContent>
+              <Button color="light" outline className="bg-white d-none d-sm-inline-flex" onClick={() => navigate(-1)}>
+                <Icon name="arrow-left"></Icon>
+                <span>Back</span>
+              </Button>
+              <a
+                href="#back"
+                onClick={(ev) => {
+                  ev.preventDefault();
+                  navigate(-1);
+                }}
+                className="btn btn-icon btn-outline-light bg-white d-inline-flex d-sm-none"
+              >
+                <Icon name="arrow-left"></Icon>
+              </a>
+            </BlockHeadContent>
           </BlockBetween>
-          {/* <p>Basic info, like your name and address, that you use on Nio Platform.</p> */}
         </BlockHead>
-        {/* <Card>
-          <div className="card-inner">
-            <ul className="nk-tranx-statistics">
-              <li className="item">
-                <Icon name="sign-kobo" className="bg-primary-dim"></Icon>
-                <div className="info">
-                  <div className="title">Wallet Balance</div>
-                  <div className="count"></div>
-                </div>
-              </li>
-            </ul>
+
+        {/* User Balances Strip */}
+        <div className="ud-balance-strip mb-4">
+          <div className="ud-balance-card ud-balance-card-main">
+            <div className="ud-balance-icon">
+              <Icon name="wallet" />
+            </div>
+            <div className="ud-balance-details">
+              <span className="ud-balance-label">Wallet Balance</span>
+              <span className="ud-balance-amount">
+                {formatter("NGN").format(user?.data?.wallet?.mainBalance ?? 0)}
+              </span>
+            </div>
           </div>
-        </Card> */}
+
+          <div className="ud-balance-card ud-balance-card-bonus">
+            <div className="ud-balance-icon">
+              <Icon name="coins" />
+            </div>
+            <div className="ud-balance-details">
+              <div className="ud-balance-label">
+                <span>Bonus / Cashback</span>
+                <span className="ud-balance-badge">Cashback</span>
+              </div>
+              <span className="ud-balance-amount text-success">
+                {formatter("NGN").format(user?.data?.wallet?.bonusBalance ?? 0)}
+              </span>
+            </div>
+          </div>
+
+          {typeof user?.data?.wallet?.commissionBalance === "number" && user?.data?.wallet?.commissionBalance > 0 && (
+            <div className="ud-balance-card ud-balance-card-commission">
+              <div className="ud-balance-icon">
+                <Icon name="growth" />
+              </div>
+              <div className="ud-balance-details">
+                <span className="ud-balance-label">Commission Balance</span>
+                <span className="ud-balance-amount text-primary">
+                  {formatter("NGN").format(user?.data?.wallet?.commissionBalance ?? 0)}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
         <Card>
           <div className="card-aside-wrap" id="user-detail-block">
             <div className="card-content">
