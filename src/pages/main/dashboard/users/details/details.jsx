@@ -31,14 +31,16 @@ const Details = ({ user, isLoading }) => {
 
   const { data: providersData } = useGetProviders(1, 100);
   const virtualAccountProviders = providersData?.data?.filter((p) => {
-    if (!p.serviceTypes) return false;
-    // Handle both populated objects and plain strings
-    return p.serviceTypes.some(
+    const types = p.serviceType || p.serviceTypes || [];
+    const code = p.code?.toLowerCase();
+    if (code === "savehaven" || code === "safehaven" || code === "xixapay") {
+      return true;
+    }
+    return Array.isArray(types) && types.some(
       (st) =>
         st === "VIRTUAL_ACCOUNT" ||
         st === "virtual_account" ||
-        st?.code === "VIRTUAL_ACCOUNT" ||
-        st?.code === "virtual_account"
+        st?.code?.toLowerCase() === "virtual_account"
     );
   }) || [];
 
@@ -195,14 +197,14 @@ const Details = ({ user, isLoading }) => {
                     <Input
                       type="select"
                       bsSize="sm"
-                      value={user?.data?.user?.preferredProvider || ""}
+                      value={user?.data?.user?.preferredProvider?.toLowerCase() || ""}
                       onChange={handleProviderChange}
                       disabled={isUpdatingProvider}
                       style={{ width: "200px" }}
                     >
                       <option value="">System Default</option>
                       {virtualAccountProviders.map((p) => (
-                        <option key={p.id || p._id} value={p.code}>
+                        <option key={p.id || p._id} value={p.code?.toLowerCase()}>
                           {p.name} ({p.code})
                         </option>
                       ))}
