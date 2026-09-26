@@ -452,3 +452,27 @@ export const useGetUserChartData = (period = "all", startDate = "", endDate = ""
     },
   );
 };
+
+export const useUpdatePreferredProvider = (userId) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async (payload) => {
+      try {
+        const response = await instance.put(BACKEND_URLS.users + `/${userId}/preferred-provider`, payload);
+        return response.data;
+      } catch (error) {
+        throw error?.response?.data || error;
+      }
+    },
+    {
+      onSuccess: (data) => {
+        toast.success(data?.message || "Preferred provider updated successfully");
+        queryClient.invalidateQueries(["getSingleUser"]);
+      },
+      onError: (error) => {
+        toast.error(error?.message || "An error occurred");
+      },
+    },
+  );
+};

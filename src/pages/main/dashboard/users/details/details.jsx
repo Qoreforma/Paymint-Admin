@@ -9,8 +9,9 @@ import {
   Button,
 } from "../../../../../components/Component";
 import { findUpper, formatDateWithHyphen, formatDateWithTime, formatter } from "../../../../../utils/Utils";
-import { useViewUserBVN } from "../../../../../api/users/user";
-import { Modal, ModalBody, Row, Col, Badge } from "reactstrap";
+import { useViewUserBVN, useUpdatePreferredProvider } from "../../../../../api/users/user";
+import { useGetProviders } from "../../../../../api/service-providers";
+import { Modal, ModalBody, Row, Col, Badge, Input, Spinner } from "reactstrap";
 import { useForm } from "react-hook-form";
 import LoadingSpinner from "../../../../components/spinner";
 import { usePermission } from "../../../../../utils/usePermission";
@@ -27,6 +28,25 @@ const Details = ({ user, isLoading }) => {
     handleSubmit,
     formState: { errors },
   } = useForm({ defaultValues: { password: "" } });
+
+  const { data: providersData } = useGetProviders(1, 100);
+  const virtualAccountProviders = providersData?.data?.filter((p) => {
+    if (!p.serviceTypes) return false;
+    // Handle both populated objects and plain strings
+    return p.serviceTypes.some(
+      (st) =>
+        st === "VIRTUAL_ACCOUNT" ||
+        st === "virtual_account" ||
+        st?.code === "VIRTUAL_ACCOUNT" ||
+        st?.code === "virtual_account"
+    );
+  }) || [];
+
+  const { mutate: updatePreferredProvider, isLoading: isUpdatingProvider } = useUpdatePreferredProvider(user?.data?.user?.id);
+
+  const handleProviderChange = (e) => {
+    updatePreferredProvider({ provider: e.target.value || null });
+  };
 
   const handleViewBVN = (data) => {
     console.log({ data });
@@ -154,6 +174,49 @@ const Details = ({ user, isLoading }) => {
               </span>
             </div>
           </div> */}
+        </div>
+      </Block>
+
+      <div className="nk-divider divider md"></div>
+
+      <Block>
+        <BlockHead className="nk-block-head-line">
+          <BlockTitle tag="h4" className="overline-title">
+            Virtual Account Settings
+          </BlockTitle>
+        </BlockHead>
+        <div className="profile-ud-list">
+          <div className="profile-ud-item">
+            <div className="profile-ud wider">
+              <span className="profile-ud-label">Preferred Provider Override</span>
+              <span className="profile-ud-value">
+                {hasPermission("users.update") ? (
+                  <div className="d-flex align-items-center gap-2">
+                    <Input
+                      type="select"
+                      bsSize="sm"
+                      value={user?.data?.user?.preferredProvider || ""}
+                      onChange={handleProviderChange}
+                      disabled={isUpdatingProvider}
+                      style={{ width: "200px" }}
+                    >
+                      <option value="">System Default</option>
+                      {virtualAccountProviders.map((p) => (
+                        <option key={p.id || p._id} value={p.code}>
+                          {p.name} ({p.code})
+                        </option>
+                      ))}
+                    </Input>
+                    {isUpdatingProvider && <Spinner size="sm" color="primary" />}
+                  </div>
+                ) : (
+                  <span className="text-capitalize">
+                    {user?.data?.user?.preferredProvider || "System Default"}
+                  </span>
+                )}
+              </span>
+            </div>
+          </div>
         </div>
       </Block>
 
