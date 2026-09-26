@@ -56,3 +56,37 @@ export const useAddTreasuryEntry = () => {
     }
   );
 };
+
+export const useUpdateTreasuryEntry = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    async ({ id, ...data }) => {
+      const endpoint = `${BACKEND_URLS.treasury}/entry/${id}`;
+      const res = await requests.put(endpoint, data);
+      return res;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["treasury-ledger"]);
+        queryClient.invalidateQueries(["platform-finances"]);
+      },
+    }
+  );
+};
+
+export const useDeleteTreasuryEntry = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    async (id) => {
+      const endpoint = `${BACKEND_URLS.treasury}/entry/${id}`;
+      const res = await requests.delete(endpoint);
+      return res;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["treasury-ledger"]);
+        queryClient.invalidateQueries(["platform-finances"]);
+      },
+    }
+  );
+};

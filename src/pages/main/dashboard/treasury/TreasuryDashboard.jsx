@@ -14,17 +14,22 @@ import {
 } from "../../../../components/Component";
 import Content from "../../../../layout/content/Content";
 import Head from "../../../../layout/head/Head";
-import { useGetTreasuryLedger, useGetPlatformFinances } from "../../../../api/treasury";
+import { useGetTreasuryLedger, useGetPlatformFinances, useDeleteTreasuryEntry } from "../../../../api/treasury";
 import { formatter } from "../../../../utils/Utils";
 import LoadingSpinner from "../../../components/spinner";
 import DateRangeFilter from "../tables/date-range-filter";
 import AddEntryModal from "./AddEntryModal";
 import dayjs from "dayjs";
 import PaginationComponent from "../../../../components/pagination/Pagination";
+import toast from "react-hot-toast";
 
 const TreasuryDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [showGuide, setShowGuide] = useState(true);
+
+  const { mutate: deleteEntry, isLoading: isDeleting } = useDeleteTreasuryEntry();
 
   const page = parseInt(searchParams.get("page")) || 1;
   const limit = parseInt(searchParams.get("limit")) || 20;
@@ -60,7 +65,33 @@ const TreasuryDashboard = () => {
     });
   };
 
-  const toggleModal = () => setModalOpen(!modalOpen);
+  const handleEdit = (item) => {
+    setSelectedEntry(item);
+    setModalOpen(true);
+  };
+
+  const handleDelete = (item) => {
+    if (window.confirm(`Are you sure you want to delete this treasury entry (${item.description} - ${formatter(item.currency || "NGN").format(item.amount)})?`)) {
+      deleteEntry(item._id, {
+        onSuccess: () => {
+          toast.success("Treasury entry deleted successfully");
+        },
+        onError: (err) => {
+          toast.error(err?.response?.data?.message || err?.message || "Failed to delete entry");
+        },
+      });
+    }
+  };
+
+  const handleNewEntry = () => {
+    setSelectedEntry(null);
+    setModalOpen(true);
+  };
+
+  const toggleModal = () => {
+    setModalOpen(!modalOpen);
+    if (modalOpen) setSelectedEntry(null);
+  };
 
   if (financesLoading) return <LoadingSpinner />;
 
@@ -77,7 +108,7 @@ const TreasuryDashboard = () => {
               <div className="text-soft">Manage capital injections, track expenses, and view real-time platform liquidity.</div>
             </BlockHeadContent>
             <BlockHeadContent>
-              <Button color="primary" onClick={toggleModal}>
+              <Button color="primary" onClick={handleNewEntry}>
                 <Icon name="plus" />
                 <span>Record Entry</span>
               </Button>
@@ -218,6 +249,98 @@ const TreasuryDashboard = () => {
           </Card>
         </Block>
 
+        {/* What Each Entry Type Means & How It Affects Your Finances */}
+        <Block>
+          <Card className="card-bordered">
+            <div className="card-inner py-3 border-bottom d-flex align-items-center justify-content-between">
+              <div className="d-flex align-items-center gap-2">
+                <Icon name="info-fill" className="text-primary fs-4" />
+                <div>
+                  <h6 className="title mb-0">What Each Entry Type Means & How It Affects Your Finances</h6>
+                  <span className="text-soft small">Accounting reference guide for treasury records and platform valuation.</span>
+                </div>
+              </div>
+              <Button color="light" size="sm" className="btn-dim" onClick={() => setShowGuide(!showGuide)}>
+                <Icon name={showGuide ? "chevron-up" : "chevron-down"} />
+                <span>{showGuide ? "Hide Guide" : "Show Guide"}</span>
+              </Button>
+            </div>
+            {showGuide && (
+              <div className="table-responsive">
+                <table className="table table-tranx is-compact mb-0">
+                  <thead className="tb-tnx-head bg-light">
+                    <tr>
+                      <th style={{ width: "22%" }}>Entry Type</th>
+                      <th style={{ width: "18%" }}>Short Tag</th>
+                      <th style={{ width: "35%" }}>What It Means</th>
+                      <th style={{ width: "25%" }}>Financial Impact</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <span className="fw-bold text-danger">Operational Expense</span>
+                      </td>
+                      <td>
+                        <span className="badge badge-dim bg-danger">OPEX (Recurring)</span>
+                      </td>
+                      <td>
+                        <span className="small text-soft">
+                          Day-to-day business running costs (e.g., monthly hosting, server bills, team salaries, ad campaigns, tools).
+                        </span>
+                      </td>
+                      <td>
+                        <span className="small fw-semibold text-danger">
+                          <Icon name="arrow-down-right" className="me-1" />
+                          Deducts directly from Gross Profit to calculate <strong>True Net Profit</strong>.
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span className="fw-bold text-success">Capital Injection / Funding</span>
+                      </td>
+                      <td>
+                        <span className="badge badge-dim bg-success">Working Capital (Liquid)</span>
+                      </td>
+                      <td>
+                        <span className="small text-soft">
+                          Actual liquid cash deposited to fund provider balances (e.g., ClubKonnect, SafeHaven, VTPass) or master bank accounts.
+                        </span>
+                      </td>
+                      <td>
+                        <span className="small fw-semibold text-success">
+                          <Icon name="arrow-up-right" className="me-1" />
+                          Directly increases <strong>Platform Liquidity</strong> & Available Float (it is active liquid money).
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span className="fw-bold text-warning">Out of Pocket Expense</span>
+                      </td>
+                      <td>
+                        <span className="badge badge-dim bg-warning">Capex (Sunk Startup Cost)</span>
+                      </td>
+                      <td>
+                        <span className="small text-soft">
+                          Upfront capital spent out-of-pocket to bootstrap/build the platform (e.g., initial domain purchase, app setup, company registration).
+                        </span>
+                      </td>
+                      <td>
+                        <span className="small fw-semibold text-warning">
+                          <Icon name="check-circle" className="me-1" />
+                          Adds to <strong>Total Project Worth</strong> (sunk valuation) without reducing monthly net profit.
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        </Block>
+
         {/* Ledger Table */}
         <Block>
           <Card className="card-bordered">
@@ -266,12 +389,13 @@ const TreasuryDashboard = () => {
                       <th>Description</th>
                       <th>Amount</th>
                       <th>Recorded By</th>
+                      <th className="text-end" style={{ width: "95px" }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {ledgerLoading ? (
                       <tr>
-                        <td colSpan="6" className="text-center py-4"><LoadingSpinner /></td>
+                        <td colSpan="7" className="text-center py-4"><LoadingSpinner /></td>
                       </tr>
                     ) : ledger.length > 0 ? (
                       ledger.map((item) => (
@@ -297,11 +421,34 @@ const TreasuryDashboard = () => {
                             </span>
                           </td>
                           <td>{item.recordedBy?.firstName} {item.recordedBy?.lastName}</td>
+                          <td className="text-end">
+                            <div className="d-flex align-items-center justify-content-end gap-1">
+                              <Button
+                                size="xs"
+                                color="light"
+                                className="btn-icon btn-dim"
+                                onClick={() => handleEdit(item)}
+                                title="Edit Entry"
+                              >
+                                <Icon name="edit" />
+                              </Button>
+                              <Button
+                                size="xs"
+                                color="danger"
+                                className="btn-icon btn-dim text-danger"
+                                onClick={() => handleDelete(item)}
+                                disabled={isDeleting}
+                                title="Delete Entry"
+                              >
+                                <Icon name="trash" />
+                              </Button>
+                            </div>
+                          </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="6" className="text-center py-4 text-soft">No ledger entries found.</td>
+                        <td colSpan="7" className="text-center py-4 text-soft">No ledger entries found.</td>
                       </tr>
                     )}
                   </tbody>
@@ -322,7 +469,7 @@ const TreasuryDashboard = () => {
         </Block>
       </Content>
 
-      <AddEntryModal isOpen={modalOpen} toggle={toggleModal} />
+      <AddEntryModal isOpen={modalOpen} toggle={toggleModal} entry={selectedEntry} />
     </React.Fragment>
   );
 };

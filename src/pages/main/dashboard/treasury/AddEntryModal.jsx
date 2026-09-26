@@ -1,17 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, ModalBody, ModalHeader, ModalFooter, Spinner } from "reactstrap";
-import { Button, Col, Row } from "../../../../components/Component";
-import { useAddTreasuryEntry } from "../../../../api/treasury";
+import { Button, Col, Row, Icon } from "../../../../components/Component";
+import { useAddTreasuryEntry, useUpdateTreasuryEntry } from "../../../../api/treasury";
 import toast from "react-hot-toast";
 
-const AddEntryModal = ({ isOpen, toggle }) => {
+const ENTRY_TYPE_INFO = {
+  EXPENSE: {
+    title: "Operational Expense",
+    desc: "Day-to-day business running costs (hosting, salaries, marketing, ads). Deducted directly from transaction gross profit to calculate True Net Profit.",
+    impactBadge: "Deducts from Net Profit",
+    badgeClass: "badge-danger",
+    alertClass: "alert-danger",
+    icon: "trend-down",
+  },
+  CAPITAL_INJECTION: {
+    title: "Capital Injection / Funding",
+    desc: "Actual liquid funds deposited to fund provider balances (e.g. ClubKonnect, SafeHaven, VTPass) or bank accounts. Directly increases Platform Liquidity & Available Cash.",
+    impactBadge: "Increases Liquid Cash",
+    badgeClass: "badge-success",
+    alertClass: "alert-success",
+    icon: "coins",
+  },
+  CAPITAL_EXPENSE: {
+    title: "Out-of-Pocket Expense (Sunk Capital)",
+    desc: "Upfront capital spent out-of-pocket to bootstrap/build the platform (domain purchase, app setup, company incorporation). Adds to Total Project Worth without reducing monthly operational profit.",
+    impactBadge: "Adds to Project Valuation",
+    badgeClass: "badge-warning",
+    alertClass: "alert-warning",
+    icon: "property-add",
+  },
+};
+
+const AddEntryModal = ({ isOpen, toggle, entry = null }) => {
   const [type, setType] = useState("EXPENSE");
   const [category, setCategory] = useState("HOSTING");
   const [provider, setProvider] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
 
-  const { mutate, isLoading } = useAddTreasuryEntry();
+  const isEditMode = Boolean(entry && (entry._id || entry.id));
+  const { mutate: addEntry, isLoading: isAdding } = useAddTreasuryEntry();
+  const { mutate: updateEntry, isLoading: isUpdating } = useUpdateTreasuryEntry();
+  const isLoading = isAdding || isUpdating;
+
+  useEffect(() => {
+    if (entry && isOpen) {
+      setType(entry.type || "EXPENSE");
+      setCategory(entry.category || "HOSTING");
+      setProvider(entry.provider || "");
+      setAmount(entry.amount ? String(entry.amount) : "");
+      setDescription(entry.description || "");
+    } else if (!entry && isOpen) {
+      setType("EXPENSE");
+      setCategory("HOSTING");
+      setProvider("");
+      setAmount("");
+      setDescription("");
+    }
+  }, [entry, isOpen]);
 
   const handleSave = () => {
     if (!amount || isNaN(amount) || amount <= 0) {
@@ -31,18 +77,34 @@ const AddEntryModal = ({ isOpen, toggle }) => {
       description,
     };
 
-    mutate(payload, {
-      onSuccess: () => {
-        toast.success("Treasury entry recorded successfully");
-        setAmount("");
-        setDescription("");
-        setProvider("");
-        toggle();
-      },
-      onError: (err) => {
-        toast.error(err?.response?.data?.message || "Failed to record entry");
-      },
-    });
+    if (isEditMode) {
+      const id = entry._id || entry.id;
+      updateEntry(
+        { id, ...payload },
+        {
+          onSuccess: () => {
+            toast.success("Treasury entry updated successfully");
+            toggle();
+          },
+          onError: (err) => {
+            toast.error(err?.response?.data?.message || err?.message || "Failed to update entry");
+          },
+        }
+      );
+    } else {
+      addEntry(payload, {
+        onSuccess: () => {
+          toast.success("Treasury entry recorded successfully");
+          setAmount("");
+          setDescription("");
+          setProvider("");
+          toggle();
+        },
+        onError: (err) => {
+          toast.error(err?.response?.data?.message || err?.message || "Failed to record entry");
+        },
+      });
+    }
   };
 
   const getCategories = () => {
@@ -57,15 +119,26 @@ const AddEntryModal = ({ isOpen, toggle }) => {
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} className="modal-dialog-centered" size="md">
-      <ModalHeader toggle={toggle}>Record Treasury Entry</ModalHeader>
+      <ModalHeader toggle={toggle}>
+        {isEditMode ? "Edit Treasury Entry" : "Record Treasury Entry"}
+      </ModalHeader>
       <ModalBody>
         <form className="form-validate is-alter">
           <Row className="gy-4">
             <Col sm="12">
               <div className="form-group">
-                <label className="form-label" htmlFor="type">
-                  Entry Type
-                </label>
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <label className="form-label mb-0" htmlFor="type">
+                    Entry Type
+                  </label>
+                  <span className="text-muted small">
+                    {type === "EXPENSE"
+                      ? "OPEX (Recurring)"
+                      : type === "CAPITAL_INJECTION"
+                      ? "Working Capital (Liquid)"
+                      : "Capex (Sunk Startup Cost)"}
+                  </span>
+                </div>
                 <div className="form-control-wrap">
                   <select
                     className="form-control"
@@ -76,11 +149,28 @@ const AddEntryModal = ({ isOpen, toggle }) => {
                       setCategory(e.target.value === "EXPENSE" ? "HOSTING" : e.target.value === "CAPITAL_EXPENSE" ? "DOMAIN" : "PROVIDER_FUNDING");
                     }}
                   >
-                    <option value="EXPENSE">Operational Expense</option>
-                    <option value="CAPITAL_INJECTION">Capital Injection / Funding</option>
+                    <option value="EXPENSE">Operational Expense (OPEX)</option>
+                    <option value="CAPITAL_INJECTION">Capital Injection / Funding (Liquid Cash)</option>
                     <option value="CAPITAL_EXPENSE">Out of Pocket Expense (Sunk Capital)</option>
                   </select>
                 </div>
+
+                {ENTRY_TYPE_INFO[type] && (
+                  <div className={`alert ${ENTRY_TYPE_INFO[type].alertClass} alert-dim mt-2 py-2 px-3`}>
+                    <div className="d-flex align-items-start gap-2">
+                      <Icon name={ENTRY_TYPE_INFO[type].icon} className="fs-5 mt-1" />
+                      <div className="small w-100">
+                        <div className="d-flex align-items-center justify-content-between mb-1">
+                          <strong className="text-dark">{ENTRY_TYPE_INFO[type].title}</strong>
+                          <span className={`badge badge-sm ${ENTRY_TYPE_INFO[type].badgeClass} badge-dim`}>
+                            {ENTRY_TYPE_INFO[type].impactBadge}
+                          </span>
+                        </div>
+                        <div className="text-soft">{ENTRY_TYPE_INFO[type].desc}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </Col>
 
@@ -183,8 +273,10 @@ const AddEntryModal = ({ isOpen, toggle }) => {
           {isLoading ? (
             <>
               <Spinner size="sm" color="light" className="me-1" />
-              <span>Saving...</span>
+              <span>{isEditMode ? "Updating..." : "Saving..."}</span>
             </>
+          ) : isEditMode ? (
+            "Update Entry"
           ) : (
             "Save Entry"
           )}
