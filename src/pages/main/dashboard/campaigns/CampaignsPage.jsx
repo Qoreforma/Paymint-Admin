@@ -27,11 +27,6 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
-  Nav,
-  NavItem,
-  NavLink,
-  TabContent,
-  TabPane,
 } from "reactstrap";
 import {
   useGetAudiences,
@@ -41,6 +36,7 @@ import {
   useGetCampaigns,
   useGetDailyStats,
   useControlCampaign,
+  useDeleteCampaign,
   useResetAudience,
   useDeleteAudience,
   usePruneRecipients,
@@ -72,41 +68,46 @@ const OFFICIAL_LINKS = {
 
 // Ready-to-use bill payment & reward email templates
 const EMAIL_TEMPLATES = {
-  cashbackElectricityData: {
-    id: "cashbackElectricityData",
-    name: "⚡ 5% Cashback: Electricity & Data Weekend Blitz",
-    category: "🔥 Cashback & Discounts",
-    subject: "⚡ Enjoy 5% Instant Cashback on All Electricity & Data Recharges!",
-    campaignName: "5% Electricity & Data Cashback Blitz",
-    desc: "Targeted promo offering 5% instant cashback on prepaid meter tokens & SME data bundles.",
+  betterDataDeals: {
+    id: "betterDataDeals",
+    name: "📶 Better Data Deals: Buy Data & Get Cashback",
+    category: "📶 Data & Airtime",
+    subject: "📶 Buy Data & Earn Cashback on PayMint",
+    campaignName: "Better Data Deals Cashback Promo",
+    desc: "Promote affordable MTN, Airtel, Glo & 9mobile data plans with instant delivery and cashback on eligible purchases.",
     content: `{{headerBanner}}
 {{logo}}
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
   <div style="background: linear-gradient(135deg, #0f3dac 0%, #1e40af 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
-    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">⚡ Limited Weekend Offer</span>
-    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">5% Instant Cashback on All Bills</h1>
-    <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Recharge electricity tokens or buy mobile data and get 5% right back into your wallet.</p>
+    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">📶 Better Data Deals</span>
+    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Buy Data. Get Cashback.</h1>
+    <p style="color: #dbeafe; font-size: 14px; margin: 0;">Get affordable data plans on PayMint and earn cashback on eligible purchases.</p>
   </div>
 
   <p>Hi <strong>{{firstName}}</strong>,</p>
-  <p>Why pay more for essential utilities? For a limited time, PayMint is giving you <strong>5% instant cashback</strong> credited directly to your wallet every time you recharge your prepaid electricity meter or purchase data bundles.</p>
+  <p>You do not have to pay full price for data every single time. With PayMint, you get access to affordable mobile data across major Nigerian networks, plus cashback on eligible transactions.</p>
 
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin: 20px 0;">
-    <h3 style="font-size: 15px; margin: 0 0 12px 0; color: #0f3dac; font-weight: 700;">What You Get This Weekend:</h3>
+    <h3 style="font-size: 15px; margin: 0 0 12px 0; color: #0f3dac; font-weight: 700;">Why Buy Data on PayMint:</h3>
     <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #334155; line-height: 1.8;">
-      <li><strong>💡 Electricity Meter Tokens:</strong> Instant 20-digit token generation for IKEDC, EKEDC, AEDC, IBEDC & all Discos.</li>
-      <li><strong>📶 High-Speed Data:</strong> Instant delivery for MTN, Airtel, Glo & 9mobile from ₦220/GB.</li>
-      <li><strong>💸 5% Instant Wallet Cashback:</strong> Automatically credited into your PayMint balance in under 5 seconds.</li>
-      <li><strong>🛡️ Zero Hidden Fees:</strong> No convenience charges, no service markups.</li>
+      <li><strong>📶 Available Networks:</strong> MTN, Airtel, Glo, and 9mobile data plans in one place.</li>
+      <li><strong>💰 Cashback on Recharges:</strong> Earn cashback on eligible data and airtime purchases.</li>
+      <li><strong>⚡ Fast Delivery:</strong> Direct network delivery within seconds of payment.</li>
+      <li><strong>💳 Flexible Payment:</strong> Pay securely using your PayMint wallet or dedicated virtual account.</li>
     </ul>
   </div>
 
+  <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px; margin: 20px 0;">
+    <h4 style="margin: 0 0 8px 0; color: #1e40af; font-size: 14px; font-weight: 700;">💡 Popular Plans:</h4>
+    <p style="margin: 0; font-size: 13.5px; color: #1e3a8a; line-height: 1.7;">From daily bundles to monthly data plans, find the right fit for work, streaming, and everyday browsing at transparent prices.</p>
+  </div>
+
   <div style="text-align: center; margin: 28px 0;">
-    <a href="{{website}}" style="background: #0f3dac; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(15, 61, 172, 0.25);">Claim 5% Cashback Now</a>
+    <a href="{{website}}" style="background: #0f3dac; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(15, 61, 172, 0.25);">Buy Data Now</a>
   </div>
 
   <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
-    <p style="margin-bottom: 6px;">Manage all your bills conveniently on the PayMint Mobile App:</p>
+    <p style="margin-bottom: 6px;">Manage your recharges and bills easily on the PayMint App:</p>
     <div>
       📱 <a href="{{playStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600; margin-right: 12px;">Google Play Store</a>
       🍏 <a href="{{appStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600;">Apple App Store</a>
@@ -118,143 +119,37 @@ const EMAIL_TEMPLATES = {
 {{footerBanner}}`,
   },
 
-  walletFundingBonus: {
-    id: "walletFundingBonus",
-    name: "🎁 Wallet Bonus: Fund ₦5,000+ & Claim ₦500 Free Credit",
-    category: "🔥 Cashback & Discounts",
-    subject: "🎁 Fund ₦5,000+ Today & Get ₦500 Free Wallet Bonus on PayMint!",
-    campaignName: "₦500 Wallet Top-Up Bonus Promo",
-    desc: "Stimulate account deposits by offering ₦500 bonus on virtual account bank transfers.",
-    content: `{{headerBanner}}
-{{logo}}
-<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
-  <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
-    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">🎁 Special Wallet Bonus</span>
-    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Claim Your Free ₦500 Wallet Bonus</h1>
-    <p style="color: #d1fae5; font-size: 14px; margin: 0;">Top up your wallet today and enjoy free extra cash for your bill payments.</p>
-  </div>
-
-  <p>Hello <strong>{{firstName}}</strong>,</p>
-  <p>Here is an exclusive bonus to help you save more! Simply transfer <strong>₦5,000 or more</strong> into your dedicated PayMint virtual bank account today, and we will instantly credit your wallet with a <strong>free ₦500 bonus</strong>.</p>
-
-  <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 18px; margin: 20px 0;">
-    <h3 style="font-size: 15px; margin: 0 0 10px 0; color: #065f46; font-weight: 700;">How to Claim in 3 Simple Steps:</h3>
-    <ol style="padding-left: 20px; margin: 0; font-size: 14px; color: #064e3b; line-height: 1.8;">
-      <li>Log in to your PayMint account or open the app.</li>
-      <li>Copy your dedicated virtual bank account number (instant reflection).</li>
-      <li>Transfer ₦5,000 or more from any Nigerian bank — your ₦500 bonus is added automatically!</li>
-    </ol>
-  </div>
-
-  <p style="font-size: 14px; color: #475569;">Use your bonus to buy cheap data bundles, recharge airtime, pay electricity tokens, or fund your betting wallet with zero charges.</p>
-
-  <div style="text-align: center; margin: 28px 0;">
-    <a href="{{website}}" style="background: #059669; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">Fund Wallet & Get ₦500 Bonus</a>
-  </div>
-
-  <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
-    <p style="margin-bottom: 6px;">Available on iOS and Android:</p>
-    <div>
-      📱 <a href="{{playStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600; margin-right: 12px;">Google Play Store</a>
-      🍏 <a href="{{appStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600;">Apple App Store</a>
-    </div>
-  </div>
-
-  <p style="font-size: 13px; color: #94a3b8; margin-top: 20px; text-align: center;">Happy saving,<br/>PayMint Customer Rewards</p>
-</div>
-{{footerBanner}}`,
-  },
-
-  zeroFeeCable: {
-    id: "zeroFeeCable",
-    name: "📺 Zero Convenience Fee: DSTV, GOtv & StarTimes",
-    category: "💡 Utilities & Bills",
-    subject: "📺 Stop Paying Extra: Renew DSTV, GOtv & StarTimes with ₦0 Fees on PayMint",
-    campaignName: "Zero Fee Cable TV Subscriptions",
-    desc: "Highlight ₦0 convenience charge and 60-second signal reconnect on cable bouquets.",
-    content: `{{headerBanner}}
-{{logo}}
-<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
-  <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
-    <span style="background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">📺 Zero Convenience Fees</span>
-    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Never Pay Extra for Cable TV Again</h1>
-    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Renew DSTV, GOtv, StarTimes & Showmax at official provider rates.</p>
-  </div>
-
-  <p>Hi <strong>{{firstName}}</strong>,</p>
-  <p>Did you know other platforms charge you an extra ₦100 to ₦200 convenience fee just to pay for your television subscription? On <strong>PayMint</strong>, you pay exactly what the bouquet costs — <strong>₦0 service charge, ₦0 hidden fees</strong>.</p>
-
-  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin: 20px 0;">
-    <h3 style="font-size: 15px; margin: 0 0 12px 0; color: #0f3dac; font-weight: 700;">Why Switch Your TV Renewals to PayMint:</h3>
-    <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #334155; line-height: 1.8;">
-      <li><strong>⚡ Instant Viewing Reconnection:</strong> Your signal reconnects automatically within 60 seconds of payment.</li>
-      <li><strong>📺 All Bouquets Supported:</strong> DSTV Premium, Compact Plus, Confam, Yanga; GOtv Supa+, Supa, Max, Jinja; and StarTimes.</li>
-      <li><strong>💾 Saved IUC Numbers:</strong> Save your smartcard numbers for effortless 1-click renewals each month.</li>
-      <li><strong>🧾 Official Receipts:</strong> Download and share transaction receipts instantly.</li>
-    </ul>
-  </div>
-
-  <div style="text-align: center; margin: 28px 0;">
-    <a href="{{website}}" style="background: #0f3dac; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(15, 61, 172, 0.25);">Renew Cable TV Now</a>
-  </div>
-
-  <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
-    <p style="margin-bottom: 6px;">Experience fast renewals on the PayMint app:</p>
-    <div>
-      📱 <a href="{{playStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600; margin-right: 12px;">Google Play Store</a>
-      🍏 <a href="{{appStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600;">Apple App Store</a>
-    </div>
-  </div>
-
-  <p style="font-size: 13px; color: #94a3b8; margin-top: 20px; text-align: center;">Warm regards,<br/>The PayMint Team</p>
-</div>
-{{footerBanner}}`,
-  },
-
   cheapDataPromo: {
     id: "cheapDataPromo",
-    name: "📶 Data Deals: High-Speed SME & Direct Data from ₦220/GB",
+    name: "📶 High-Speed Data Bundles: MTN, Airtel, Glo & 9mobile",
     category: "📶 Data & Airtime",
-    subject: "📶 Data Running Low? Get High-Speed Data from ₦220/GB on PayMint",
-    campaignName: "Unbeatable Cheap Data Flash Promo",
-    desc: "Target heavy internet users with cheap MTN, Airtel, Glo, and 9mobile data plans.",
+    subject: "📶 Reliable High-Speed Mobile Data on PayMint",
+    campaignName: "High-Speed Mobile Data Deals",
+    desc: "Target active mobile data users with fast, automated SME & direct data bundles.",
     content: `{{headerBanner}}
 {{logo}}
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
   <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
     <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">📶 Superfast Internet</span>
-    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">High-Speed Data Starting at ₦220/GB</h1>
-    <p style="color: #bfdbfe; font-size: 14px; margin: 0;">Stay connected on MTN, Airtel, Glo & 9mobile with instant 5-second delivery.</p>
+    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Never Run Out of Mobile Data</h1>
+    <p style="color: #bfdbfe; font-size: 14px; margin: 0;">Stay connected on MTN, Airtel, Glo & 9mobile with instant automated delivery.</p>
   </div>
 
   <p>Hi <strong>{{firstName}}</strong>,</p>
-  <p>Don't let your data run out during an important call or movie stream! PayMint gives you the fastest and most affordable internet data bundles in Nigeria with 30-day validity.</p>
+  <p>Don't let your data run out during an important call, work project, or streaming session. PayMint offers convenient, reliable mobile data bundles delivered directly to your line in seconds.</p>
 
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0;">
-    <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 14px; text-align: center;">
-      <div style="font-size: 13px; font-weight: 800; color: #b45309;">MTN SME & Direct</div>
-      <div style="font-size: 18px; font-weight: 800; color: #78350f; margin: 4px 0;">From ₦240 / GB</div>
-      <div style="font-size: 12px; color: #92400e;">Instant 30-day validity</div>
-    </div>
-    <div style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; padding: 14px; text-align: center;">
-      <div style="font-size: 13px; font-weight: 800; color: #b91c1c;">AIRTEL Bundles</div>
-      <div style="font-size: 18px; font-weight: 800; color: #7f1d1d; margin: 4px 0;">From ₦235 / GB</div>
-      <div style="font-size: 12px; color: #991b1b;">High-speed 4G/5G browsing</div>
-    </div>
-    <div style="background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 8px; padding: 14px; text-align: center;">
-      <div style="font-size: 13px; font-weight: 800; color: #15803d;">GLO Mega Packs</div>
-      <div style="font-size: 18px; font-weight: 800; color: #14532d; margin: 4px 0;">From ₦220 / GB</div>
-      <div style="font-size: 12px; color: #166534;">Massive gigabytes deals</div>
-    </div>
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: center;">
-      <div style="font-size: 13px; font-weight: 800; color: #0284c7;">9MOBILE Corporate</div>
-      <div style="font-size: 18px; font-weight: 800; color: #0369a1; margin: 4px 0;">From ₦220 / GB</div>
-      <div style="font-size: 12px; color: #075985;">Reliable uninterrupted speed</div>
-    </div>
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin: 20px 0;">
+    <h3 style="font-size: 15px; margin: 0 0 12px 0; color: #1d4ed8; font-weight: 700;">Why Switch to PayMint Data:</h3>
+    <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #334155; line-height: 1.8;">
+      <li><strong>⚡ Instant Delivery:</strong> Direct carrier API dispatch within 5 seconds.</li>
+      <li><strong>📶 All Networks Supported:</strong> MTN SME & Direct, Airtel Corporate, Glo Mega & 9mobile.</li>
+      <li><strong>💰 Transparent Pricing:</strong> Competitive rates with cashback on eligible purchases.</li>
+      <li><strong>📱 24/7 Availability:</strong> Top up anytime of the day or night with zero downtime.</li>
+    </ul>
   </div>
 
   <div style="text-align: center; margin: 28px 0;">
-    <a href="{{website}}" style="background: #2563eb; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">Buy Cheap Data Now</a>
+    <a href="{{website}}" style="background: #2563eb; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">Buy Data Now</a>
   </div>
 
   <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
@@ -272,35 +167,35 @@ const EMAIL_TEMPLATES = {
 
   airtimeSurgeDiscount: {
     id: "airtimeSurgeDiscount",
-    name: "📞 Airtime Surge: Instant Up to 6% Discount on Recharge",
+    name: "📞 Fast Airtime Recharge: Instant Delivery Across All Networks",
     category: "📶 Data & Airtime",
-    subject: "📞 Airtime Discount Surge: Save Up to 6% on Every Network Recharge!",
-    campaignName: "Airtime Recharge Discount Surge",
-    desc: "Promote instant discount of up to 6% on VTU airtime across all Nigerian networks.",
+    subject: "📞 Need Airtime Fast? Instant 3-Second Delivery on PayMint",
+    campaignName: "Instant Airtime Recharge Promo",
+    desc: "Promote instant VTU airtime recharge across MTN, Airtel, Glo & 9mobile with zero failed transactions.",
     content: `{{headerBanner}}
 {{logo}}
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
   <div style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
-    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">📞 Airtime Discount Surge</span>
-    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Never Pay 100% for Airtime Again</h1>
-    <p style="color: #fef3c7; font-size: 14px; margin: 0;">Enjoy up to 6% instant discounts on MTN, Airtel, Glo & 9mobile recharges.</p>
+    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">📞 Instant Airtime Top-Up</span>
+    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Airtime in Seconds, Any Time</h1>
+    <p style="color: #fef3c7; font-size: 14px; margin: 0;">Fast, automated VTU airtime recharge across MTN, Airtel, Glo & 9mobile.</p>
   </div>
 
   <p>Hello <strong>{{firstName}}</strong>,</p>
-  <p>Why pay full price when you can keep more money in your pocket? With PayMint's Airtime Discount Surge, you receive an <strong>instant discount</strong> automatically deducted at checkout every time you recharge.</p>
+  <p>Need urgent airtime for calls or quick subscriptions? On PayMint, airtime delivery is automated and reflects on your phone in under 3 seconds with zero extra service charges.</p>
 
   <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 18px; margin: 20px 0;">
-    <h3 style="font-size: 15px; margin: 0 0 10px 0; color: #92400e; font-weight: 700;">How Your Discount Works:</h3>
-    <p style="font-size: 14px; color: #78350f; margin: 0 0 12px 0;">Recharge ₦1,000 Airtime and pay only <strong>₦940</strong>. Recharge ₦5,000 and pay only <strong>₦4,700</strong>! The discount is applied instantly with zero coupon codes needed.</p>
+    <h3 style="font-size: 15px; margin: 0 0 10px 0; color: #92400e; font-weight: 700;">Why Recharge on PayMint:</h3>
     <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #78350f; line-height: 1.8;">
-      <li>⚡ Instant 3-second network delivery</li>
-      <li>👥 Send airtime to multiple phone numbers at once</li>
-      <li>🏷️ Available 24/7 across all four Nigerian mobile carriers</li>
+      <li>⚡ <strong>Instant 3-Second Delivery:</strong> Direct carrier connection ensures zero pending transactions.</li>
+      <li>🏷️ <strong>Zero Convenience Fees:</strong> Pay exactly what you recharge.</li>
+      <li>👥 <strong>Multi-Recharge:</strong> Top up multiple numbers easily for family and friends.</li>
+      <li>💰 <strong>Cashback Rewards:</strong> Earn cashback on eligible recharges directly into your wallet.</li>
     </ul>
   </div>
 
   <div style="text-align: center; margin: 28px 0;">
-    <a href="{{website}}" style="background: #d97706; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);">Recharge with Discount Now</a>
+    <a href="{{website}}" style="background: #d97706; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);">Recharge Airtime Now</a>
   </div>
 
   <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
@@ -365,37 +260,176 @@ const EMAIL_TEMPLATES = {
 {{footerBanner}}`,
   },
 
+  cashbackElectricityData: {
+    id: "cashbackElectricityData",
+    name: "⚡ Electricity & Data: Instant Tokens & Quick Recharges",
+    category: "💡 Utilities & Bills",
+    subject: "⚡ Recharge Electricity Tokens & Mobile Data Instantly on PayMint",
+    campaignName: "Electricity & Data Instant Recharges",
+    desc: "Instant 20-digit token generation for all Discos and dependable high-speed data bundles.",
+    content: `{{headerBanner}}
+{{logo}}
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
+  <div style="background: linear-gradient(135deg, #0f3dac 0%, #1e40af 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
+    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">⚡ Instant Utility Recharges</span>
+    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Fast Electricity & Data in Seconds</h1>
+    <p style="color: #cbd5e1; font-size: 14px; margin: 0;">Recharge prepaid meter tokens or buy mobile data with zero hassle and instant confirmation.</p>
+  </div>
+
+  <p>Hi <strong>{{firstName}}</strong>,</p>
+  <p>Why wait or deal with delayed tokens? PayMint provides direct, 24/7 automated delivery for your essential utility payments with real-time receipts and transparent rates.</p>
+
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin: 20px 0;">
+    <h3 style="font-size: 15px; margin: 0 0 12px 0; color: #0f3dac; font-weight: 700;">What You Get on PayMint:</h3>
+    <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #334155; line-height: 1.8;">
+      <li><strong>💡 Electricity Meter Tokens:</strong> Instant 20-digit token generation for IKEDC, EKEDC, AEDC, IBEDC & all major Discos.</li>
+      <li><strong>📶 High-Speed Data:</strong> Fast network delivery for MTN, Airtel, Glo & 9mobile.</li>
+      <li><strong>💰 Cashback on Eligible Purchases:</strong> Earn cashback rewards directly into your wallet.</li>
+      <li><strong>🛡️ Zero Hidden Fees:</strong> Transparent pricing with instant downloadable receipts.</li>
+    </ul>
+  </div>
+
+  <div style="text-align: center; margin: 28px 0;">
+    <a href="{{website}}" style="background: #0f3dac; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(15, 61, 172, 0.25);">Recharge Now</a>
+  </div>
+
+  <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
+    <p style="margin-bottom: 6px;">Manage all your bills conveniently on the PayMint Mobile App:</p>
+    <div>
+      📱 <a href="{{playStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600; margin-right: 12px;">Google Play Store</a>
+      🍏 <a href="{{appStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600;">Apple App Store</a>
+    </div>
+  </div>
+
+  <p style="font-size: 13px; color: #94a3b8; margin-top: 20px; text-align: center;">Best regards,<br/>The PayMint Team</p>
+</div>
+{{footerBanner}}`,
+  },
+
+  zeroFeeCable: {
+    id: "zeroFeeCable",
+    name: "📺 Zero Convenience Fee: DSTV, GOtv & StarTimes",
+    category: "💡 Utilities & Bills",
+    subject: "📺 Stop Paying Extra: Renew DSTV, GOtv & StarTimes with ₦0 Fees on PayMint",
+    campaignName: "Zero Fee Cable TV Subscriptions",
+    desc: "Highlight ₦0 convenience charge and 60-second signal reconnect on cable bouquets.",
+    content: `{{headerBanner}}
+{{logo}}
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
+  <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
+    <span style="background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">📺 Zero Convenience Fees</span>
+    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Never Pay Extra for Cable TV Again</h1>
+    <p style="color: #94a3b8; font-size: 14px; margin: 0;">Renew DSTV, GOtv, StarTimes & Showmax at official provider rates.</p>
+  </div>
+
+  <p>Hi <strong>{{firstName}}</strong>,</p>
+  <p>Did you know other platforms charge you an extra ₦100 to ₦200 convenience fee just to pay for your television subscription? On <strong>PayMint</strong>, you pay exactly what the bouquet costs — <strong>₦0 service charge, ₦0 hidden fees</strong>.</p>
+
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin: 20px 0;">
+    <h3 style="font-size: 15px; margin: 0 0 12px 0; color: #0f3dac; font-weight: 700;">Why Switch Your TV Renewals to PayMint:</h3>
+    <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #334155; line-height: 1.8;">
+      <li><strong>⚡ Instant Viewing Reconnection:</strong> Your signal reconnects automatically within 60 seconds of payment.</li>
+      <li><strong>📺 All Bouquets Supported:</strong> DSTV Premium, Compact Plus, Confam, Yanga; GOtv Supa+, Supa, Max, Jinja; and StarTimes.</li>
+      <li><strong>💾 Saved IUC Numbers:</strong> Save your smartcard numbers for effortless 1-click renewals each month.</li>
+      <li><strong>🧾 Official Receipts:</strong> Download and share transaction receipts instantly.</li>
+    </ul>
+  </div>
+
+  <div style="text-align: center; margin: 28px 0;">
+    <a href="{{website}}" style="background: #0f3dac; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(15, 61, 172, 0.25);">Renew Cable TV Now</a>
+  </div>
+
+  <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
+    <p style="margin-bottom: 6px;">Experience fast renewals on the PayMint app:</p>
+    <div>
+      📱 <a href="{{playStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600; margin-right: 12px;">Google Play Store</a>
+      🍏 <a href="{{appStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600;">Apple App Store</a>
+    </div>
+  </div>
+
+  <p style="font-size: 13px; color: #94a3b8; margin-top: 20px; text-align: center;">Warm regards,<br/>The PayMint Team</p>
+</div>
+{{footerBanner}}`,
+  },
+
+  walletFundingBonus: {
+    id: "walletFundingBonus",
+    name: "💳 Dedicated Virtual Account: Instant Bank Transfer Funding",
+    category: "💳 Wallet & Banking",
+    subject: "💳 Fund Your PayMint Wallet in Seconds via Dedicated Virtual Account",
+    campaignName: "Instant Virtual Account Funding Guide",
+    desc: "Educate users on funding their wallet seamlessly via their personal virtual account number with zero deposit delays.",
+    content: `{{headerBanner}}
+{{logo}}
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
+  <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
+    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">💳 24/7 Instant Top-Up</span>
+    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Instant Wallet Funding Made Easy</h1>
+    <p style="color: #d1fae5; font-size: 14px; margin: 0;">Fund your PayMint wallet instantly through your personal virtual bank account.</p>
+  </div>
+
+  <p>Hello <strong>{{firstName}}</strong>,</p>
+  <p>Say goodbye to card payment glitches and pending debits. Every PayMint account comes with a dedicated virtual account number linked directly to your wallet for instant, automated funding.</p>
+
+  <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 18px; margin: 20px 0;">
+    <h3 style="font-size: 15px; margin: 0 0 10px 0; color: #065f46; font-weight: 700;">How to Fund in 3 Simple Steps:</h3>
+    <ol style="padding-left: 20px; margin: 0; font-size: 14px; color: #064e3b; line-height: 1.8;">
+      <li>Open your PayMint app or dashboard and tap <strong>Add Money / Fund Wallet</strong>.</li>
+      <li>Copy your dedicated virtual bank account number.</li>
+      <li>Make a transfer from any Nigerian banking app — your wallet updates automatically within seconds!</li>
+    </ol>
+  </div>
+
+  <p style="font-size: 14px; color: #475569;">Once funded, use your balance to buy high-speed data, recharge airtime, pay electricity bills, or top up betting wallets with zero stress.</p>
+
+  <div style="text-align: center; margin: 28px 0;">
+    <a href="{{website}}" style="background: #059669; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">Fund Your Wallet Now</a>
+  </div>
+
+  <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
+    <p style="margin-bottom: 6px;">Available on iOS and Android:</p>
+    <div>
+      📱 <a href="{{playStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600; margin-right: 12px;">Google Play Store</a>
+      🍏 <a href="{{appStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600;">Apple App Store</a>
+    </div>
+  </div>
+
+  <p style="font-size: 13px; color: #94a3b8; margin-top: 20px; text-align: center;">Warm regards,<br/>PayMint Operations</p>
+</div>
+{{footerBanner}}`,
+  },
+
   bettingTopUpCashback: {
     id: "bettingTopUpCashback",
-    name: "⚽ Betting Top-Up: Instant Wallet Funding + 2% Cashback",
+    name: "⚽ Instant Betting Top-Up: Fund SportyBet, Bet9ja & 1xBet",
     category: "⚽ Betting & Entertainment",
-    subject: "⚽ Fund SportyBet, Bet9ja & 1xBet Instantly + Earn 2% Cashback!",
-    campaignName: "Betting Wallet Funding + 2% Cashback",
-    desc: "Target sports fans with 2% cashback and zero card payment failures on betting deposits.",
+    subject: "⚽ Fund SportyBet, Bet9ja & 1xBet Instantly with Zero Transaction Fees!",
+    campaignName: "Instant Betting Wallet Funding",
+    desc: "Target sports enthusiasts with instant reflection on betting deposits and zero debit failures.",
     content: `{{headerBanner}}
 {{logo}}
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
   <div style="background: linear-gradient(135deg, #15803d 0%, #166534 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
-    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">⚽ Zero Delays, Zero Glitches</span>
-    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Instant Betting Top-Up + 2% Cashback</h1>
+    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">⚽ Zero Delays, Zero Failed Debits</span>
+    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Instant Betting Top-Up</h1>
     <p style="color: #dcfce7; font-size: 14px; margin: 0;">Fund SportyBet, Bet9ja, 1xBet & more directly from your PayMint wallet.</p>
   </div>
 
   <p>Hi <strong>{{firstName}}</strong>,</p>
-  <p>Never let a failed debit card transaction make you miss out on high-odds game matches. Top up your betting account in seconds on PayMint and get <strong>2% cashback</strong> credited right back into your PayMint balance!</p>
+  <p>Never let a failed card transaction make you miss out on high-odds game matches. Top up your betting account in seconds on PayMint directly from your wallet balance with zero transaction fees.</p>
 
   <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 18px; margin: 20px 0;">
     <h3 style="font-size: 15px; margin: 0 0 12px 0; color: #166534; font-weight: 700;">Supported Betting Platforms:</h3>
     <p style="font-size: 14px; color: #14532d; margin: 0 0 10px 0;">⚽ <strong>SportyBet</strong> &bull; ⚽ <strong>Bet9ja</strong> &bull; ⚽ <strong>1xBet</strong> &bull; ⚽ <strong>BetKing</strong> &bull; ⚽ <strong>BangBet</strong> &bull; ⚽ <strong>MerryBet</strong></p>
     <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #14532d; line-height: 1.8;">
       <li>⚡ 100% instant fund reflection into your sportsbook account</li>
-      <li>💰 2% cashback automatically refunded to your PayMint balance</li>
-      <li>🛡️ Zero bank network downtime or pending debit headaches</li>
+      <li>🛡️ Zero card payment failures or pending bank network issues</li>
+      <li>🧾 Instant receipt generation for every top-up</li>
     </ul>
   </div>
 
   <div style="text-align: center; margin: 28px 0;">
-    <a href="{{website}}" style="background: #15803d; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);">Fund Betting Wallet & Earn 2%</a>
+    <a href="{{website}}" style="background: #15803d; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);">Fund Betting Wallet Now</a>
   </div>
 
   <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
@@ -413,38 +447,39 @@ const EMAIL_TEMPLATES = {
 
   referAndEarnCredits: {
     id: "referAndEarnCredits",
-    name: "🤝 Refer & Earn: ₦1,000 Bill Credits for You & Friends",
+    name: "🤝 Share PayMint: Better Recharges for Friends & Family",
     category: "🎁 Rewards & Announcements",
-    subject: "🤝 Share PayMint with Friends: Earn ₦1,000 Free Bill Credit per Referral!",
-    campaignName: "₦1,000 Refer & Earn Bill Credits",
-    desc: "Drive organic viral referral loops offering ₦1,000 credits per friend invited.",
+    subject: "🤝 Enjoying PayMint? Share with Friends and Family Today!",
+    campaignName: "Share PayMint Community Promo",
+    desc: "Encourage active users to share PayMint for dependable utility bill payments and fast data.",
     content: `{{headerBanner}}
 {{logo}}
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
   <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
-    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">🤝 PayMint Referral Club</span>
-    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Earn ₦1,000 for Every Friend You Invite</h1>
-    <p style="color: #ede9fe; font-size: 14px; margin: 0;">Help your friends save on airtime, data and electricity bills and earn free wallet credits.</p>
+    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">🤝 The Smarter Way to Pay Bills</span>
+    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Share PayMint with Friends</h1>
+    <p style="color: #ede9fe; font-size: 14px; margin: 0;">Help your friends experience instant electricity tokens, affordable data, and zero-fee cable subscriptions.</p>
   </div>
 
   <p>Hi <strong>{{firstName}}</strong>,</p>
-  <p>Love using PayMint to recharge bills and buy cheap data? Tell your friends and get paid for it! Every time a friend signs up with your referral link and pays their first bill of ₦1,000 or more, you both receive <strong>₦1,000 free wallet bonus</strong>.</p>
+  <p>Love using PayMint to recharge bills, purchase high-speed data, and get instant prepaid meter tokens? Help your friends and family avoid delayed tokens and debit errors by introducing them to PayMint.</p>
 
   <div style="background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 10px; padding: 18px; margin: 20px 0;">
-    <h3 style="font-size: 15px; margin: 0 0 10px 0; color: #5b21b6; font-weight: 700;">How to Start Earning:</h3>
-    <ol style="padding-left: 20px; margin: 0; font-size: 14px; color: #4c1d95; line-height: 1.8;">
-      <li>Open your PayMint dashboard and copy your unique referral link.</li>
-      <li>Share with your friends and family on WhatsApp, Instagram, or X.</li>
-      <li>As soon as they recharge, ₦1,000 is credited straight to your wallet!</li>
-    </ol>
+    <h3 style="font-size: 15px; margin: 0 0 10px 0; color: #5b21b6; font-weight: 700;">Why Your Friends Will Love PayMint:</h3>
+    <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #4c1d95; line-height: 1.8;">
+      <li>⚡ <strong>Electricity Tokens:</strong> Instant 20-digit token delivery in under 3 seconds.</li>
+      <li>📶 <strong>Affordable Data:</strong> High-speed MTN, Airtel, Glo & 9mobile bundles.</li>
+      <li>📺 <strong>₦0 Fee Cable TV:</strong> Pay exact bouquet prices for DSTV, GOtv & StarTimes.</li>
+      <li>💳 <strong>Dedicated Virtual Accounts:</strong> 100% reliable 24/7 bank transfer funding.</li>
+    </ul>
   </div>
 
   <div style="text-align: center; margin: 28px 0;">
-    <a href="{{website}}" style="background: #7c3aed; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);">Get Your Referral Link</a>
+    <a href="{{website}}" style="background: #7c3aed; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);">Share PayMint Today</a>
   </div>
 
   <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
-    <p style="margin-bottom: 6px;">Invite directly from your mobile contacts:</p>
+    <p style="margin-bottom: 6px;">Available on all devices:</p>
     <div>
       📱 <a href="{{playStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600; margin-right: 12px;">Google Play Store</a>
       🍏 <a href="{{appStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600;">Apple App Store</a>
@@ -452,52 +487,6 @@ const EMAIL_TEMPLATES = {
   </div>
 
   <p style="font-size: 13px; color: #94a3b8; margin-top: 20px; text-align: center;">Warm regards,<br/>The PayMint Team</p>
-</div>
-{{footerBanner}}`,
-  },
-
-  monthlyLeaderboard: {
-    id: "monthlyLeaderboard",
-    name: "🏆 Bill-Pay Leaderboard: Win Up to ₦20,000 This Month",
-    category: "🎁 Rewards & Announcements",
-    subject: "🏆 Pay Your Monthly Bills on PayMint & Win Up to ₦20,000 Cash Prizes!",
-    campaignName: "Monthly Bill-Pay Leaderboard Challenge",
-    desc: "Gamified reward challenge with ₦500,000 prize pool for top utility bill payers.",
-    content: `{{headerBanner}}
-{{logo}}
-<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 580px; margin: 0 auto;">
-  <div style="background: linear-gradient(135deg, #0f3dac 0%, #1e3a8a 100%); color: #ffffff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
-    <span style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 10px;">🏆 ₦500,000 Monthly Prize Pool</span>
-    <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.25;">Win Up to ₦20,000 for Paying Your Bills</h1>
-    <p style="color: #bfdbfe; font-size: 14px; margin: 0;">Every utility bill and data recharge earns points on our monthly leaderboard.</p>
-  </div>
-
-  <p>Hi <strong>{{firstName}}</strong>,</p>
-  <p>Paying monthly household bills shouldn't just be an expense — with PayMint, it enters you into our <strong>Monthly Bill-Pay Challenge</strong> with over ₦500,000 in cash prizes distributed to our top 50 users this month!</p>
-
-  <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 18px; margin: 20px 0;">
-    <h3 style="font-size: 15px; margin: 0 0 12px 0; color: #1d4ed8; font-weight: 700;">How to Earn Points:</h3>
-    <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #1e3a8a; line-height: 1.8;">
-      <li>⚡ <strong>Electricity Bill Recharge:</strong> 50 points per ₦1,000 recharged</li>
-      <li>📺 <strong>Cable TV Subscription:</strong> 40 points per renewal</li>
-      <li>📶 <strong>Data & Airtime Bundles:</strong> 30 points per ₦1,000 spent</li>
-      <li>🥇 <strong>1st Place Prize:</strong> ₦20,000 cash straight into your bank account!</li>
-    </ul>
-  </div>
-
-  <div style="text-align: center; margin: 28px 0;">
-    <a href="{{website}}" style="background: #0f3dac; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(15, 61, 172, 0.25);">Pay Bills & Climb Leaderboard</a>
-  </div>
-
-  <div style="border-top: 1px solid #e2e8f0; padding-top: 18px; margin-top: 24px; font-size: 13px; color: #64748b; text-align: center;">
-    <p style="margin-bottom: 6px;">Track your points live on the PayMint app:</p>
-    <div>
-      📱 <a href="{{playStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600; margin-right: 12px;">Google Play Store</a>
-      🍏 <a href="{{appStore}}" style="color: #0f3dac; text-decoration: none; font-weight: 600;">Apple App Store</a>
-    </div>
-  </div>
-
-  <p style="font-size: 13px; color: #94a3b8; margin-top: 20px; text-align: center;">Best regards,<br/>The PayMint Team</p>
 </div>
 {{footerBanner}}`,
   },
@@ -548,9 +537,9 @@ const EMAIL_TEMPLATES = {
 };
 
 // Aliases for backwards compatibility
-EMAIL_TEMPLATES.brandShowcase = EMAIL_TEMPLATES.cashbackElectricityData;
+EMAIL_TEMPLATES.brandShowcase = EMAIL_TEMPLATES.betterDataDeals;
 EMAIL_TEMPLATES.executiveLetter = EMAIL_TEMPLATES.platformUpgradeAnnouncement;
-EMAIL_TEMPLATES.quickPromo = EMAIL_TEMPLATES.cheapDataPromo;
+EMAIL_TEMPLATES.quickPromo = EMAIL_TEMPLATES.betterDataDeals;
 
 const CampaignsPage = () => {
   // Queries
@@ -575,6 +564,7 @@ const CampaignsPage = () => {
   const { mutate: createCampaign, isLoading: isCreating } = useCreateCampaign();
   const { mutate: updateCampaign, isLoading: isUpdating } = useUpdateCampaign();
   const { mutate: controlCampaign } = useControlCampaign();
+  const { mutate: deleteCampaign } = useDeleteCampaign();
   const { mutate: resetAudience, isLoading: isResetting } = useResetAudience();
   const { mutate: deleteAudience, isLoading: isDeletingAud } = useDeleteAudience();
   const { mutate: pruneRecipients, isLoading: isPruning } = usePruneRecipients();
@@ -583,6 +573,7 @@ const CampaignsPage = () => {
   // UI States
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedEditCampaign, setSelectedEditCampaign] = useState(null);
   const [attributionModalOpen, setAttributionModalOpen] = useState(false);
   const [selectedCampaignForAttr, setSelectedCampaignForAttr] = useState(null);
   const [showCharts, setShowCharts] = useState(true);
@@ -591,16 +582,16 @@ const CampaignsPage = () => {
   const [editorTab, setEditorTab] = useState("edit"); // "edit" | "preview"
   const [editEditorTab, setEditEditorTab] = useState("edit");
 
-  const [selectedTemplateKey, setSelectedTemplateKey] = useState("cashbackElectricityData");
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState("betterDataDeals");
 
   // Create Campaign Form State
   const [formData, setFormData] = useState({
-    name: EMAIL_TEMPLATES.cashbackElectricityData.campaignName,
-    subject: EMAIL_TEMPLATES.cashbackElectricityData.subject,
+    name: EMAIL_TEMPLATES.betterDataDeals.campaignName,
+    subject: EMAIL_TEMPLATES.betterDataDeals.subject,
     senderName: "PayMint",
     senderEmail: "",
     sendingAccount: "dedicated", // "dedicated" (300/d) | "primary" (200/d)
-    htmlContent: EMAIL_TEMPLATES.cashbackElectricityData.content,
+    htmlContent: EMAIL_TEMPLATES.betterDataDeals.content,
     dailyLimit: 300,
     allocations: {},
   });
@@ -661,8 +652,8 @@ const CampaignsPage = () => {
       };
     });
 
-    const defaultTpl = EMAIL_TEMPLATES.cashbackElectricityData;
-    setSelectedTemplateKey("cashbackElectricityData");
+    const defaultTpl = EMAIL_TEMPLATES.betterDataDeals;
+    setSelectedTemplateKey("betterDataDeals");
 
     setFormData({
       name: defaultTpl.campaignName,
@@ -680,6 +671,7 @@ const CampaignsPage = () => {
   };
 
   const openEditModal = (camp) => {
+    setSelectedEditCampaign(camp);
     setEditFormData({
       id: camp._id,
       name: camp.name || "",
@@ -689,6 +681,7 @@ const CampaignsPage = () => {
       sendingAccount: camp.sendingAccount || "dedicated",
       htmlContent: camp.htmlContent || "",
       dailyLimit: camp.dailyLimit || (camp.sendingAccount === "primary" ? 200 : 300),
+      status: camp.status || "draft",
     });
     setEditEditorTab("edit");
     setEditModalOpen(true);
@@ -779,6 +772,7 @@ const CampaignsPage = () => {
       if (conf.enabled && conf.count > 0) {
         formattedAlloc.push({
           audienceId: audId,
+          count: conf.count,
           requestedCount: conf.count,
         });
       }
@@ -808,6 +802,7 @@ const CampaignsPage = () => {
       if (conf.enabled && conf.count > 0) {
         formattedAlloc.push({
           audienceId: audId,
+          count: conf.count,
           requestedCount: conf.count,
         });
       }
@@ -1473,23 +1468,25 @@ const CampaignsPage = () => {
                     return (
                       <tr key={camp._id}>
                         <td>
-                          <div className="d-flex align-items-center gap-1 flex-wrap">
-                            <span className="fw-bold text-dark">{camp.name}</span>
-                            {camp.sendingAccount === "primary" ? (
-                              <Badge color="light" className="border text-primary fs-10px">
-                                🛡️ Primary (200/d)
-                              </Badge>
-                            ) : (
-                              <Badge color="light" className="border text-success fs-10px">
-                                🚀 Dedicated (300/d)
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="text-soft fs-12px text-truncate" style={{ maxWidth: "260px" }}>
-                            {camp.subject}
-                          </div>
-                          <div className="text-soft fs-11px mt-1">
-                            Created: {formatDateWithTime(camp.createdAt)}
+                          <div className="campaign-cell-meta">
+                            <div className="campaign-cell-title-row">
+                              <span className="campaign-cell-name">{camp.name}</span>
+                              {camp.sendingAccount === "primary" ? (
+                                <Badge color="light" className="border text-primary fs-10px">
+                                  🛡️ Primary (200/d)
+                                </Badge>
+                              ) : (
+                                <Badge color="light" className="border text-success fs-10px">
+                                  🚀 Dedicated (300/d)
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="campaign-cell-subject" title={camp.subject}>
+                              {camp.subject}
+                            </div>
+                            <div className="campaign-cell-date">
+                              Created: {formatDateWithTime(camp.createdAt)}
+                            </div>
                           </div>
                         </td>
                         <td>
@@ -1569,6 +1566,17 @@ const CampaignsPage = () => {
                                 <span>View Attribution & ROI</span>
                               </DropdownItem>
 
+                              {camp.status === "draft" && (
+                                <DropdownItem
+                                  onClick={() =>
+                                    controlCampaign({ id: camp._id, action: "start" })
+                                  }
+                                >
+                                  <Icon name="play" className="me-2 text-success" />
+                                  <span>Start / Launch Delivery</span>
+                                </DropdownItem>
+                              )}
+
                               {["sending", "queued"].includes(camp.status) && (
                                 <DropdownItem
                                   onClick={() =>
@@ -1591,13 +1599,13 @@ const CampaignsPage = () => {
                                 </DropdownItem>
                               )}
 
-                              {["sending", "queued", "paused"].includes(camp.status) && (
+                              {["draft", "sending", "queued", "paused"].includes(camp.status) && (
                                 <DropdownItem
                                   className="text-danger"
                                   onClick={() => {
                                     if (
                                       window.confirm(
-                                        "Are you sure you want to cancel this campaign? Remaining unsent recipients will not be sent."
+                                        `Are you sure you want to cancel the campaign "${camp.name}"? Remaining unsent recipients will not be sent.`
                                       )
                                     ) {
                                       controlCampaign({ id: camp._id, action: "cancel" });
@@ -1609,9 +1617,27 @@ const CampaignsPage = () => {
                                 </DropdownItem>
                               )}
 
-                              {["completed", "cancelled"].includes(camp.status) && (
+                              {["draft", "completed", "cancelled"].includes(camp.status) && (
                                 <DropdownItem
                                   className="text-danger"
+                                  onClick={() => {
+                                    if (
+                                      window.confirm(
+                                        `Permanently delete campaign "${camp.name}" and all its recipient records? This action cannot be undone.`
+                                      )
+                                    ) {
+                                      deleteCampaign(camp._id);
+                                    }
+                                  }}
+                                >
+                                  <Icon name="trash" className="me-2" />
+                                  <span>Delete Campaign</span>
+                                </DropdownItem>
+                              )}
+
+                              {["completed", "cancelled"].includes(camp.status) && (
+                                <DropdownItem
+                                  className="text-warning"
                                   onClick={() => {
                                     if (
                                       window.confirm(
@@ -1622,7 +1648,7 @@ const CampaignsPage = () => {
                                     }
                                   }}
                                 >
-                                  <Icon name="trash" className="me-2" />
+                                  <Icon name="trash-empty" className="me-2" />
                                   <span>Purge Recipient Logs</span>
                                 </DropdownItem>
                               )}
@@ -1867,24 +1893,24 @@ const CampaignsPage = () => {
                       value={selectedTemplateKey}
                       onChange={(e) => handleTemplateSelect(e.target.value, false)}
                     >
-                      <optgroup label="🔥 Cashback & Discounts">
-                        <option value="cashbackElectricityData">⚡ 5% Cashback: Electricity & Data Weekend Blitz</option>
-                        <option value="walletFundingBonus">🎁 Wallet Bonus: Fund ₦5,000+ & Claim ₦500 Free Credit</option>
+                      <optgroup label="📶 Data & Airtime Deals">
+                        <option value="betterDataDeals">📶 Better Data Deals: Buy Data & Get Cashback (Default)</option>
+                        <option value="cheapDataPromo">📶 High-Speed Data Bundles: MTN, Airtel, Glo & 9mobile</option>
+                        <option value="airtimeSurgeDiscount">📞 Airtime Top-Up: Instant 3-Second Delivery</option>
                       </optgroup>
                       <optgroup label="💡 Utilities & Electricity Bills">
                         <option value="electricityMeterRescue">💡 Electricity Meter: Instant 20-Digit Token in 3s</option>
+                        <option value="cashbackElectricityData">⚡ Electricity & Data: Instant Recharges</option>
                         <option value="zeroFeeCable">📺 Zero Convenience Fee: DSTV, GOtv & StarTimes</option>
                       </optgroup>
-                      <optgroup label="📶 Data & Airtime Deals">
-                        <option value="cheapDataPromo">📶 Cheap Data: High-Speed SME & Direct from ₦220/GB</option>
-                        <option value="airtimeSurgeDiscount">📞 Airtime Surge: Instant Up to 6% Discount on Recharge</option>
+                      <optgroup label="💳 Wallet & Deposits">
+                        <option value="walletFundingBonus">💳 Dedicated Virtual Account: Instant Bank Transfer</option>
                       </optgroup>
                       <optgroup label="⚽ Betting & Entertainment">
-                        <option value="bettingTopUpCashback">⚽ Betting Top-Up: Instant Wallet Funding + 2% Cashback</option>
+                        <option value="bettingTopUpCashback">⚽ Betting Top-Up: Instant Wallet Funding</option>
                       </optgroup>
                       <optgroup label="🎁 Rewards & Announcements">
-                        <option value="referAndEarnCredits">🤝 Refer & Earn: ₦1,000 Bill Credits for You & Friends</option>
-                        <option value="monthlyLeaderboard">🏆 Bill-Pay Leaderboard: Win Up to ₦20,000 This Month</option>
+                        <option value="referAndEarnCredits">🤝 Share PayMint: Better Recharges for Friends</option>
                         <option value="platformUpgradeAnnouncement">🚀 Official Update: 99.9% Bill Success Rate & Auto-Pay</option>
                       </optgroup>
                     </select>
@@ -1915,7 +1941,7 @@ const CampaignsPage = () => {
                 </div>
 
                 {/* Tag insertion chips */}
-                <div>
+                <div className="campaign-tag-chips-wrapper">
                   <div className="campaign-tag-chips-label">Click a tag to insert into your email copy:</div>
                   <div className="campaign-tag-chips-row">
                     <button
@@ -2052,7 +2078,7 @@ const CampaignsPage = () => {
 
               <div className="campaign-modal-footer">
                 <Button color="light" type="button" onClick={() => setCreateModalOpen(false)}>
-                  Cancel
+                  Discard / Close
                 </Button>
                 <Button color="primary" type="submit" disabled={isCreating}>
                   {isCreating ? "Queueing Campaign..." : "Launch & Queue Campaign"}
@@ -2156,39 +2182,38 @@ const CampaignsPage = () => {
                 </Col>
               </div>
 
-              <div className="border-top pt-3 mb-2">
-                <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                  <h6 className="title mb-0 fs-14px">
-                    Email Message Content & Banners
-                  </h6>
+              <div className="campaign-email-section">
+                <div className="campaign-email-section-header">
+                  <div className="campaign-email-section-title">
+                    <Icon name="mail" /> Email Message Content &amp; Banners
+                  </div>
                   {/* Template Quick Select */}
-                  <div className="d-flex align-items-center gap-1">
+                  <div className="campaign-template-selector-box">
                     <span className="fs-11px text-soft">Template:</span>
                     <select
-                      className="form-select form-select-sm"
-                      style={{ minWidth: "260px" }}
+                      className="campaign-template-select"
                       onChange={(e) => handleTemplateSelect(e.target.value, true)}
                       defaultValue=""
                     >
-                      <option value="" disabled>Apply a Template Preset (10 Available)...</option>
-                      <optgroup label="🔥 Cashback & Bonuses">
-                        <option value="cashbackElectricityData">⚡ 5% Cashback: Electricity & Data Weekend Blitz</option>
-                        <option value="walletFundingBonus">🎁 Wallet Bonus: Fund ₦5,000+ & Claim ₦500 Free Credit</option>
+                      <option value="" disabled>Apply a Template Preset...</option>
+                      <optgroup label="📶 Data & Airtime Deals">
+                        <option value="betterDataDeals">📶 Better Data Deals: Buy Data & Get Cashback</option>
+                        <option value="cheapDataPromo">📶 High-Speed Data Bundles: MTN, Airtel, Glo & 9mobile</option>
+                        <option value="airtimeSurgeDiscount">📞 Airtime Top-Up: Instant 3-Second Delivery</option>
                       </optgroup>
                       <optgroup label="💡 Utilities & Electricity Bills">
                         <option value="electricityMeterRescue">💡 Electricity Meter: Instant 20-Digit Token in 3s</option>
+                        <option value="cashbackElectricityData">⚡ Electricity & Data: Instant Recharges</option>
                         <option value="zeroFeeCable">📺 Zero Convenience Fee: DSTV, GOtv & StarTimes</option>
                       </optgroup>
-                      <optgroup label="📶 Data & Airtime Deals">
-                        <option value="cheapDataPromo">📶 Cheap Data: High-Speed SME & Direct from ₦220/GB</option>
-                        <option value="airtimeSurgeDiscount">📞 Airtime Surge: Instant Up to 6% Discount on Recharge</option>
+                      <optgroup label="💳 Wallet & Deposits">
+                        <option value="walletFundingBonus">💳 Dedicated Virtual Account: Instant Bank Transfer</option>
                       </optgroup>
                       <optgroup label="⚽ Betting & Entertainment">
-                        <option value="bettingTopUpCashback">⚽ Betting Top-Up: Instant Wallet Funding + 2% Cashback</option>
+                        <option value="bettingTopUpCashback">⚽ Betting Top-Up: Instant Wallet Funding</option>
                       </optgroup>
                       <optgroup label="🎁 Rewards & Announcements">
-                        <option value="referAndEarnCredits">🤝 Refer & Earn: ₦1,000 Bill Credits for You & Friends</option>
-                        <option value="monthlyLeaderboard">🏆 Bill-Pay Leaderboard: Win Up to ₦20,000 This Month</option>
+                        <option value="referAndEarnCredits">🤝 Share PayMint: Better Recharges for Friends</option>
                         <option value="platformUpgradeAnnouncement">🚀 Official Update: 99.9% Bill Success Rate & Auto-Pay</option>
                       </optgroup>
                     </select>
@@ -2196,7 +2221,7 @@ const CampaignsPage = () => {
                 </div>
 
                 {/* Banner Status Chips */}
-                <div className="d-flex flex-wrap gap-2 align-items-center p-2 mb-2 bg-light rounded fs-12px">
+                <div className="campaign-banner-status-bar">
                   <span className="fw-bold text-dark">Active Banners:</span>
                   <Badge color={banners?.logoUrl ? "success" : "light"} className="border">
                     {banners?.logoUrl ? "✓ Logo Set" : "Logo Not Configured"}
@@ -2208,121 +2233,118 @@ const CampaignsPage = () => {
                     {banners?.footerBannerUrl ? "✓ Footer Banner Set" : "Footer Banner Not Set"}
                   </Badge>
                 </div>
-              </div>
 
-              {/* Tag insertion chips */}
-              <div className="mb-2">
-                <div className="fs-11px text-soft mb-1">Click a tag to insert into your email copy:</div>
-                <div className="d-flex flex-wrap gap-1">
+                {/* Tag insertion chips */}
+                <div className="campaign-tag-chips-wrapper">
+                  <div className="campaign-tag-chips-label">Click a tag to insert into your email copy:</div>
+                  <div className="campaign-tag-chips-row">
+                    <button
+                      type="button"
+                      className="campaign-tag-chip"
+                      onClick={() => insertEditTag("{{logo}}")}
+                      title="Inserts PayMint Logo Image"
+                    >
+                      + {"{{logo}}"}
+                    </button>
+                    <button
+                      type="button"
+                      className="campaign-tag-chip"
+                      onClick={() => insertEditTag("{{headerBanner}}")}
+                      title="Inserts Header Banner Image"
+                    >
+                      + {"{{headerBanner}}"}
+                    </button>
+                    <button
+                      type="button"
+                      className="campaign-tag-chip"
+                      onClick={() => insertEditTag("{{footerBanner}}")}
+                      title="Inserts Footer Banner Image"
+                    >
+                      + {"{{footerBanner}}"}
+                    </button>
+                    <button
+                      type="button"
+                      className="campaign-tag-chip"
+                      onClick={() => insertEditTag("{{firstName}}")}
+                    >
+                      + {"{{firstName}}"}
+                    </button>
+                    <button
+                      type="button"
+                      className="campaign-tag-chip"
+                      onClick={() => insertEditTag("{{lastName}}")}
+                    >
+                      + {"{{lastName}}"}
+                    </button>
+                    <button
+                      type="button"
+                      className="campaign-tag-chip"
+                      onClick={() => insertEditTag("{{email}}")}
+                    >
+                      + {"{{email}}"}
+                    </button>
+                    <button
+                      type="button"
+                      className="campaign-tag-chip"
+                      onClick={() => insertEditTag("{{website}}")}
+                    >
+                      + {"{{website}}"}
+                    </button>
+                    <button
+                      type="button"
+                      className="campaign-tag-chip"
+                      onClick={() => insertEditTag("{{playStore}}")}
+                    >
+                      + {"{{playStore}}"}
+                    </button>
+                    <button
+                      type="button"
+                      className="campaign-tag-chip"
+                      onClick={() => insertEditTag("{{appStore}}")}
+                    >
+                      + {"{{appStore}}"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Editor vs Live Preview Tabs */}
+                <div className="campaign-editor-tabs">
                   <button
                     type="button"
-                    className="campaign-tag-chip"
-                    onClick={() => insertEditTag("{{logo}}")}
+                    className={`campaign-editor-tab${editEditorTab === "edit" ? " active" : ""}`}
+                    onClick={() => setEditEditorTab("edit")}
                   >
-                    + {"{{logo}}"}
+                    <Icon name="code" />
+                    Edit HTML / Content
                   </button>
                   <button
                     type="button"
-                    className="campaign-tag-chip"
-                    onClick={() => insertEditTag("{{headerBanner}}")}
+                    className={`campaign-editor-tab${editEditorTab === "preview" ? " active" : ""}`}
+                    onClick={() => setEditEditorTab("preview")}
                   >
-                    + {"{{headerBanner}}"}
-                  </button>
-                  <button
-                    type="button"
-                    className="campaign-tag-chip"
-                    onClick={() => insertEditTag("{{footerBanner}}")}
-                  >
-                    + {"{{footerBanner}}"}
-                  </button>
-                  <button
-                    type="button"
-                    className="campaign-tag-chip"
-                    onClick={() => insertEditTag("{{firstName}}")}
-                  >
-                    + {"{{firstName}}"}
-                  </button>
-                  <button
-                    type="button"
-                    className="campaign-tag-chip"
-                    onClick={() => insertEditTag("{{lastName}}")}
-                  >
-                    + {"{{lastName}}"}
-                  </button>
-                  <button
-                    type="button"
-                    className="campaign-tag-chip"
-                    onClick={() => insertEditTag("{{email}}")}
-                  >
-                    + {"{{email}}"}
-                  </button>
-                  <button
-                    type="button"
-                    className="campaign-tag-chip"
-                    onClick={() => insertEditTag("{{website}}")}
-                  >
-                    + {"{{website}}"}
-                  </button>
-                  <button
-                    type="button"
-                    className="campaign-tag-chip"
-                    onClick={() => insertEditTag("{{playStore}}")}
-                  >
-                    + {"{{playStore}}"}
-                  </button>
-                  <button
-                    type="button"
-                    className="campaign-tag-chip"
-                    onClick={() => insertEditTag("{{appStore}}")}
-                  >
-                    + {"{{appStore}}"}
+                    <Icon name="eye" />
+                    Live Email Preview
                   </button>
                 </div>
-              </div>
 
-              {/* Edit Tabs */}
-              <Nav tabs className="mb-2">
-                <NavItem>
-                  <NavLink
-                    className={editEditorTab === "edit" ? "active" : ""}
-                    onClick={() => setEditEditorTab("edit")}
-                    style={{ cursor: "pointer", padding: "6px 14px", fontSize: "13px" }}
-                  >
-                    <Icon name="code" className="me-1" />
-                    Edit HTML / Content
-                  </NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink
-                    className={editEditorTab === "preview" ? "active" : ""}
-                    onClick={() => setEditEditorTab("preview")}
-                    style={{ cursor: "pointer", padding: "6px 14px", fontSize: "13px" }}
-                  >
-                    <Icon name="eye" className="me-1" />
-                    Live Email Preview
-                  </NavLink>
-                </NavItem>
-              </Nav>
-
-              <TabContent activeTab={editEditorTab}>
-                <TabPane tabId="edit">
-                  <textarea
-                    className="form-control"
-                    rows="9"
-                    style={{ fontFamily: "monospace", fontSize: "13px" }}
-                    value={editFormData.htmlContent}
-                    onChange={(e) => setEditFormData({ ...editFormData, htmlContent: e.target.value })}
-                    required
-                  />
-                </TabPane>
-                <TabPane tabId="preview">
+                {editEditorTab === "edit" ? (
+                  <div>
+                    <textarea
+                      className="campaign-html-editor"
+                      rows="9"
+                      value={editFormData.htmlContent}
+                      onChange={(e) => setEditFormData({ ...editFormData, htmlContent: e.target.value })}
+                      required
+                    />
+                  </div>
+                ) : (
                   <div
                     style={{
                       background: "#f8fafc",
                       border: "1px solid #e2e8f0",
                       borderRadius: "8px",
-                      padding: "24px",
-                      maxHeight: "380px",
+                      padding: "20px",
+                      maxHeight: "360px",
                       overflowY: "auto",
                     }}
                   >
@@ -2331,26 +2353,50 @@ const CampaignsPage = () => {
                         background: "#ffffff",
                         border: "1px solid #e2e8f0",
                         borderRadius: "8px",
-                        padding: "30px",
+                        padding: "24px",
                         maxWidth: "600px",
                         margin: "0 auto",
-                        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
+                        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.08)",
                       }}
                       dangerouslySetInnerHTML={{
                         __html: renderPreviewHtml(editFormData.htmlContent),
                       }}
                     />
                   </div>
-                </TabPane>
-              </TabContent>
+                )}
+              </div>
 
-              <div className="d-flex justify-content-end gap-2 mt-4">
-                <Button color="light" type="button" onClick={() => setEditModalOpen(false)}>
-                  Cancel
-                </Button>
-                <Button color="primary" type="submit" disabled={isUpdating}>
-                  {isUpdating ? "Saving Changes..." : "Save Changes"}
-                </Button>
+              <div className="campaign-modal-footer d-flex justify-content-between align-items-center">
+                <div>
+                  {["draft", "sending", "queued", "paused"].includes(selectedEditCampaign?.status || editFormData?.status) && (
+                    <Button
+                      color="danger"
+                      outline
+                      type="button"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `Are you sure you want to cancel the campaign "${editFormData.name}"? Remaining unsent recipients will not be sent.`
+                          )
+                        ) {
+                          controlCampaign({ id: editFormData.id, action: "cancel" });
+                          setEditModalOpen(false);
+                        }
+                      }}
+                    >
+                      <Icon name="cross-circle" className="me-1" />
+                      Cancel Campaign
+                    </Button>
+                  )}
+                </div>
+                <div className="d-flex gap-2">
+                  <Button color="light" type="button" onClick={() => setEditModalOpen(false)}>
+                    Close
+                  </Button>
+                  <Button color="primary" type="submit" disabled={isUpdating}>
+                    {isUpdating ? "Saving Changes..." : "Save Changes"}
+                  </Button>
+                </div>
               </div>
             </form>
           </ModalBody>

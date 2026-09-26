@@ -90,7 +90,7 @@ export const useControlCampaign = () => {
     ({ id, action }) =>
       toast.promise(
         instance
-          .post(`/marketing/campaigns/${id}/${action}`)
+          .post(`/marketing/campaigns/${id}/${action}`, {})
           .then((res) => res.data),
         {
           loading: `Updating campaign (${action})...`,
@@ -101,6 +101,28 @@ export const useControlCampaign = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["MarketingCampaigns"]);
+        queryClient.invalidateQueries(["MarketingDailyStats"]);
+      },
+    }
+  );
+};
+
+export const useDeleteCampaign = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (id) =>
+      toast.promise(
+        instance.delete(`/marketing/campaigns/${id}`).then((res) => res.data),
+        {
+          loading: "Deleting campaign...",
+          success: (d) => d?.message || "Campaign deleted successfully",
+          error: (e) => e?.response?.data?.message || "Failed to delete campaign",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["MarketingCampaigns"]);
+        queryClient.invalidateQueries(["MarketingDailyStats"]);
       },
     }
   );

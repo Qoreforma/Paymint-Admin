@@ -381,6 +381,8 @@
 .campaign-table {
   margin-bottom: 0 !important;
   width: 100%;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
 }
 
 .campaign-table thead th {
@@ -393,17 +395,64 @@
   padding: 0.85rem 1rem !important;
   border-bottom: 1px solid #e2e8f0 !important;
   vertical-align: middle !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
 }
 
 .campaign-table tbody td {
-  padding: 0.9rem 1rem !important;
+  padding: 0.95rem 1rem !important;
   border-bottom: 1px solid #f1f5f9 !important;
   vertical-align: middle !important;
   font-size: 0.8125rem;
+  line-height: 1.4 !important;
 }
 
 .campaign-table tbody tr:hover td {
   background-color: #f8fafc !important;
+}
+
+/* ── CAMPAIGN TABLE CELL FORMATTING ────────────────────── */
+.campaign-cell-meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.35rem !important;
+  min-width: 250px;
+  max-width: 360px;
+}
+
+.campaign-cell-title-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.45rem !important;
+  flex-wrap: wrap !important;
+  line-height: 1.35 !important;
+}
+
+.campaign-cell-name {
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  font-size: 0.875rem !important;
+  line-height: 1.35 !important;
+  display: inline-block !important;
+}
+
+.campaign-cell-subject {
+  color: #64748b !important;
+  font-size: 0.775rem !important;
+  line-height: 1.4 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 320px;
+}
+
+.campaign-cell-date {
+  color: #94a3b8 !important;
+  font-size: 0.725rem !important;
+  line-height: 1.25 !important;
+  display: block !important;
 }
 
 /* ── MODAL ENHANCEMENTS ──────────────────────────────────── */
@@ -567,17 +616,18 @@
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  padding: 1rem 1.1rem;
-  margin-bottom: 1.1rem;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  overflow: visible;
 }
 
 .campaign-email-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
 
 .campaign-email-section-title {
@@ -598,44 +648,58 @@
   padding: 0.55rem 0.75rem;
   background: #f1f5f9;
   border-radius: 8px;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
   font-size: 0.775rem;
 }
 
-.campaign-tag-chips-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 0.75rem;
+.campaign-tag-chips-wrapper {
+  margin-bottom: 0.85rem !important;
+  display: block !important;
+  clear: both !important;
+  position: relative;
 }
 
 .campaign-tag-chips-label {
-  font-size: 0.72rem;
-  color: #6b7280;
-  margin-bottom: 0.3rem;
+  font-size: 0.72rem !important;
+  color: #64748b !important;
+  margin-bottom: 0.4rem !important;
+  display: block !important;
+}
+
+.campaign-tag-chips-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.45rem !important;
+  margin-bottom: 0.85rem !important;
+  align-items: center !important;
 }
 
 /* Editor tabs */
 .campaign-editor-tabs {
-  display: flex;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 0.75rem;
-  gap: 0.25rem;
+  display: flex !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  margin-top: 0.85rem !important;
+  margin-bottom: 0.85rem !important;
+  gap: 0.35rem !important;
+  clear: both !important;
+  width: 100% !important;
+  position: relative;
+  z-index: 2;
 }
 
 .campaign-editor-tab {
-  padding: 0.4rem 0.85rem;
-  font-size: 0.8rem;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   border: none;
   background: transparent;
-  color: #6b7280;
+  color: #64748b;
   border-bottom: 2px solid transparent;
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
   margin-bottom: -1px;
 }
 
@@ -643,10 +707,11 @@
   color: #0f3dac;
   border-bottom-color: #0f3dac;
   background: transparent;
+  font-weight: 700;
 }
 
 .campaign-editor-tab:hover:not(.active) {
-  color: #374151;
+  color: #1e293b;
 }
 
 /* Template Selector Controls */
