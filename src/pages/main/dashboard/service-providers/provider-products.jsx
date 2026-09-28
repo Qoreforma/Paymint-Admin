@@ -216,9 +216,17 @@ const ServiceProvidersProducts = () => {
     setView({ add: t==="add", details: t==="details", edit: t==="edit", products: t==="products" });
 
   const resetForm = () =>
-    setFormData({ name:"", amount:"", provider_amount:"", dataSizeDisplay:"", validityPeriod:"", validity:"", dataType:"", category:"" });
+    setFormData({ name:"", amount:"", provider_amount:"", dataSizeDisplay:"", validityPeriod:"", validity:"", dataType:"", category:"", allowBelowCost: false });
 
   const onFormSubmit = (form) => {
+    const pCost = Number(form.provider_amount || formData?.provider_amount || 0);
+    const minAllowed = Math.floor(pCost * 0.97 * 100) / 100;
+    if (pCost > 0 && Number(form.amount) < pCost && !form.allowBelowCost) {
+      return;
+    }
+    if (pCost > 0 && Number(form.amount) < minAllowed) {
+      return;
+    }
     updateProduct({
       amount: form.amount,
       name: form.name,
@@ -227,6 +235,7 @@ const ServiceProvidersProducts = () => {
       validity: form.validity,
       category: form.category,
       productType: form.dataType,
+      allowBelowCost: !!form.allowBelowCost,
       attributes: {
         ...(allProducts.find((p) => p._id === editId)?.attributes || {}),
         dataType: form.dataType,
@@ -250,6 +259,7 @@ const ServiceProvidersProducts = () => {
           validityPeriod: item?.attributes?.validityPeriod,
           dataType: item?.attributes?.dataType || item?.productType || "",
           category: item?.category || item?.attributes?.category || "",
+          allowBelowCost: !!item?.allowBelowCost,
         });
       }
     });
@@ -269,7 +279,15 @@ const ServiceProvidersProducts = () => {
     setSearchParams((sp) => { sp.set("page", pageNumber); return sp; });
 
   const total_amount = watch("amount");
-  const difference   = total_amount - (formData?.provider_amount || 0);
+  const watchAllowBelowCost = watch("allowBelowCost");
+  const providerCost = Number(formData?.provider_amount || 0);
+  const difference = Number(total_amount || 0) - providerCost;
+  const maxAllowedDiscount = providerCost * 0.03;
+  const minAllowedAmount = providerCost - maxAllowedDiscount;
+  const isBelowCost = providerCost > 0 && difference < 0;
+  const isBelowCostNotAllowed = isBelowCost && !watchAllowBelowCost;
+  const isDiscountExceeded = providerCost > 0 && Number(total_amount) < minAllowedAmount;
+  const isDiscounted = difference < 0 && !isDiscountExceeded;
 
   return (
     <React.Fragment>
@@ -898,24 +916,58 @@ const ServiceProvidersProducts = () => {
                     </Col>
                     <Col md="12">
                       <div className="form-group">
-                        <label className="form-label">Difference</label>
+                        <label className="form-label">
+                          {difference < 0 ? "Discount off Face Value" : "Margin / Markup"}
+                        </label>
                         <div className="form-control-wrap">
                           <input
                             type="number"
                             className="form-control"
                             disabled
-                            value={difference > 0 ? difference : 0}
+                            value={difference}
                           />
-                          {difference < 0 && (
-                            <span className="invalid">
-                              New amount is less than provider amount
+                          {isBelowCostNotAllowed && (
+                            <span className="invalid d-block mt-1">
+                              Selling amount is below provider cost. Check &quot;Allow Selling Below Provider Cost&quot; below to enable this.
+                            </span>
+                          )}
+                          {isDiscountExceeded && (
+                            <span className="invalid d-block mt-1">
+                              Selling amount cannot be more than 3% below provider amount (Min: ₦{minAllowedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                            </span>
+                          )}
+                          {isDiscounted && !isBelowCostNotAllowed && (
+                            <span className="text-warning small d-block mt-1">
+                              Discount: ₦{Math.abs(difference).toLocaleString()} ({providerCost > 0 ? ((Math.abs(difference) / providerCost) * 100).toFixed(1) : 0}% off face value)
                             </span>
                           )}
                         </div>
                       </div>
                     </Col>
+                    <Col md="12">
+                      <div
+                        className="custom-control custom-switch mt-2 p-2 rounded border"
+                        style={{
+                          background: watchAllowBelowCost ? "#fffbeb" : "#f8fafc",
+                          borderColor: watchAllowBelowCost ? "#fef3c7" : "#e2e8f0",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          className="custom-control-input"
+                          id="edit-allow-below-cost-provider"
+                          {...register("allowBelowCost")}
+                        />
+                        <label className="custom-control-label fw-bold text-dark" htmlFor="edit-allow-below-cost-provider">
+                          Allow Selling Below Provider Cost (Max 3% Wholesale Discount)
+                        </label>
+                        <div className="text-muted small ps-1">
+                          Enable only when provider gives wholesale discount. Allows selling amount to drop down to -3% below cost.
+                        </div>
+                      </div>
+                    </Col>
                     <Col size="12">
-                      <Button color="primary" type="submit">
+                      <Button color="primary" type="submit" disabled={isBelowCostNotAllowed || isDiscountExceeded}>
                         <Icon className="plus"></Icon>
                         <span>Proceed</span>
                       </Button>

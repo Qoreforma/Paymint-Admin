@@ -322,12 +322,17 @@ const ProductDetailModal = ({ isOpen, toggle, product, onEdit }) => {
           <div className="col-md-4">
             <div
               className="p-3 rounded-3 border"
-              style={{ background: margin > 0 ? "#ecfdf5" : "#f8fafc" }}
+              style={{
+                background: margin > 0 ? "#ecfdf5" : margin < 0 ? "#fffbeb" : "#f8fafc",
+                borderColor: margin < 0 ? "#fde68a" : undefined,
+              }}
             >
-              <span className="text-muted small d-block">Profit Margin</span>
+              <span className="text-muted small d-block">
+                {margin < 0 ? "Discount (Below Cost)" : "Profit Margin"}
+              </span>
               <span
                 className="fs-5 fw-bold"
-                style={{ color: margin > 0 ? "#059669" : "#64748b" }}
+                style={{ color: margin > 0 ? "#059669" : margin < 0 ? "#d97706" : "#64748b" }}
               >
                 {margin > 0 ? "+" : ""}{formatter("NGN").format(margin)}
               </span>
@@ -454,6 +459,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
     validityPeriod: "",
     isHot: false,
     isActive: true,
+    allowBelowCost: false,
   });
 
   // Sync state when product opens
@@ -472,6 +478,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
         validityPeriod: product.attributes?.validityPeriod || "",
         isHot: !!product.isHot,
         isActive: product.isActive !== false,
+        allowBelowCost: !!product.allowBelowCost,
       });
     }
   }, [product]);
@@ -484,9 +491,21 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
     }));
   };
 
+  const sellingPrice = Number(formData.amount || 0);
+  const providerCost = Number(formData.providerAmount || product?.providerAmount || 0);
+  const minAllowedSellingPrice = providerCost > 0 ? Math.floor(providerCost * 0.97 * 100) / 100 : 0;
+  const isBelowCost = providerCost > 0 && sellingPrice > 0 && sellingPrice < providerCost;
+  const isBelowCostNotAllowed = isBelowCost && !formData.allowBelowCost;
+  const isDiscountExceeded = providerCost > 0 && sellingPrice > 0 && sellingPrice < minAllowedSellingPrice;
+  const diffFromCost = sellingPrice - providerCost;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!product) return;
+
+    if (isBelowCostNotAllowed || isDiscountExceeded) {
+      return;
+    }
 
     const payload = {
       name: formData.name,
@@ -496,6 +515,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
       description: formData.description,
       isHot: formData.isHot,
       isActive: formData.isActive,
+      allowBelowCost: formData.allowBelowCost,
     };
 
     if (isDataProduct) {
@@ -572,13 +592,33 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
               <input
                 type="number"
                 name="amount"
-                className="form-control"
+                className={`form-control ${isBelowCostNotAllowed || isDiscountExceeded ? "is-invalid" : ""}`}
                 value={formData.amount}
                 onChange={handleChange}
                 required
                 min="0"
                 step="any"
               />
+              {isBelowCostNotAllowed && (
+                <div className="invalid-feedback d-block">
+                  Selling amount is below provider cost. Check &quot;Allow Selling Below Provider Cost&quot; below to enable this.
+                </div>
+              )}
+              {isDiscountExceeded && (
+                <div className="invalid-feedback d-block">
+                  Selling amount cannot be more than 3% below provider cost (Min: ₦{minAllowedSellingPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                </div>
+              )}
+              {isBelowCost && formData.allowBelowCost && !isDiscountExceeded && (
+                <div className="text-warning small mt-1">
+                  Discount: ₦{Math.abs(diffFromCost).toLocaleString()} ({providerCost > 0 ? ((Math.abs(diffFromCost) / providerCost) * 100).toFixed(1) : 0}% off cost)
+                </div>
+              )}
+              {diffFromCost > 0 && (
+                <div className="text-success small mt-1">
+                  Margin: +₦{diffFromCost.toLocaleString()} (+{providerCost > 0 ? ((diffFromCost / providerCost) * 100).toFixed(1) : 0}%)
+                </div>
+              )}
             </div>
 
             {/* Provider Amount */}
@@ -595,6 +635,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                 step="any"
                 disabled
               />
+              <span className="text-muted small">Synchronized from provider catalog (Read-only)</span>
             </div>
 
             {/* Data-Specific Fields */}
@@ -728,6 +769,32 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                 </label>
               </div>
             </div>
+
+            {/* Allow Selling Below Cost Switch */}
+            <div className="col-12">
+              <div
+                className="custom-control custom-switch mt-2 p-2 rounded border"
+                style={{
+                  background: formData.allowBelowCost ? "#fffbeb" : "#f8fafc",
+                  borderColor: formData.allowBelowCost ? "#fef3c7" : "#e2e8f0",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id="edit-allow-below-cost"
+                  name="allowBelowCost"
+                  checked={formData.allowBelowCost}
+                  onChange={handleChange}
+                />
+                <label className="custom-control-label fw-bold text-dark" htmlFor="edit-allow-below-cost">
+                  Allow Selling Below Provider Cost (Max 3% Wholesale Discount)
+                </label>
+                <div className="text-muted small ps-1">
+                  Enable only when the provider gives wholesale discount. Allows selling amount to drop down to -3% below cost.
+                </div>
+              </div>
+            </div>
           </div>
         </ModalBody>
 
@@ -743,7 +810,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={isLoading}
+            disabled={isLoading || isBelowCostNotAllowed || isDiscountExceeded}
           >
             {isLoading ? "Saving..." : "Save Changes"}
           </button>
@@ -772,6 +839,7 @@ const ProductList = () => {
     dataSize: "",
     isHot: "all",
     status: "all",
+    allowBelowCost: "all",
     sortBy: "createdAt",
     sortOrder: "desc",
   });
@@ -798,6 +866,7 @@ const ProductList = () => {
     dataSize: filters.dataSize,
     isHot: filters.isHot,
     status: filters.status,
+    allowBelowCost: filters.allowBelowCost,
     sortBy: filters.sortBy,
     sortOrder: filters.sortOrder,
   });
@@ -929,7 +998,7 @@ const ProductList = () => {
       setFilter("providerId", []);
       return;
     }
-    setFilter(key, key === "isHot" || key === "status" ? "all" : "");
+    setFilter(key, key === "isHot" || key === "status" || key === "allowBelowCost" ? "all" : "");
   };
 
   const activeFilters = Object.entries(filters).filter(([k, v]) => {
@@ -1334,6 +1403,36 @@ const ProductList = () => {
                         ))}
                       </DropdownMenu>
                     </UncontrolledDropdown>
+
+                    {/* Pricing / Below Cost */}
+                    <UncontrolledDropdown>
+                      <DropdownToggle
+                        tag="button"
+                        className={`btn btn-sm ${filters.allowBelowCost && filters.allowBelowCost !== "all" ? "btn-primary" : "btn-outline-light text-dark border"}`}
+                        id="filter-pricing-toggle"
+                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8 }}
+                      >
+                        <Icon name="tag" className="me-1" />
+                        {filters.allowBelowCost === "true"
+                          ? "Below Cost Only"
+                          : filters.allowBelowCost === "false"
+                            ? "Standard Cost"
+                            : "Pricing"}
+                        <Icon name="chevron-down" className="ms-1" />
+                      </DropdownToggle>
+                      <DropdownMenu container="body" style={{ minWidth: 180, zIndex: 1060 }}>
+                        <DropdownItem onClick={() => setFilter("allowBelowCost", "all")} className={filters.allowBelowCost === "all" ? "fw-bold" : ""}>
+                          All Pricing
+                        </DropdownItem>
+                        <DropdownItem divider />
+                        <DropdownItem onClick={() => setFilter("allowBelowCost", "true")} className={filters.allowBelowCost === "true" ? "fw-bold text-primary" : ""}>
+                          🏷️ Below Cost Only
+                        </DropdownItem>
+                        <DropdownItem onClick={() => setFilter("allowBelowCost", "false")} className={filters.allowBelowCost === "false" ? "fw-bold text-primary" : ""}>
+                          Standard Cost Only
+                        </DropdownItem>
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
                   </div>
                 </div>
 
@@ -1348,7 +1447,7 @@ const ProductList = () => {
                         className="btn btn-sm btn-outline-danger"
                         style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8, flexShrink: 0 }}
                         onClick={() => {
-                          setFilters({ search: "", providerId: [], serviceTypeId: "", serviceId: "", dataType: "", category: "", validity: "", dataSize: "", isHot: "all", status: "all", sortBy: "createdAt", sortOrder: "desc" });
+                          setFilters({ search: "", providerId: [], serviceTypeId: "", serviceId: "", dataType: "", category: "", validity: "", dataSize: "", isHot: "all", status: "all", allowBelowCost: "all", sortBy: "createdAt", sortOrder: "desc" });
                           setPendingSearch("");
                           setSearchParams((sp) => { sp.set("page", 1); return sp; });
                         }}
@@ -1374,6 +1473,7 @@ const ProductList = () => {
                         if (key === "validity") label = `Validity: ${VALIDITY_OPTIONS.find((v) => v.value === val)?.label ?? val}`;
                         if (key === "isHot") label = val === "true" ? "🔥 Hot Only" : "Regular Only";
                         if (key === "status") label = val === "true" ? "✅ Active" : "⛔ Inactive";
+                        if (key === "allowBelowCost") label = val === "true" ? "🏷️ Below Cost Only" : "Standard Cost Only";
                         if (key === "search") label = `Search: "${val}"`;
                         return <FilterPill key={key} label={label} onClear={() => clearFilter(key)} />;
                       })}
@@ -1817,6 +1917,11 @@ const ProductList = () => {
                                 {margin > 0 && (
                                   <div style={{ fontSize: 11, color: "#16a34a", fontWeight: 500 }}>
                                     +{formatter("NGN").format(margin)} margin
+                                  </div>
+                                )}
+                                {margin < 0 && (
+                                  <div style={{ fontSize: 11, color: "#d97706", fontWeight: 500 }}>
+                                    {formatter("NGN").format(margin)} discount
                                   </div>
                                 )}
                               </div>
