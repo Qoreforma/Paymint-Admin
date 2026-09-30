@@ -76,11 +76,13 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
       .then((response) => response.json())
       .then((response) => response?.data);
 
-    const final = data?.map((data) => ({
-      id: data?._id,
-      value: `${data.firstname} ${data?.lastname} - ${data?.email}`,
-      label: `${data.firstname} ${data?.lastname} - ${data?.email}`,
-    }));
+    const final = Array.isArray(data)
+      ? data.map((item) => ({
+          id: item?._id || item?.id,
+          value: `${item?.firstname || item?.firstName || ""} ${item?.lastname || item?.lastName || ""} - ${item?.email || ""}`,
+          label: `${item?.firstname || item?.firstName || ""} ${item?.lastname || item?.lastName || ""} - ${item?.email || ""}`,
+        }))
+      : [];
     return final;
   };
 
@@ -90,19 +92,37 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
       return;
     }
 
-    let submittedData;
-    const channels = data.channels.map((item) => item.value);
-    const hasPushSelected = channels.includes("push");
-    const pushType = hasPushSelected && data.type ? (data.type.value ? data.type.value : data.type) : undefined;
+    const channels = Array.isArray(data.channels)
+      ? data.channels.map((item) => item?.value || item)
+      : [];
 
-    let target_users = selectedUsers.map((item) => item.id);
-    let target = data.target.value ? data.target.value : data.target;
+    if (channels.length === 0) {
+      toast.error("Please select at least one channel");
+      return;
+    }
+
+    const hasPushSelected = channels.includes("push");
+    const pushType =
+      hasPushSelected && data.type ? (data.type?.value ? data.type.value : data.type) : undefined;
+
+    const target = data.target?.value ? data.target.value : data.target;
+    if (!target) {
+      toast.error("Please select target users");
+      return;
+    }
+
+    let submittedData;
 
     if (target === "specific") {
+      if (!selectedUsers || selectedUsers.length === 0) {
+        toast.error("Please select at least one user");
+        return;
+      }
+      const target_users = (selectedUsers || []).map((item) => item?.id || item?.value || item);
       submittedData = {
         title: data.title,
         body: data.body,
-        target: data.target.value ? data.target.value : data.target,
+        target,
         channels,
         ...(pushType && { type: pushType }),
         ...(data.schedule && {
@@ -116,7 +136,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
       submittedData = {
         title: data.title,
         body: data.body,
-        target: data.target.value ? data.target.value : data.target,
+        target,
         channels,
         ...(pushType && { type: pushType }),
         ...(data.schedule && {
@@ -138,7 +158,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
   };
 
   const defaultChannel = useMemo(() => {
-    if (!formData.channels) return [];
+    if (!Array.isArray(formData.channels)) return [];
 
     return formData.channels.map((channel) => ({
       label: channel === "push" ? "Push" : channel === "email" ? "Email" : channel === "sms" ? "SMS" : "In App",
@@ -158,32 +178,35 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
 
   // Handle channel change to enforce Email alone rule
   const handleChannelChange = (selectedOptions) => {
-    const hasEmailSelected = selectedOptions.some((option) => option.value === "email");
+    const options = selectedOptions || [];
+    const hasEmailSelected = options.some((option) => option?.value === "email");
 
     if (hasEmailSelected) {
       // If Email is selected, only keep Email
-      const emailOnly = selectedOptions.filter((option) => option.value === "email");
+      const emailOnly = options.filter((option) => option?.value === "email");
       setSelectedChannels(emailOnly);
       setValue("channels", emailOnly);
     } else {
-      setSelectedChannels(selectedOptions);
-      setValue("channels", selectedOptions);
+      setSelectedChannels(options);
+      setValue("channels", options);
     }
   };
 
   useEffect(() => {
-    const defaultChannels = formData.channels
+    const defaultChannels = Array.isArray(formData.channels)
       ? formData.channels.map((channel) => ({
           label: channel === "push" ? "Push" : channel === "email" ? "Email" : channel === "sms" ? "SMS" : "In App",
           value: channel,
         }))
       : [];
 
-    const defaultUsers = formData.users?.map((user) => ({
-      id: user?._id,
-      value: `${user.firstname} ${user?.lastname} - ${user?.email}`,
-      label: `${user.firstname} ${user?.lastname} - ${user?.email}`,
-    }));
+    const defaultUsers = Array.isArray(formData.users)
+      ? formData.users.map((user) => ({
+          id: user?._id || user?.id,
+          value: `${user?.firstname || user?.firstName || ""} ${user?.lastname || user?.lastName || ""} - ${user?.email || ""}`,
+          label: `${user?.firstname || user?.firstName || ""} ${user?.lastname || user?.lastName || ""} - ${user?.email || ""}`,
+        }))
+      : [];
 
     const defaultType = formData.type
       ? TRANSACTION_TYPE_OPTIONS.find((item) => item.value === formData.type) || {
@@ -336,13 +359,16 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
                       control={control}
                       name="channels"
                       rules={{ required: "Please select at least one channel" }}
-                      render={({ fieldState }) => (
+                      render={({ field, fieldState }) => (
                         <>
                           <RSelect
                             isMulti
                             options={channelOption}
                             value={selectedChannels}
-                            onChange={handleChannelChange}
+                            onChange={(options) => {
+                              handleChannelChange(options);
+                              field.onChange(options || []);
+                            }}
                             placeholder="Select channels..."
                           />
                           {fieldState.error && <span className="invalid">{fieldState.error.message}</span>}
@@ -413,7 +439,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
                     value={selectedUsers}
                     defaultValue={selectedUsers}
                     placeholder={"Select Users"}
-                    onChange={(e) => setSelectedUsers(e)}
+                    onChange={(e) => setSelectedUsers(e || [])}
                   />
                 </Col>
               )}
