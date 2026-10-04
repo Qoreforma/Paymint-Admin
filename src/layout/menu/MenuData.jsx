@@ -226,6 +226,34 @@ const menu = [
   // },
 
   {
+    heading: "Support & Help Desk",
+    show: "all",
+  },
+  {
+    icon: "help-alt",
+    text: "Customer Support",
+    link: "/support-desk",
+    permission: "all",
+    subMenu: [
+      {
+        text: "Live Chat Desk",
+        link: "/support-desk",
+        permission: "all",
+      },
+      {
+        text: "Ticket Queue",
+        link: "/support-desk/queue",
+        permission: "all",
+      },
+      {
+        text: "Provider Outages",
+        link: "/support-desk/outages",
+        permission: "all",
+      },
+    ],
+  },
+
+  {
     heading: "New & updates",
     show: "all",
     // show: ["alerts", "announcement", "faqs", "referral-terms", "all"],

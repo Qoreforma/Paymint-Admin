@@ -114,6 +114,7 @@ import ServicesApiDiscounts from "../pages/main/dashboard/services/services-api-
 import DeviceAndIpPage from "../pages/main/dashboard/settings/DeviceAndIp";
 import EmailBannersPage from "../pages/main/dashboard/settings/EmailBanners";
 import AirtimeCashConfigPage from "../pages/main/dashboard/settings/AirtimeCashConfig";
+import SupportDeskPage from "../pages/main/dashboard/support/SupportDesk";
 
 const routes = (
   <Route>
@@ -214,6 +215,10 @@ const routes = (
           <Route path="create-roles" element={<CreateRoles />}></Route>
           <Route path="edit-roles/:roleId" element={<EditRoles />}></Route>
           <Route path="referral-management" element={<ReferralsPage />}></Route>
+
+          <Route path="support-desk" element={<SupportDeskPage />} />
+          <Route path="support-desk/:tab" element={<SupportDeskPage />} />
+          <Route path="support-desk/ticket/:ticketId" element={<SupportDeskPage />} />
 
           <Route path="settings">
             <Route index element={<UserInfoPage />} />

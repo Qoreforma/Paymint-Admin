@@ -75,6 +75,18 @@ const BACKEND_URLS = {
   rewardAnalytics: "/reward-analytics",
   analytics: "/analytics",
   treasury: "/treasury",
+  support: {
+    queue: "/support/queue",
+    stats: "/support/stats",
+    ticket: (id) => `/support/tickets/${id}`,
+    messages: (id) => `/support/tickets/${id}/messages`,
+    claim: (id) => `/support/tickets/${id}/claim`,
+    reassign: (id) => `/support/tickets/${id}/reassign`,
+    resolve: (id) => `/support/tickets/${id}/resolve`,
+    close: (id) => `/support/tickets/${id}/close`,
+    outages: "/support/outages",
+    outage: (provider) => `/support/outages/${provider}`,
+  },
 };
 
 export default BACKEND_URLS;
