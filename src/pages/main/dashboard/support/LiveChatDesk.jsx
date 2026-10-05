@@ -441,36 +441,42 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
             {/* Chat Input Foot */}
             <div className="support-chat-foot">
               {/* Quick Canned Responses */}
-              <div className="quick-replies-bar">
-                {CANNED_RESPONSES.map((resp, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="quick-reply-chip"
-                    onClick={() => handleQuickReply(resp)}
-                  >
-                    {resp}
-                  </button>
-                ))}
+              <div className="quick-replies-container">
+                <span className="quick-replies-label">Quick:</span>
+                <div className="quick-replies-bar">
+                  {CANNED_RESPONSES.map((resp, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className="quick-reply-chip"
+                      onClick={() => handleQuickReply(resp)}
+                      title={resp}
+                    >
+                      {resp}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Input Form */}
-              <form onSubmit={handleSendMessage} className="d-flex align-items-center gap-2 mt-2">
-                <Input
-                  type="textarea"
-                  rows="2"
-                  placeholder="Type your message to the customer... (Enter to send)"
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  disabled={selectedTicket.status === "closed"}
-                  style={{ resize: "none" }}
-                />
+              <form onSubmit={handleSendMessage} className="support-chat-input-form">
+                <div className="support-input-wrap">
+                  <Input
+                    type="textarea"
+                    rows="2"
+                    placeholder="Type your message to the customer... (Enter to send)"
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={selectedTicket.status === "closed"}
+                    style={{ resize: "none" }}
+                  />
+                </div>
                 <Button
                   color="primary"
                   type="submit"
                   disabled={!inputMessage.trim() || isSending || selectedTicket.status === "closed"}
-                  style={{ height: "48px", minWidth: "90px" }}
+                  className="support-send-btn"
                 >
                   {isSending ? (
                     <Spinner size="sm" />
