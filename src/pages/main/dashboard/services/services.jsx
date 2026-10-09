@@ -73,9 +73,36 @@ const Services = () => {
     name: "",
     logo: "",
     active: false,
+    status: "active",
+    statusMessage: "",
     product_type: "",
     created_at: "",
   });
+
+  const [selectedStatus, setSelectedStatus] = useState("active");
+  const [statusMessage, setStatusMessage] = useState("");
+
+  const statuses = [
+    { value: "active", label: "Active" },
+    { value: "temporary-deactivated", label: "Temporary Deactivated (Outage)" },
+    { value: "coming-soon", label: "Coming Soon" },
+    { value: "deactivated", label: "Deactivated" },
+  ];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "active":
+        return "success";
+      case "temporary-deactivated":
+        return "warning";
+      case "coming-soon":
+        return "info";
+      case "deactivated":
+        return "danger";
+      default:
+        return "secondary";
+    }
+  };
 
   const [view, setView] = useState({
     add: false,
@@ -128,16 +155,31 @@ const Services = () => {
   const onEditClick = (id) => {
     services?.data?.forEach((item) => {
       if (item._id === id) {
+        const itemStatus = item?.status || (item?.isActive ? "active" : "deactivated");
         setFormData({
           name: item?.name,
           logo: item?.logo,
           active: item?.isActive,
+          status: itemStatus,
+          statusMessage: item?.statusMessage || "",
           product_type: item?.serviceTypeId?.name,
           created_at: item?.createdAt,
         });
+        setSelectedStatus(itemStatus);
+        setStatusMessage(item?.statusMessage || "");
       }
     });
     setEditedId(id);
+  };
+
+  const onStatusSubmit = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    updateStatus({
+      status: selectedStatus,
+      statusMessage: statusMessage?.trim() || null,
+      isActive: selectedStatus === "active",
+    });
+    setView({ add: false, details: false, edit: false, types: false });
   };
 
   useEffect(() => {
@@ -358,22 +400,32 @@ const Services = () => {
                             </DataTableRow>
                             <DataTableRow>{item?.serviceTypeId?.name}</DataTableRow>
                             <DataTableRow>
-                              <div className="custom-control-sm custom-switch">
-                                <input
-                                  type="checkbox"
-                                  className="custom-control-input"
-                                  checked={item?.isActive}
+                              <div className="d-flex align-items-center gap-1">
+                                <Badge
+                                  color={getStatusColor(item?.status || (item?.isActive ? "active" : "deactivated"))}
+                                  className="badge-dot has-bg d-inline-flex"
+                                  style={{ cursor: "pointer" }}
                                   onClick={() => {
                                     onEditClick(item._id);
-                                    updateStatus({ isActive: !item?.isActive });
+                                    setView({ add: false, edit: true, details: false, types: false });
                                   }}
-                                  id={item._id}
-                                />
-                                <label className="custom-control-label" htmlFor={item._id}>
-                                  <span className={`ccap fw-medium ${item?.isActive ? "text-success" : ""}`}>
-                                    {item.isActive ? "active" : "inactive"}
+                                >
+                                  <span className="ccap fw-medium">
+                                    {item?.status || (item?.isActive ? "active" : "deactivated")}
                                   </span>
-                                </label>
+                                </Badge>
+                                <Button
+                                  color="light"
+                                  size="xs"
+                                  className="btn-icon btn-trigger ms-1"
+                                  title="Edit Status & Notice"
+                                  onClick={() => {
+                                    onEditClick(item._id);
+                                    setView({ add: false, edit: true, details: false, types: false });
+                                  }}
+                                >
+                                  <Icon name="edit" />
+                                </Button>
                               </div>
                             </DataTableRow>
                             <DataTableRow className="tb-odr-action">
@@ -490,11 +542,10 @@ const Services = () => {
           </Card>
         </Block>
 
-        {/* ADD CATEGORIES */}
-        <Modal isOpen={view.add || view.edit} toggle={() => onFormCancel()} className="modal-dialog-centered" size="md">
+        {/* EDIT SERVICE STATUS MODAL */}
+        <Modal isOpen={view.edit} toggle={() => onFormCancel()} className="modal-dialog-centered" size="lg">
           <ModalBody className="bg-white rounded">
             <a href="#cancel" className="close">
-              {" "}
               <Icon
                 name="cross-sm"
                 onClick={(ev) => {
@@ -504,78 +555,69 @@ const Services = () => {
               ></Icon>
             </a>
             <div className="p-2">
-              <h5 className="title">{view.add ? "Add" : "Edit"} Account</h5>
-              <div className="mt-4">
-                <form onSubmit={handleSubmit(onFormSubmit)}>
-                  <Row className="g-3">
-                    <Col md="12">
-                      <div className="form-group">
-                        <label className="form-label" htmlFor="bank_code">
-                          Bank ID
-                        </label>
-                        <div className="form-control-wrap">
-                          <input
-                            type="text"
-                            className="form-control"
-                            {...register("bank_code", {
-                              required: "This field is required",
-                            })}
-                            onChange={(e) => setFormData({ ...formData, bank_code: e.target.value })}
-                            value={formData.bank_code}
-                          />
-                          {errors.bank_code && <span className="invalid">{errors.bank_code.message}</span>}
-                        </div>
-                      </div>
-                    </Col>
-
-                    <Col md="12">
-                      <div className="form-group">
-                        <label className="form-label" htmlFor="account_number">
-                          Account Number
-                        </label>
-                        <div className="form-control-wrap">
-                          <input
-                            type="number"
-                            className="form-control"
-                            {...register("account_number", {
-                              required: "This field is required",
-                            })}
-                            onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
-                            value={formData.account_number}
-                          />
-                          {errors.account_number && <span className="invalid">{errors.account_number.message}</span>}
-                        </div>
-                      </div>
-                    </Col>
-
-                    <Col md="12">
-                      <div className="form-group">
-                        <label className="form-label" htmlFor="account_name">
-                          Account Name
-                        </label>
-                        <div className="form-control-wrap">
-                          <input
-                            type="text"
-                            className="form-control"
-                            {...register("account_name")}
-                            onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
-                            value={formData.account_name}
-                            disabled
-                          />
-                          {errors.account_name && <span className="invalid">{errors.account_name.message}</span>}
-                        </div>
-                      </div>
-                    </Col>
-
-                    <Col size="12">
-                      <Button color="primary" type="submit">
-                        <Icon className="plus"></Icon>
-                        <span>{view.add ? "Add" : "Verify"} Account</span>
-                      </Button>
-                    </Col>
-                  </Row>
-                </form>
+              <div className="nk-modal-head mb-3">
+                <h5 className="title">Update Service Status — {formData.name}</h5>
+                <p className="text-soft">
+                  Control operational status and dynamic outage notice displayed to mobile & web users.
+                </p>
               </div>
+              <form onSubmit={onStatusSubmit}>
+                <Row className="g-3">
+                  <Col md="12">
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="service-status">
+                        Operational Status
+                      </label>
+                      <div className="form-control-wrap">
+                        <RSelect
+                          options={statuses}
+                          value={statuses.find((s) => s.value === selectedStatus)}
+                          onChange={(e) => setSelectedStatus(e.value)}
+                        />
+                      </div>
+                    </div>
+                  </Col>
+
+                  <Col md="12">
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="service-status-message">
+                        Custom Outage Notice / Status Message (Optional)
+                      </label>
+                      <div className="form-control-wrap">
+                        <textarea
+                          className="form-control"
+                          id="service-status-message"
+                          rows="3"
+                          placeholder={
+                            selectedStatus === "temporary-deactivated"
+                              ? `${formData.name} is temporarily unavailable. We're monitoring the issue and will notify you once service is restored. 💙`
+                              : selectedStatus === "coming-soon"
+                              ? `${formData.name} will be available soon. Stay tuned!`
+                              : selectedStatus === "deactivated"
+                              ? `${formData.name} is currently unavailable.`
+                              : "No notice needed when active."
+                          }
+                          value={statusMessage}
+                          onChange={(e) => setStatusMessage(e.target.value)}
+                          disabled={selectedStatus === "active"}
+                        />
+                        <span className="form-note text-muted mt-1">
+                          {selectedStatus === "active"
+                            ? "Service is operational. No notice is shown to users."
+                            : "Leave empty to use the system default message, or type custom instructions (e.g. maintenance window, ETA) for users & app developers."}
+                        </span>
+                      </div>
+                    </div>
+                  </Col>
+
+                  <Col size="12">
+                    <Button color="primary" type="submit">
+                      <Icon name="check-circle" className="me-1"></Icon>
+                      <span>Update Service Status</span>
+                    </Button>
+                  </Col>
+                </Row>
+              </form>
             </div>
           </ModalBody>
         </Modal>

@@ -2390,10 +2390,20 @@ const CampaignsPage = () => {
                   )}
                 </div>
                 <div className="d-flex gap-2">
-                  <Button color="light" type="button" onClick={() => setEditModalOpen(false)}>
+                  <Button
+                    color="light"
+                    type="button"
+                    style={{ borderRadius: "8px", padding: "8px 20px", fontWeight: 600 }}
+                    onClick={() => setEditModalOpen(false)}
+                  >
                     Close
                   </Button>
-                  <Button color="primary" type="submit" disabled={isUpdating}>
+                  <Button
+                    color="primary"
+                    type="submit"
+                    style={{ borderRadius: "8px", padding: "8px 20px", fontWeight: 600 }}
+                    disabled={isUpdating}
+                  >
                     {isUpdating ? "Saving Changes..." : "Save Changes"}
                   </Button>
                 </div>

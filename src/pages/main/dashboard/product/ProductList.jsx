@@ -260,22 +260,45 @@ const ProductDetailModal = ({ isOpen, toggle, product, onEdit }) => {
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg" centered>
-      <div className="modal-header border-bottom py-3 px-4">
-        <div className="d-flex align-items-center gap-3">
+      <div
+        className="d-flex align-items-center justify-content-between border-bottom"
+        style={{
+          padding: "24px 28px 18px 28px",
+          background: "#ffffff",
+          borderTopLeftRadius: "12px",
+          borderTopRightRadius: "12px",
+        }}
+      >
+        <div className="d-flex align-items-center" style={{ gap: "16px" }}>
           <img
             src={product.logo || service?.logo || NoIcon}
             alt={product.name}
-            style={{ width: 44, height: 44, borderRadius: 10, objectFit: "contain" }}
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 12,
+              objectFit: "contain",
+              border: "1px solid #eef2f6",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+            }}
           />
           <div>
-            <h5 className="modal-title mb-0 fw-bold">{product.name}</h5>
-            <span className="text-muted small">{product.code}</span>
+            <h5 className="mb-1 fw-bold text-dark" style={{ fontSize: "1.15rem", lineHeight: 1.3 }}>
+              {product.name}
+            </h5>
+            <span className="text-muted small fw-medium">{product.code}</span>
           </div>
         </div>
-        <button type="button" className="btn-close" onClick={toggle} aria-label="Close"></button>
+        <button
+          type="button"
+          className="btn-close"
+          onClick={toggle}
+          aria-label="Close"
+          style={{ padding: "8px", cursor: "pointer" }}
+        />
       </div>
 
-      <ModalBody className="p-4">
+      <ModalBody style={{ padding: "24px 28px 28px 28px" }}>
         {/* Top Badges & Status */}
         <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
           <span className={`badge ${product.isActive ? "bg-success" : "bg-danger"}`}>
@@ -403,10 +426,19 @@ const ProductDetailModal = ({ isOpen, toggle, product, onEdit }) => {
         </div>
       </ModalBody>
 
-      <div className="modal-footer border-top px-4 py-3">
+      <div
+        className="d-flex align-items-center justify-content-end gap-2 border-top"
+        style={{
+          padding: "16px 28px",
+          background: "#f8fafc",
+          borderBottomLeftRadius: "12px",
+          borderBottomRightRadius: "12px",
+        }}
+      >
         <button
           type="button"
           className="btn btn-outline-secondary"
+          style={{ borderRadius: "8px", padding: "8px 20px", fontWeight: 600, fontSize: "0.875rem" }}
           onClick={toggle}
         >
           Close
@@ -414,6 +446,7 @@ const ProductDetailModal = ({ isOpen, toggle, product, onEdit }) => {
         <button
           type="button"
           className="btn btn-primary"
+          style={{ borderRadius: "8px", padding: "8px 20px", fontWeight: 600, fontSize: "0.875rem" }}
           onClick={() => {
             toggle();
             onEdit(product);
@@ -547,17 +580,33 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg" centered>
       <form onSubmit={handleSubmit}>
-        <div className="modal-header border-bottom py-3 px-4">
+        <div
+          className="d-flex align-items-center justify-content-between border-bottom"
+          style={{
+            padding: "24px 28px 18px 28px",
+            background: "#ffffff",
+            borderTopLeftRadius: "12px",
+            borderTopRightRadius: "12px",
+          }}
+        >
           <div>
-            <h5 className="modal-title fw-bold mb-0">Edit Product</h5>
-            <span className="text-muted small">
+            <h5 className="modal-title fw-bold text-dark mb-1" style={{ fontSize: "1.15rem", lineHeight: 1.3 }}>
+              Edit Product
+            </h5>
+            <span className="text-muted small fw-medium">
               {product.name} ({product.serviceId?.name || "VAS Product"})
             </span>
           </div>
-          <button type="button" className="btn-close" onClick={toggle} aria-label="Close"></button>
+          <button
+            type="button"
+            className="btn-close"
+            onClick={toggle}
+            aria-label="Close"
+            style={{ padding: "8px", cursor: "pointer" }}
+          />
         </div>
 
-        <ModalBody className="p-4">
+        <ModalBody style={{ padding: "24px 28px 28px 28px" }}>
           <div className="row g-3">
             {/* Name */}
             <div className="col-md-6">
@@ -773,35 +822,57 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
             {/* Allow Selling Below Cost Switch */}
             <div className="col-12">
               <div
-                className="custom-control custom-switch mt-2 p-2 rounded border"
+                className="rounded border d-flex align-items-center justify-content-between p-3 mt-2"
                 style={{
                   background: formData.allowBelowCost ? "#fffbeb" : "#f8fafc",
-                  borderColor: formData.allowBelowCost ? "#fef3c7" : "#e2e8f0",
+                  borderColor: formData.allowBelowCost ? "#fde68a" : "#e2e8f0",
                 }}
               >
-                <input
-                  type="checkbox"
-                  className="custom-control-input"
-                  id="edit-allow-below-cost"
-                  name="allowBelowCost"
-                  checked={formData.allowBelowCost}
-                  onChange={handleChange}
-                />
-                <label className="custom-control-label fw-bold text-dark" htmlFor="edit-allow-below-cost">
-                  Allow Selling Below Provider Cost (Max 3% Wholesale Discount)
-                </label>
-                <div className="text-muted small ps-1">
-                  Enable only when the provider gives wholesale discount. Allows selling amount to drop down to -3% below cost.
+                <div className="pe-3" style={{ flex: 1 }}>
+                  <label
+                    className="fw-bold text-dark d-block mb-1"
+                    htmlFor="edit-allow-below-cost"
+                    style={{ fontSize: "0.875rem", cursor: "pointer" }}
+                  >
+                    Allow Selling Below Provider Cost (Max 3% Wholesale Discount)
+                  </label>
+                  <div className="text-muted small">
+                    Enable only when the provider gives wholesale discount. Allows selling amount to drop down to -3% below cost.
+                  </div>
+                </div>
+                <div className="custom-control custom-switch flex-shrink-0" style={{ margin: 0, paddingLeft: "2.75rem" }}>
+                  <input
+                    type="checkbox"
+                    className="custom-control-input"
+                    id="edit-allow-below-cost"
+                    name="allowBelowCost"
+                    checked={formData.allowBelowCost}
+                    onChange={handleChange}
+                  />
+                  <label
+                    className="custom-control-label"
+                    htmlFor="edit-allow-below-cost"
+                    style={{ cursor: "pointer" }}
+                  />
                 </div>
               </div>
             </div>
           </div>
         </ModalBody>
 
-        <div className="modal-footer border-top px-4 py-3">
+        <div
+          className="d-flex align-items-center justify-content-end gap-2 border-top"
+          style={{
+            padding: "16px 28px",
+            background: "#f8fafc",
+            borderBottomLeftRadius: "12px",
+            borderBottomRightRadius: "12px",
+          }}
+        >
           <button
             type="button"
             className="btn btn-outline-secondary"
+            style={{ borderRadius: "8px", padding: "8px 20px", fontWeight: 600, fontSize: "0.875rem" }}
             onClick={toggle}
             disabled={isLoading}
           >
@@ -810,6 +881,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
           <button
             type="submit"
             className="btn btn-primary"
+            style={{ borderRadius: "8px", padding: "8px 20px", fontWeight: 600, fontSize: "0.875rem" }}
             disabled={isLoading || isBelowCostNotAllowed || isDiscountExceeded}
           >
             {isLoading ? "Saving..." : "Save Changes"}
@@ -1436,16 +1508,22 @@ const ProductList = () => {
                   </div>
                 </div>
 
-                {/* Active Filter Pills – Spacious Display */}
+                {/* Active Filter Pills – Clean Spacious Box without stray horizontal hairline */}
                 {activeFilters.length > 0 && (
-                  <div className="mt-4 pt-4 border-top">
-                    <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-                      <span className="text-dark fw-bold" style={{ fontSize: 14 }}>
-                        Active filters & sort:
+                  <div
+                    className="mt-3 p-3 rounded-3"
+                    style={{
+                      background: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                    }}
+                  >
+                    <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-2">
+                      <span className="text-dark fw-bold small">
+                        Active filters & sort ({activeFilters.length}):
                       </span>
                       <button
                         className="btn btn-sm btn-outline-danger"
-                        style={{ padding: "8px 16px", fontSize: 13, fontWeight: 500, borderRadius: 8, flexShrink: 0 }}
+                        style={{ padding: "6px 14px", fontSize: 12, fontWeight: 600, borderRadius: 6, flexShrink: 0 }}
                         onClick={() => {
                           setFilters({ search: "", providerId: [], serviceTypeId: "", serviceId: "", dataType: "", category: "", validity: "", dataSize: "", isHot: "all", status: "all", allowBelowCost: "all", sortBy: "createdAt", sortOrder: "desc" });
                           setPendingSearch("");

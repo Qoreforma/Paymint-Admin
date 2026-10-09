@@ -279,30 +279,50 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
                   }
                   theme="primary"
                 />
-                <div className="min-w-0">
-                  <div className="d-flex align-items-center gap-2 flex-wrap">
-                    <h6 className="mb-0 font-weight-bold text-truncate" style={{ fontSize: "0.95rem", maxWidth: "200px" }}>
+                <div className="d-flex flex-column justify-content-center" style={{ gap: "4px", minWidth: 0 }}>
+                  <div className="d-flex align-items-center gap-2 flex-wrap" style={{ lineHeight: 1.3 }}>
+                    <span
+                      className="fw-bold text-dark text-truncate"
+                      style={{ fontSize: "0.95rem", lineHeight: 1.3, maxWidth: "220px" }}
+                    >
                       {selectedTicket.userId?.firstName
                         ? `${selectedTicket.userId.firstName} ${selectedTicket.userId.lastName || ""}`
                         : "Customer"}
-                    </h6>
-                    <Badge color="outline-light" className="text-primary">
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.72rem",
+                        fontWeight: 600,
+                        padding: "2px 8px",
+                        borderRadius: "6px",
+                        background: "#eff6ff",
+                        color: "#2563eb",
+                        border: "1px solid #bfdbfe",
+                        lineHeight: 1.2,
+                        display: "inline-flex",
+                        alignItems: "center",
+                      }}
+                    >
                       #{selectedTicket.ticketNumber || selectedTicket._id?.substring(0, 8)}
-                    </Badge>
+                    </span>
                     <span
                       className={`support-badge-priority priority-${selectedTicket.priority || "medium"}`}
+                      style={{ lineHeight: 1.2 }}
                     >
                       {selectedTicket.priority || "medium"}
                     </span>
                   </div>
-                  <div className="text-soft d-flex align-items-center gap-2 text-truncate" style={{ fontSize: "0.75rem" }}>
+                  <div
+                    className="text-soft d-flex align-items-center gap-2 text-truncate"
+                    style={{ fontSize: "0.8rem", lineHeight: 1.3, color: "#64748b" }}
+                  >
                     <span className="text-truncate">{selectedTicket.userId?.email || "No email"}</span>
                     <span>•</span>
                     <span>{selectedTicket.userId?.phone || "No phone"}</span>
                     {selectedTicket.userId?._id && (
                       <Link
                         to={`/user-details/${selectedTicket.userId._id}`}
-                        className="text-primary ms-1"
+                        className="text-primary ms-1 fw-medium"
                         target="_blank"
                       >
                         [Profile]

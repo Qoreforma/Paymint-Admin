@@ -946,23 +946,36 @@ const ServiceProvidersProducts = () => {
                     </Col>
                     <Col md="12">
                       <div
-                        className="custom-control custom-switch mt-2 p-2 rounded border"
+                        className="rounded border d-flex align-items-center justify-content-between p-3 mt-2"
                         style={{
                           background: watchAllowBelowCost ? "#fffbeb" : "#f8fafc",
-                          borderColor: watchAllowBelowCost ? "#fef3c7" : "#e2e8f0",
+                          borderColor: watchAllowBelowCost ? "#fde68a" : "#e2e8f0",
                         }}
                       >
-                        <input
-                          type="checkbox"
-                          className="custom-control-input"
-                          id="edit-allow-below-cost-provider"
-                          {...register("allowBelowCost")}
-                        />
-                        <label className="custom-control-label fw-bold text-dark" htmlFor="edit-allow-below-cost-provider">
-                          Allow Selling Below Provider Cost (Max 3% Wholesale Discount)
-                        </label>
-                        <div className="text-muted small ps-1">
-                          Enable only when provider gives wholesale discount. Allows selling amount to drop down to -3% below cost.
+                        <div className="pe-3" style={{ flex: 1 }}>
+                          <label
+                            className="fw-bold text-dark d-block mb-1"
+                            htmlFor="edit-allow-below-cost-provider"
+                            style={{ fontSize: "0.875rem", cursor: "pointer" }}
+                          >
+                            Allow Selling Below Provider Cost (Max 3% Wholesale Discount)
+                          </label>
+                          <div className="text-muted small">
+                            Enable only when provider gives wholesale discount. Allows selling amount to drop down to -3% below cost.
+                          </div>
+                        </div>
+                        <div className="custom-control custom-switch flex-shrink-0" style={{ margin: 0, paddingLeft: "2.75rem" }}>
+                          <input
+                            type="checkbox"
+                            className="custom-control-input"
+                            id="edit-allow-below-cost-provider"
+                            {...register("allowBelowCost")}
+                          />
+                          <label
+                            className="custom-control-label"
+                            htmlFor="edit-allow-below-cost-provider"
+                            style={{ cursor: "pointer" }}
+                          />
                         </div>
                       </div>
                     </Col>
