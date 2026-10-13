@@ -51,6 +51,7 @@ import { WalletAmountStatsCard } from "../wallet/stats-card";
 import DateRangeFilter from "../tables/date-range-filter";
 import TransactionChartModal from "./TransactionChartModal";
 import TransactionProductModal from "./modals/transaction-product-modal";
+import "../service-providers/modals/configure-fallback-modal.css";
 
 export const formatTransactionType = (serviceNameOrNetwork, rawType) => {
   if (!rawType && !serviceNameOrNetwork) return "-";
@@ -1057,11 +1058,9 @@ export const ServiceTransactionTable = ({
             )}
             {(formData?.transactableId || formData?.bundle || formData?.productName) && (
               <div>
-                <Button
-                  color="primary"
-                  outline
-                  size="sm"
-                  className="btn-dim d-inline-flex align-items-center gap-1"
+                <button
+                  type="button"
+                  className="pf-cfg-btn pf-cfg-btn-active"
                   onClick={(ev) => {
                     ev.preventDefault();
                     setSelectedProductRef({
@@ -1072,10 +1071,14 @@ export const ServiceTransactionTable = ({
                     });
                     setIsProductModalOpen(true);
                   }}
+                  title="View & Edit Product"
                 >
-                  <Icon name="package" />
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="pf-cfg-btn-icon">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
                   <span>View / Edit Product</span>
-                </Button>
+                </button>
               </div>
             )}
             <p
@@ -1205,17 +1208,26 @@ export const ServiceTransactionTable = ({
                     <span className="sub-text">Network</span>
                     <span className="caption-text">{formData.network}</span>
                   </Col>
-                  <Col lg={8}>
-                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                  <Col lg={12}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "10px 14px",
+                        backgroundColor: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "8px",
+                      }}
+                    >
                       <div>
-                        <span className="sub-text">Data Bundle</span>
-                        <span className="caption-text fw-bold text-dark">{formData.bundle}</span>
+                        <span className="sub-text mb-0" style={{ fontSize: "11px", color: "#64748b" }}>Data Bundle</span>
+                        <span className="caption-text fw-bold text-dark" style={{ fontSize: "13px" }}>{formData.bundle}</span>
                       </div>
                       {(formData?.transactableId || formData?.bundle) && (
                         <button
                           type="button"
-                          className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1"
-                          style={{ padding: "3px 8px", fontSize: "11px", borderRadius: "6px" }}
+                          className="pf-cfg-btn pf-cfg-btn-active"
                           onClick={() => {
                             setSelectedProductRef({
                               productId: formData?.transactableId,
@@ -1225,8 +1237,12 @@ export const ServiceTransactionTable = ({
                             });
                             setIsProductModalOpen(true);
                           }}
+                          title="View & Edit Product"
                         >
-                          <Icon name="eye" />
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="pf-cfg-btn-icon">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
                           <span>View Product</span>
                         </button>
                       )}
@@ -1273,16 +1289,29 @@ export const ServiceTransactionTable = ({
                     <span className="caption-text">{formData.smartCardNumber}</span>
                   </Col>
                   <Col lg={4}>
-                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                    <span className="sub-text">Service Name</span>
+                    <span className="caption-text">{formData.serviceName}</span>
+                  </Col>
+                  <Col lg={12}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "10px 14px",
+                        backgroundColor: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "8px",
+                      }}
+                    >
                       <div>
-                        <span className="sub-text">Product Name</span>
-                        <span className="caption-text fw-bold text-dark">{formData.productName}</span>
+                        <span className="sub-text mb-0" style={{ fontSize: "11px", color: "#64748b" }}>Product Name</span>
+                        <span className="caption-text fw-bold text-dark" style={{ fontSize: "13px" }}>{formData.productName}</span>
                       </div>
                       {(formData?.transactableId || formData?.productName) && (
                         <button
                           type="button"
-                          className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1"
-                          style={{ padding: "2px 6px", fontSize: "10px", borderRadius: "5px" }}
+                          className="pf-cfg-btn pf-cfg-btn-active"
                           onClick={() => {
                             setSelectedProductRef({
                               productId: formData?.transactableId,
@@ -1292,31 +1321,45 @@ export const ServiceTransactionTable = ({
                             });
                             setIsProductModalOpen(true);
                           }}
+                          title="View & Edit Product"
                         >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="pf-cfg-btn-icon">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
                           <span>View Product</span>
                         </button>
                       )}
                     </div>
-                  </Col>
-                  <Col lg={4}>
-                    <span className="sub-text">Service Name</span>
-                    <span className="caption-text">{formData.serviceName}</span>
                   </Col>
                 </>
               )}
               {formData?.type === "education" && (
                 <>
                   <Col lg={4}>
-                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                    <span className="sub-text">Service Name</span>
+                    <span className="caption-text">{formData.serviceName}</span>
+                  </Col>
+                  <Col lg={12}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "10px 14px",
+                        backgroundColor: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "8px",
+                      }}
+                    >
                       <div>
-                        <span className="sub-text">Product Name</span>
-                        <span className="caption-text fw-bold text-dark">{formData.productName}</span>
+                        <span className="sub-text mb-0" style={{ fontSize: "11px", color: "#64748b" }}>Product Name</span>
+                        <span className="caption-text fw-bold text-dark" style={{ fontSize: "13px" }}>{formData.productName}</span>
                       </div>
                       {(formData?.transactableId || formData?.productName) && (
                         <button
                           type="button"
-                          className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1"
-                          style={{ padding: "2px 6px", fontSize: "10px", borderRadius: "5px" }}
+                          className="pf-cfg-btn pf-cfg-btn-active"
                           onClick={() => {
                             setSelectedProductRef({
                               productId: formData?.transactableId,
@@ -1326,28 +1369,31 @@ export const ServiceTransactionTable = ({
                             });
                             setIsProductModalOpen(true);
                           }}
+                          title="View & Edit Product"
                         >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="pf-cfg-btn-icon">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
                           <span>View Product</span>
                         </button>
                       )}
                     </div>
                   </Col>
-                  <Col lg={4}>
-                    <span className="sub-text">Service Name</span>
-                    <span className="caption-text">{formData.serviceName}</span>
-                  </Col>
                 </>
               )}
-              <Col>
+              <Col lg={12}>
                 <span className="sub-text">Remark</span>
                 <span className="caption-text ccap">{formData.remark}</span>
               </Col>
-              <Col>
+              <Col lg={4}>
                 <span className="sub-text">Date & Time</span>
                 <span className="caption-text ccap">{formatDateWithHyphen(formData?.date)}</span>
               </Col>
 
-              <h6>User</h6>
+              <Col lg={12} className="mt-2">
+                <h6 className="overline-title text-primary-alt">User Details</h6>
+              </Col>
               <Col lg={4}>
                 <span className="sub-text">Fullname</span>
                 <span className="caption-text">{formData.fullName}</span>
@@ -1357,7 +1403,7 @@ export const ServiceTransactionTable = ({
                 <span className="sub-text">Phone</span>
                 <span className="caption-text">{formData.phone ?? "N/A"}</span>
               </Col>
-              <Col lg={6}>
+              <Col lg={4}>
                 <span className="sub-text">Email</span>
                 <span className="caption-text">{formData.email}</span>
               </Col>
