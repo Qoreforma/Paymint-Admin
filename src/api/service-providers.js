@@ -510,6 +510,58 @@ export const useToggleServiceTypeStatus = (id) => {
   );
 };
 
+export const useGetServiceTypeProviderRouting = (serviceTypeId) => {
+  return useQuery(
+    ["ServiceTypeProviderRouting", serviceTypeId],
+    async () => {
+      try {
+        const response = await instance.get(`${BACKEND_URLS.service_types}/${serviceTypeId}/provider-routing`);
+        return response.data;
+      } catch (error) {
+        console.error("Failed to fetch provider routing:", error);
+        throw error;
+      }
+    },
+    {
+      enabled: !!serviceTypeId,
+      refetchOnWindowFocus: false,
+      staleTime: 5000,
+    }
+  );
+};
+
+export const useUpdateServiceTypeProviderRouting = (serviceTypeId) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (data) =>
+      toast.promise(
+        instance
+          .put(`${BACKEND_URLS.service_types}/${serviceTypeId}/provider-routing`, data)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err.response?.data || err;
+          }),
+        {
+          success: (data) => data.message || "Provider routing updated successfully",
+          loading: "Updating provider routing...",
+          error: (error) => error?.message || "Failed to update provider routing",
+        },
+        {
+          style: {
+            minWidth: "220px",
+          },
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["ServiceTypes"]);
+        queryClient.invalidateQueries(["ServiceTypeProviderRouting", serviceTypeId]);
+      },
+    }
+  );
+};
+
 // + `?${page}&${per_page}`
 
 // *****************************CASHBACK*************************//

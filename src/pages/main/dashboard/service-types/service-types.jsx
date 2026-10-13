@@ -34,6 +34,7 @@ import { useGetServiceTypes, useToggleServiceTypeStatus } from "../../../../api/
 import SortToolTip from "../tables/SortTooltip";
 import Search from "../tables/Search";
 import LoadingSpinner from "../../../components/spinner";
+import ConfigureRoutingModal from "./modals/configure-routing-modal";
 
 const ServicesTypes = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,6 +46,8 @@ const ServicesTypes = () => {
   const [editId, setEditedId] = useState();
   const [onSearch, setonSearch] = useState(false);
   const [status, setStatus] = useState(false);
+  const [selectedServiceType, setSelectedServiceType] = useState(null);
+  const [isRoutingModalOpen, setIsRoutingModalOpen] = useState(false);
 
   const { isLoading, data: serviceTypes } = useGetServiceTypes();
   const { mutate: toggleStatus } = useToggleServiceTypeStatus(editId);
@@ -292,6 +295,9 @@ const ServicesTypes = () => {
                         <DataTableRow>
                           <span className="tb-tnx-head bg-white text-secondary">Status</span>
                         </DataTableRow>
+                        <DataTableRow size="md">
+                          <span className="tb-tnx-head bg-white text-secondary">Active Providers (Fallback Order)</span>
+                        </DataTableRow>
 
                         <DataTableRow className="nk-tb-col-tools">
                           <ul className="nk-tb-actions gx-1 my-n1">
@@ -327,6 +333,30 @@ const ServicesTypes = () => {
                                 <span className="ccap">{item.status}</span>
                               </Badge>
                             </DataTableRow>
+
+                            <DataTableRow size="md">
+                              {item.activeProviders && item.activeProviders.length > 0 ? (
+                                <div className="d-flex flex-wrap gap-1 align-items-center">
+                                  {item.activeProviders.map((p, pIdx) => (
+                                    <Badge
+                                      key={p._id || pIdx}
+                                      color={p.priority === 1 ? "success" : "info"}
+                                      className="badge-dim"
+                                      style={{ fontSize: "11px", padding: "4px 8px" }}
+                                      title={p.priority === 1 ? "Primary Vendor (#1)" : `Fallback Vendor (#${p.priority})`}
+                                    >
+                                      {p.priority === 1 ? "🥇 " : `#${p.priority} `}
+                                      {p.name}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              ) : (
+                                <Badge color="light" className="badge-dim text-muted" style={{ fontSize: "11px" }}>
+                                  No Active Providers
+                                </Badge>
+                              )}
+                            </DataTableRow>
+
                             <DataTableRow className="nk-tb-col-tools">
                               <ul className="nk-tb-actions gx-1 my-n1">
                                 <li>
@@ -339,7 +369,7 @@ const ServicesTypes = () => {
                                         <li>
                                           <DropdownItem
                                             tag="a"
-                                            href="#"
+                                            href="#edit"
                                             onClick={(ev) => {
                                               ev.preventDefault();
                                               onEditClick(item.id);
@@ -348,6 +378,20 @@ const ServicesTypes = () => {
                                           >
                                             <Icon name="edit"></Icon>
                                             <span>Edit Status</span>
+                                          </DropdownItem>
+                                        </li>
+                                        <li>
+                                          <DropdownItem
+                                            tag="a"
+                                            href="#routing"
+                                            onClick={(ev) => {
+                                              ev.preventDefault();
+                                              setSelectedServiceType(item);
+                                              setIsRoutingModalOpen(true);
+                                            }}
+                                          >
+                                            <Icon name="swap-alt"></Icon>
+                                            <span>Configure Routing & Fallback</span>
                                           </DropdownItem>
                                         </li>
                                       </ul>
@@ -479,6 +523,16 @@ const ServicesTypes = () => {
             </div>
           </ModalBody>
         </Modal>
+
+        {/* Configure Provider Routing & Fallback Modal */}
+        <ConfigureRoutingModal
+          isOpen={isRoutingModalOpen}
+          toggle={() => {
+            setIsRoutingModalOpen(false);
+            setSelectedServiceType(null);
+          }}
+          serviceType={selectedServiceType}
+        />
       </Content>
     </React.Fragment>
   );

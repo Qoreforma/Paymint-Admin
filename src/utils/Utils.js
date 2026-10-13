@@ -172,18 +172,37 @@ export const bulkActionOptions = [
 ];
 
 export const formatter = (currency = "USD", fractiondigit = 2) => {
-  const format = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    currencyDisplay: "narrowSymbol",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: fractiondigit,
-  });
+  const safeCurrency =
+    typeof currency === "string" && currency.trim().length === 3
+      ? currency.trim().toUpperCase()
+      : "NGN";
+
+  const digits = typeof fractiondigit === "number" && !isNaN(fractiondigit) ? fractiondigit : 2;
+
+  let format;
+  try {
+    format = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: safeCurrency,
+      currencyDisplay: "narrowSymbol",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: digits,
+    });
+  } catch (err) {
+    format = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "NGN",
+      currencyDisplay: "narrowSymbol",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: digits,
+    });
+  }
 
   return {
     format(value) {
-      const factor = 10 ** fractiondigit;
-      const truncated = Math.trunc(value * factor) / factor;
+      const num = Number(value || 0);
+      const factor = 10 ** digits;
+      const truncated = Math.trunc(num * factor) / factor;
       return format.format(truncated);
     },
   };
@@ -233,12 +252,23 @@ export const formatDateToISO = (dateString) => {
   return date.toISOString();
 };
 
-export const formatCurrency = (value, country = "en-NG", currency = "NGN", fraction = 2) =>
-  new Intl.NumberFormat(country, {
-    style: "currency",
-    currency: currency,
-    minimumFractionDigits: fraction,
-  }).format(value);
+export const formatCurrency = (value, country = "en-NG", currency = "NGN", fraction = 2) => {
+  const safeCountry = typeof country === "string" ? country : "en-NG";
+  const safeCurrency =
+    typeof currency === "string" && currency.trim().length === 3
+      ? currency.trim().toUpperCase()
+      : "NGN";
+  const safeFraction = typeof fraction === "number" ? fraction : 2;
+  try {
+    return new Intl.NumberFormat(safeCountry, {
+      style: "currency",
+      currency: safeCurrency,
+      minimumFractionDigits: safeFraction,
+    }).format(Number(value || 0));
+  } catch (err) {
+    return `₦${Number(value || 0).toLocaleString()}`;
+  }
+};
 
 export const objectToQueryString = (obj) =>
   Object.entries(obj)

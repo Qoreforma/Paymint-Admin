@@ -4,10 +4,10 @@ import {
   useGetProductFallbackCandidates,
   useUpdateProductFallbacks,
 } from "../../../../../api/product/products";
-import { Button, Col, Icon, Row } from "../../../../../components/Component";
+import { Button, Icon } from "../../../../../components/Component";
 import { formatter } from "../../../../../utils/Utils";
 
-const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
+const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
   const productId = product?._id || product?.id;
 
   const { data: candidateData, isLoading: loadingCandidates } =
@@ -20,7 +20,7 @@ const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
   const [fallbackChain, setFallbackChain] = useState([]);
   const [isFallbackAvailable, setIsFallbackAvailable] = useState(true);
 
-  // Initialize state when product or candidates change
+  // Initialize state when product changes
   useEffect(() => {
     if (product) {
       setIsFallbackAvailable(product.isFallbackAvailable !== false);
@@ -46,7 +46,7 @@ const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
         setFallbackChain([]);
       }
     }
-  }, [product, isOpen]);
+  }, [product]);
 
   // When candidates load, enrich items in the fallbackChain if they had missing details
   useEffect(() => {
@@ -197,13 +197,13 @@ const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
               <div className="text-end">
                 <div className="text-muted fs-11px text-uppercase">Selling Price</div>
                 <div className="fw-bold text-dark fs-15px">
-                  ₦{formatter(primaryAmount)}
+                  {formatter("NGN").format(primaryAmount)}
                 </div>
               </div>
               <div className="text-end">
                 <div className="text-muted fs-11px text-uppercase">Cost Price</div>
                 <div className="fw-bold text-secondary fs-15px">
-                  ₦{formatter(primaryCost)}
+                  {formatter("NGN").format(primaryCost)}
                 </div>
               </div>
               <div className="text-end">
@@ -212,7 +212,8 @@ const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
                   className="fw-bold fs-15px"
                   style={{ color: primaryProfit >= 0 ? "#059669" : "#dc2626" }}
                 >
-                  {primaryProfit >= 0 ? "+" : ""}₦{formatter(primaryProfit)}
+                  {primaryProfit >= 0 ? "+" : ""}
+                  {formatter("NGN").format(primaryProfit)}
                 </div>
               </div>
             </div>
@@ -301,7 +302,7 @@ const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
                       <div className="text-end">
                         <div className="text-muted fs-11px text-uppercase">Cost Price</div>
                         <div className="fw-bold text-dark fs-13px">
-                          ₦{formatter(itemCost)}
+                          {formatter("NGN").format(itemCost)}
                         </div>
                       </div>
 
@@ -311,7 +312,8 @@ const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
                           className="fw-bold fs-13px"
                           style={{ color: isLoss ? "#dc2626" : "#059669" }}
                         >
-                          {itemMargin >= 0 ? "+" : ""}₦{formatter(itemMargin)}
+                          {itemMargin >= 0 ? "+" : ""}
+                          {formatter("NGN").format(itemMargin)}
                           {isLoss && (
                             <span
                               className="ms-1"
@@ -370,7 +372,7 @@ const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
               Eligible Backup Candidates (±1% Selling Price)
             </h6>
             <span className="text-muted fs-11px">
-              Products for this service matching ₦{formatter(primaryAmount)}
+              Products for this service matching {formatter("NGN").format(primaryAmount)}
             </span>
           </div>
 
@@ -409,16 +411,17 @@ const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
                         </Badge>
                         {priceDiff > 0 && (
                           <span className="text-muted fs-11px">
-                            (₦{formatter(cand.amount)})
+                            ({formatter("NGN").format(cand.amount)})
                           </span>
                         )}
                       </div>
                       <div className="text-muted fs-11px mt-1">
-                        Cost: <strong>₦{formatter(candCost)}</strong> • Margin:{" "}
+                        Cost: <strong>{formatter("NGN").format(candCost)}</strong> • Margin:{" "}
                         <strong
                           style={{ color: candMargin >= 0 ? "#059669" : "#dc2626" }}
                         >
-                          {candMargin >= 0 ? "+" : ""}₦{formatter(candMargin)}
+                          {candMargin >= 0 ? "+" : ""}
+                          {formatter("NGN").format(candMargin)}
                         </strong>
                       </div>
                     </div>
@@ -466,6 +469,20 @@ const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
         </div>
       </ModalBody>
     </Modal>
+  );
+};
+
+const ConfigureFallbackModal = ({ isOpen, toggle, product }) => {
+  if (!isOpen || !product) {
+    return null;
+  }
+
+  return (
+    <ConfigureFallbackModalContent
+      isOpen={isOpen}
+      toggle={toggle}
+      product={product}
+    />
   );
 };
 
