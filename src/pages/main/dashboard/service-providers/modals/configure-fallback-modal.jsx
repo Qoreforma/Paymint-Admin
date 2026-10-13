@@ -72,10 +72,12 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
 
   // Enrich items in fallbackChain when candidates load
   useEffect(() => {
-    if (candidateData?.candidates && fallbackChain.length > 0) {
+    const candidatePool =
+      candidateData?.candidates || candidateData?.data?.candidates;
+    if (candidatePool && fallbackChain.length > 0) {
       setFallbackChain((prev) =>
         prev.map((item) => {
-          const match = candidateData.candidates.find(
+          const match = candidatePool.find(
             (c) => c._id === item._id || c.id === item._id
           );
           if (match) {
@@ -166,7 +168,8 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
     });
   };
 
-  const candidatesList = candidateData?.candidates || [];
+  const candidatesList =
+    candidateData?.candidates || candidateData?.data?.candidates || [];
   const selectedIds = new Set(fallbackChain.map((item) => item._id));
 
   return (

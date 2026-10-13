@@ -245,7 +245,7 @@ export const useGetProductFallbackCandidates = (productId) => {
     ["productFallbackCandidates", productId],
     async () => {
       const res = await instance.get(`${BACKEND_URLS.product}/${productId}/fallback-candidates`);
-      return res?.data;
+      return res?.data?.data || res?.data;
     },
     {
       enabled: !!productId,
