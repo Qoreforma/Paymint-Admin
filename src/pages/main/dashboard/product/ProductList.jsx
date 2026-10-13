@@ -43,6 +43,7 @@ import {
 import { useGetProviders, useGetServiceTypes } from "../../../../api/service-providers";
 import { useGetServices } from "../../../../api/services";
 import ConfigureFallbackModal from "../service-providers/modals/configure-fallback-modal";
+import "../service-providers/modals/configure-fallback-modal.css";
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 const DATA_TYPES = [
@@ -1888,7 +1889,7 @@ const ProductList = () => {
                             />
                           </div>
                         </DataTableRow>
-                        <DataTableRow size="sm" className="text-center">
+                        <DataTableRow className="text-center" style={{ minWidth: 105 }}>
                           <span>Fallbacks</span>
                         </DataTableRow>
                         <DataTableRow className="nk-tb-col-tools">
@@ -2054,22 +2055,36 @@ const ProductList = () => {
                             </DataTableRow>
 
                             {/* Fallback Action */}
-                            <DataTableRow size="sm" className="text-center">
+                            <DataTableRow className="text-center" style={{ minWidth: 105 }}>
                               <button
                                 type="button"
-                                className={`btn btn-xs ${
+                                className={`pf-cfg-btn ${
                                   item.fallbackProducts && item.fallbackProducts.length > 0
-                                    ? "btn-outline-primary"
-                                    : "btn-outline-light text-muted"
-                                } d-inline-flex align-items-center gap-1`}
-                                style={{ borderRadius: 6, padding: "2px 8px", fontSize: 11 }}
+                                    ? "pf-cfg-btn-active"
+                                    : ""
+                                }`}
                                 onClick={() => setFallbackProduct(item)}
                                 title="Configure Provider Fallback Chain"
                               >
-                                <Icon name="swap-alt" style={{ fontSize: 12 }} />
+                                <svg
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="pf-cfg-btn-icon"
+                                >
+                                  <polyline points="17 1 21 5 17 9" />
+                                  <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                                  <polyline points="7 23 3 19 7 15" />
+                                  <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                                </svg>
                                 <span>
                                   {item.fallbackProducts && item.fallbackProducts.length > 0
-                                    ? `${item.fallbackProducts.length} Chain`
+                                    ? `${item.fallbackProducts.length} in Chain`
                                     : "Configure"}
                                 </span>
                               </button>

@@ -1,0 +1,727 @@
+/* ==========================================================================
+   Configure Fallback Modal & Fallback Button Styling
+   Vanilla CSS — Pure HTML Tags, Scoped Custom Classes, 100% Non-Overlapping
+   ========================================================================== */
+
+/* ── Fallback Button in Data Tables ─────────────────────────────────────── */
+.pf-cfg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1;
+  color: #475569;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.pf-cfg-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.pf-cfg-btn-active {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  font-weight: 600;
+}
+
+.pf-cfg-btn-active:hover {
+  background-color: #dbeafe;
+  border-color: #60a5fa;
+  color: #1e40af;
+}
+
+.pf-cfg-btn-icon {
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ── Modal Overlay & Backdrop ─────────────────────────────────────────── */
+.pfm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: pfmFadeIn 0.15s ease-out;
+  box-sizing: border-box;
+}
+
+@keyframes pfmFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Modal Card ────────────────────────────────────────────────────────── */
+.pfm-card {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: pfmScaleIn 0.15s ease-out;
+}
+
+@keyframes pfmScaleIn {
+  from { transform: scale(0.97); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ── Modal Header (Pinned at Top) ──────────────────────────────────────── */
+.pfm-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: #ffffff;
+  flex-shrink: 0;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.pfm-header-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pfm-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pfm-subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.pfm-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.pfm-close-btn:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+/* ── Modal Body (Scrollable with explicit column flex) ─────────────────── */
+.pfm-body {
+  padding: 18px 22px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+/* ── Primary Product Card (Fixed Clean Box) ────────────────────────────── */
+.pfm-primary-card {
+  background: #f0f4ff;
+  border: 1px solid #d0e0fd;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.pfm-primary-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pfm-primary-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pfm-primary-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pfm-badge-primary {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pfm-primary-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.pfm-code-tag {
+  font-size: 11.5px;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+.pfm-primary-provider {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.pfm-primary-financials {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #dbeafe;
+}
+
+.pfm-stat-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.pfm-stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #6b7280;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.pfm-stat-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 2px;
+}
+
+.pfm-margin-positive {
+  color: #059669;
+}
+
+.pfm-margin-negative {
+  color: #dc2626;
+}
+
+/* ── Fallback Availability Switch Card ─────────────────────────────────── */
+.pfm-switch-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.pfm-switch-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.pfm-switch-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.pfm-switch-desc {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Pure CSS Toggle Switch */
+.pfm-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.pfm-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.pfm-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.2s ease;
+  border-radius: 24px;
+}
+
+.pfm-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.pfm-toggle input:checked + .pfm-toggle-slider {
+  background-color: #2563eb;
+}
+
+.pfm-toggle input:checked + .pfm-toggle-slider:before {
+  transform: translateX(20px);
+}
+
+/* ── Section Titles ────────────────────────────────────────────────────── */
+.pfm-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pfm-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pfm-section-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #334155;
+  letter-spacing: 0.5px;
+}
+
+.pfm-section-hint {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* ── Empty State ───────────────────────────────────────────────────────── */
+.pfm-empty-box {
+  padding: 24px 16px;
+  text-align: center;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 8px;
+  background: #fafafa;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pfm-empty-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.pfm-empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.pfm-empty-text {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+/* ── Active Fallback Chain List ────────────────────────────────────────── */
+.pfm-chain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pfm-chain-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+}
+
+.pfm-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pfm-priority-badge {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pfm-item-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pfm-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pfm-item-meta {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.pfm-item-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.pfm-item-pricing {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pfm-mini-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.pfm-mini-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.pfm-mini-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Control Buttons (Move Up, Move Down, Delete) */
+.pfm-actions-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-left: 1px solid #e2e8f0;
+  padding-left: 8px;
+}
+
+.pfm-icon-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 13px;
+  padding: 0;
+}
+
+.pfm-icon-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.pfm-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pfm-icon-btn.danger {
+  color: #dc2626;
+  border-color: #fca5a5;
+  background: #fff;
+}
+
+.pfm-icon-btn.danger:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+/* ── Candidates Scroll Box ─────────────────────────────────────────────── */
+.pfm-candidates-scroll {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fbfcfd;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.pfm-candidate-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.pfm-candidate-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.pfm-provider-tag {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.pfm-candidate-meta {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.pfm-in-chain-badge {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.pfm-add-btn {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.pfm-add-btn:hover {
+  background: #dbeafe;
+  border-color: #60a5fa;
+  color: #1e40af;
+}
+
+/* ── Modal Footer (Pinned at Bottom) ───────────────────────────────────── */
+.pfm-footer {
+  padding: 14px 22px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.pfm-btn-cancel {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pfm-btn-cancel:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.pfm-btn-save {
+  background: #2563eb;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.pfm-btn-save:hover:not(:disabled) {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.pfm-btn-save:disabled,
+.pfm-btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading Spinners */
+.pfm-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: pfmSpin 0.7s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.pfm-spinner-dark {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: pfmSpin 0.7s linear infinite;
+  display: inline-block;
+  margin: 0 auto;
+}
+
+@keyframes pfmSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive Mobile Rules ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .pfm-primary-financials {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .pfm-chain-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pfm-item-right {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px dashed #e2e8f0;
+  }
+  .pfm-candidate-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pfm-candidate-card > div:last-child {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+}

@@ -50,6 +50,7 @@ import { usePermission } from "../../../../utils/usePermission";
 import { WalletAmountStatsCard } from "../wallet/stats-card";
 import DateRangeFilter from "../tables/date-range-filter";
 import TransactionChartModal from "./TransactionChartModal";
+import TransactionProductModal from "./modals/transaction-product-modal";
 
 export const formatTransactionType = (serviceNameOrNetwork, rawType) => {
   if (!rawType && !serviceNameOrNetwork) return "-";
@@ -224,6 +225,8 @@ export const ServiceTransactionTable = ({
   const [statusToUpdate, setStatusToUpdate] = useState("");
   const [onSearch, setonSearch] = useState(false);
   const [filters, setfilters] = useState({});
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [selectedProductRef, setSelectedProductRef] = useState(null);
   const { mutate: requeryTransaction, isLoading: isRequerying } = useRequeryTransaction();
   const {
     register,
@@ -324,6 +327,8 @@ export const ServiceTransactionTable = ({
           balanceBefore: item?.balanceBefore,
           balanceAfter: item?.balanceAfter,
           profit: item?.profit,
+          transactableId: item?.transactableId,
+          transactableType: item?.transactableType,
           ...customerDetails,
         });
       }
@@ -1050,6 +1055,29 @@ export const ServiceTransactionTable = ({
                 </Button>
               </div>
             )}
+            {(formData?.transactableId || formData?.bundle || formData?.productName) && (
+              <div>
+                <Button
+                  color="primary"
+                  outline
+                  size="sm"
+                  className="btn-dim d-inline-flex align-items-center gap-1"
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    setSelectedProductRef({
+                      productId: formData?.transactableId,
+                      productName: formData?.bundle || formData?.productName,
+                      serviceCode: formData?.meta?.serviceCode,
+                      provider: formData?.provider,
+                    });
+                    setIsProductModalOpen(true);
+                  }}
+                >
+                  <Icon name="package" />
+                  <span>View / Edit Product</span>
+                </Button>
+              </div>
+            )}
             <p
               style={{
                 fontSize: "24px",
@@ -1178,8 +1206,31 @@ export const ServiceTransactionTable = ({
                     <span className="caption-text">{formData.network}</span>
                   </Col>
                   <Col lg={8}>
-                    <span className="sub-text">Data Bundle</span>
-                    <span className="caption-text">{formData.bundle}</span>
+                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                      <div>
+                        <span className="sub-text">Data Bundle</span>
+                        <span className="caption-text fw-bold text-dark">{formData.bundle}</span>
+                      </div>
+                      {(formData?.transactableId || formData?.bundle) && (
+                        <button
+                          type="button"
+                          className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1"
+                          style={{ padding: "3px 8px", fontSize: "11px", borderRadius: "6px" }}
+                          onClick={() => {
+                            setSelectedProductRef({
+                              productId: formData?.transactableId,
+                              productName: formData?.bundle,
+                              serviceCode: formData?.meta?.serviceCode,
+                              provider: formData?.provider,
+                            });
+                            setIsProductModalOpen(true);
+                          }}
+                        >
+                          <Icon name="eye" />
+                          <span>View Product</span>
+                        </button>
+                      )}
+                    </div>
                   </Col>
                 </>
               )}
@@ -1222,8 +1273,30 @@ export const ServiceTransactionTable = ({
                     <span className="caption-text">{formData.smartCardNumber}</span>
                   </Col>
                   <Col lg={4}>
-                    <span className="sub-text">Product Name</span>
-                    <span className="caption-text">{formData.productName}</span>
+                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                      <div>
+                        <span className="sub-text">Product Name</span>
+                        <span className="caption-text fw-bold text-dark">{formData.productName}</span>
+                      </div>
+                      {(formData?.transactableId || formData?.productName) && (
+                        <button
+                          type="button"
+                          className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1"
+                          style={{ padding: "2px 6px", fontSize: "10px", borderRadius: "5px" }}
+                          onClick={() => {
+                            setSelectedProductRef({
+                              productId: formData?.transactableId,
+                              productName: formData?.productName,
+                              serviceCode: formData?.meta?.serviceCode,
+                              provider: formData?.provider,
+                            });
+                            setIsProductModalOpen(true);
+                          }}
+                        >
+                          <span>View Product</span>
+                        </button>
+                      )}
+                    </div>
                   </Col>
                   <Col lg={4}>
                     <span className="sub-text">Service Name</span>
@@ -1234,8 +1307,30 @@ export const ServiceTransactionTable = ({
               {formData?.type === "education" && (
                 <>
                   <Col lg={4}>
-                    <span className="sub-text">Product Name</span>
-                    <span className="caption-text">{formData.productName}</span>
+                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                      <div>
+                        <span className="sub-text">Product Name</span>
+                        <span className="caption-text fw-bold text-dark">{formData.productName}</span>
+                      </div>
+                      {(formData?.transactableId || formData?.productName) && (
+                        <button
+                          type="button"
+                          className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1"
+                          style={{ padding: "2px 6px", fontSize: "10px", borderRadius: "5px" }}
+                          onClick={() => {
+                            setSelectedProductRef({
+                              productId: formData?.transactableId,
+                              productName: formData?.productName,
+                              serviceCode: formData?.meta?.serviceCode,
+                              provider: formData?.provider,
+                            });
+                            setIsProductModalOpen(true);
+                          }}
+                        >
+                          <span>View Product</span>
+                        </button>
+                      )}
+                    </div>
                   </Col>
                   <Col lg={4}>
                     <span className="sub-text">Service Name</span>
@@ -1285,6 +1380,14 @@ export const ServiceTransactionTable = ({
         startDate={startDate}
         endDate={endDate}
         type={type}
+      />
+      <TransactionProductModal
+        isOpen={isProductModalOpen}
+        toggle={() => {
+          setIsProductModalOpen(false);
+          setSelectedProductRef(null);
+        }}
+        productRef={selectedProductRef}
       />
     </>
   );

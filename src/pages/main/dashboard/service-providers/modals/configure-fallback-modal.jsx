@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Modal, ModalBody, Spinner } from "reactstrap";
 import {
   useGetProductFallbackCandidates,
   useUpdateProductFallbacks,
 } from "../../../../../api/product/products";
-import { Button, Icon } from "../../../../../components/Component";
 import { formatter } from "../../../../../utils/Utils";
+import "./configure-fallback-modal.css";
 
 const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
   const productId = product?._id || product?.id;
@@ -19,6 +18,29 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
   // Local state for the fallback chain and fallback availability
   const [fallbackChain, setFallbackChain] = useState([]);
   const [isFallbackAvailable, setIsFallbackAvailable] = useState(true);
+
+  // Lock body scroll while open and restore cleanly on unmount / close
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.removeProperty("overflow");
+    }
+    return () => {
+      document.body.style.removeProperty("overflow");
+    };
+  }, [isOpen]);
+
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        toggle();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, toggle]);
 
   // Initialize state when product changes
   useEffect(() => {
@@ -48,7 +70,7 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
     }
   }, [product]);
 
-  // When candidates load, enrich items in the fallbackChain if they had missing details
+  // Enrich items in fallbackChain when candidates load
   useEffect(() => {
     if (candidateData?.candidates && fallbackChain.length > 0) {
       setFallbackChain((prev) =>
@@ -138,6 +160,7 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
 
     updateFallbacks(payload, {
       onSuccess: () => {
+        document.body.style.removeProperty("overflow");
         toggle();
       },
     });
@@ -147,328 +170,330 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
   const selectedIds = new Set(fallbackChain.map((item) => item._id));
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} className="modal-dialog-centered modal-dialog-scrollable" size="lg">
-      <ModalBody className="bg-white rounded p-4" style={{ maxHeight: "88vh", overflowY: "auto" }}>
-        {/* Header */}
-        <div className="d-flex align-items-center justify-content-between pb-3 border-bottom mb-3">
-          <div>
-            <h5 className="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-              <span style={{ fontSize: "1.25rem" }}>🔄</span>
+    <div className="pfm-overlay" onClick={toggle}>
+      <div className="pfm-card" onClick={(e) => e.stopPropagation()}>
+        {/* Pinned Header */}
+        <div className="pfm-header">
+          <div className="pfm-header-info">
+            <h4 className="pfm-title">
+              <span>🔄</span>
               Manage Provider Fallback Chain
-            </h5>
-            <span className="text-muted fs-12px">
+            </h4>
+            <div className="pfm-subtitle">
               Configure automatic backup providers for <strong>{product?.name}</strong> if the primary provider fails.
-            </span>
+            </div>
           </div>
           <button
             type="button"
-            className="btn-close"
+            className="pfm-close-btn"
             aria-label="Close"
             onClick={toggle}
-          ></button>
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Primary Product Card */}
-        <div
-          className="p-3 rounded mb-3"
-          style={{
-            background: "#f0f4ff",
-            border: "1px solid #d0e0fd",
-          }}
-        >
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-              <div className="d-flex align-items-center gap-2">
-                <Badge color="primary" className="text-uppercase fw-bold">
-                  Primary Product
-                </Badge>
-                <span className="fw-bold text-dark fs-14px">{product?.name}</span>
-                <span className="text-muted fs-12px">({product?.code})</span>
-              </div>
-              <div className="text-muted fs-12px mt-1">
-                Provider:{" "}
-                <strong className="text-secondary">
-                  {product?.providerId?.name || product?.providerId?.code || "Default"}
-                </strong>
+        {/* Scrollable Body */}
+        <div className="pfm-body">
+          {/* Section 1: Primary Product Card */}
+          <div className="pfm-primary-card">
+            <div className="pfm-primary-top">
+              <div className="pfm-primary-identity">
+                <div className="pfm-primary-tags">
+                  <span className="pfm-badge-primary">Primary Product</span>
+                  <span className="pfm-primary-name">{product?.name}</span>
+                  <span className="pfm-code-tag">({product?.code})</span>
+                </div>
+                <div className="pfm-primary-provider">
+                  Provider:{" "}
+                  <strong>
+                    {product?.providerId?.name || product?.providerId?.code || "Default"}
+                  </strong>
+                </div>
               </div>
             </div>
 
-            <div className="d-flex align-items-center gap-3">
-              <div className="text-end">
-                <div className="text-muted fs-11px text-uppercase">Selling Price</div>
-                <div className="fw-bold text-dark fs-15px">
+            <div className="pfm-primary-financials">
+              <div className="pfm-stat-box">
+                <span className="pfm-stat-label">Selling Price</span>
+                <span className="pfm-stat-value">
                   {formatter("NGN").format(primaryAmount)}
-                </div>
+                </span>
               </div>
-              <div className="text-end">
-                <div className="text-muted fs-11px text-uppercase">Cost Price</div>
-                <div className="fw-bold text-secondary fs-15px">
+              <div className="pfm-stat-box">
+                <span className="pfm-stat-label">Cost Price</span>
+                <span className="pfm-stat-value">
                   {formatter("NGN").format(primaryCost)}
-                </div>
+                </span>
               </div>
-              <div className="text-end">
-                <div className="text-muted fs-11px text-uppercase">Margin</div>
-                <div
-                  className="fw-bold fs-15px"
-                  style={{ color: primaryProfit >= 0 ? "#059669" : "#dc2626" }}
+              <div className="pfm-stat-box">
+                <span className="pfm-stat-label">Margin</span>
+                <span
+                  className={`pfm-stat-value ${
+                    primaryProfit >= 0 ? "pfm-margin-positive" : "pfm-margin-negative"
+                  }`}
                 >
                   {primaryProfit >= 0 ? "+" : ""}
                   {formatter("NGN").format(primaryProfit)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Global Fallback Availability Switch Card */}
+          <div className="pfm-switch-card">
+            <div className="pfm-switch-info">
+              <span className="pfm-switch-title">
+                Eligible as Fallback for other products
+              </span>
+              <span className="pfm-switch-desc">
+                When disabled, other products will skip this product in their fallback chains.
+              </span>
+            </div>
+            <label
+              className="pfm-toggle"
+              htmlFor="switch-fallback-avail"
+              title="Toggle fallback eligibility"
+            >
+              <input
+                type="checkbox"
+                id="switch-fallback-avail"
+                checked={isFallbackAvailable}
+                onChange={(e) => setIsFallbackAvailable(e.target.checked)}
+              />
+              <span className="pfm-toggle-slider"></span>
+            </label>
+          </div>
+
+          {/* Section 3: Active Fallback Chain */}
+          <div className="pfm-section">
+            <div className="pfm-section-header">
+              <h6 className="pfm-section-title">
+                Active Fallback Chain ({fallbackChain.length})
+              </h6>
+              <span className="pfm-section-hint">
+                Cascades sequentially from Priority #1 onwards
+              </span>
+            </div>
+
+            {fallbackChain.length === 0 ? (
+              <div className="pfm-empty-box">
+                <div className="pfm-empty-icon">🔗</div>
+                <div className="pfm-empty-title">No fallbacks configured</div>
+                <div className="pfm-empty-text">
+                  Select an eligible candidate from the list below to add a backup provider.
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+            ) : (
+              <div className="pfm-chain-list">
+                {fallbackChain.map((item, index) => {
+                  const itemCost = Number(item.providerAmount || 0);
+                  const itemMargin = primaryAmount - itemCost;
+                  const isLoss = itemCost > primaryAmount;
 
-        {/* Global Fallback Availability Switch */}
-        <div className="d-flex align-items-center justify-content-between p-3 rounded mb-3 bg-light border">
-          <div>
-            <div className="fw-bold text-dark fs-13px">
-              Eligible as Fallback for other products
-            </div>
-            <div className="text-muted fs-12px">
-              When disabled, other products will skip this product in their fallback chains.
-            </div>
-          </div>
-          <div className="form-check form-switch m-0">
-            <input
-              type="checkbox"
-              className="form-check-input"
-              role="switch"
-              id="switch-fallback-avail"
-              style={{ width: "2.5rem", height: "1.25rem", cursor: "pointer" }}
-              checked={isFallbackAvailable}
-              onChange={(e) => setIsFallbackAvailable(e.target.checked)}
-            />
-          </div>
-        </div>
-
-        {/* Configured Chain Section */}
-        <div className="mb-4">
-          <div className="d-flex align-items-center justify-content-between mb-2">
-            <h6 className="fw-bold text-dark mb-0 fs-13px text-uppercase">
-              Active Fallback Chain ({fallbackChain.length})
-            </h6>
-            <span className="text-muted fs-11px">
-              Cascades sequentially from Priority #1 onwards
-            </span>
-          </div>
-
-          {fallbackChain.length === 0 ? (
-            <div
-              className="text-center p-3 rounded border border-dashed text-muted"
-              style={{ background: "#fafafa" }}
-            >
-              <div className="fs-18px mb-1">🔗</div>
-              <div className="fw-medium fs-13px">No fallbacks configured</div>
-              <div className="fs-11px">
-                Select an eligible candidate from the list below to add a backup provider.
-              </div>
-            </div>
-          ) : (
-            <div className="d-flex flex-column gap-2">
-              {fallbackChain.map((item, index) => {
-                const itemCost = Number(item.providerAmount || 0);
-                const itemMargin = primaryAmount - itemCost;
-                const isLoss = itemCost > primaryAmount;
-
-                return (
-                  <div
-                    key={item._id}
-                    className="p-2 px-3 rounded border d-flex align-items-center justify-content-between bg-white shadow-sm"
-                    style={{ borderColor: "#e5e7eb" }}
-                  >
-                    <div className="d-flex align-items-center gap-3">
-                      <Badge
-                        color="secondary"
-                        className="fw-bold rounded-pill px-2 py-1"
-                        style={{ fontSize: 11 }}
-                      >
-                        #{index + 1}
-                      </Badge>
-                      <div>
-                        <div className="fw-bold text-dark fs-13px">
-                          {item.name}
+                  return (
+                    <div key={item._id} className="pfm-chain-item">
+                      <div className="pfm-item-left">
+                        <span className="pfm-priority-badge">#{index + 1}</span>
+                        <div className="pfm-item-details">
+                          <span className="pfm-item-name">{item.name}</span>
+                          <span className="pfm-item-meta">
+                            Provider: <strong>{item.providerName}</strong> • Code: <code>{item.code}</code>
+                          </span>
                         </div>
-                        <div className="text-muted fs-11px">
-                          Provider:{" "}
-                          <strong className="text-secondary">{item.providerName}</strong>{" "}
-                          • Code: <code>{item.code}</code>
+                      </div>
+
+                      <div className="pfm-item-right">
+                        <div className="pfm-item-pricing">
+                          <div className="pfm-mini-stat">
+                            <span className="pfm-mini-label">Cost Price</span>
+                            <span className="pfm-mini-value">
+                              {formatter("NGN").format(itemCost)}
+                            </span>
+                          </div>
+
+                          <div className="pfm-mini-stat" style={{ minWidth: 80 }}>
+                            <span className="pfm-mini-label">Margin</span>
+                            <span
+                              className={`pfm-mini-value ${
+                                isLoss ? "pfm-margin-negative" : "pfm-margin-positive"
+                              }`}
+                            >
+                              {itemMargin >= 0 ? "+" : ""}
+                              {formatter("NGN").format(itemMargin)}
+                              {isLoss && (
+                                <span
+                                  style={{ marginLeft: 3 }}
+                                  title="Cost exceeds selling price!"
+                                >
+                                  ⚠️
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Priority & Delete Controls */}
+                        <div className="pfm-actions-wrap">
+                          <button
+                            type="button"
+                            className="pfm-icon-btn"
+                            disabled={index === 0}
+                            onClick={() => moveUp(index)}
+                            title="Move priority up"
+                            aria-label="Move priority up"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="12" y1="19" x2="12" y2="5"></line>
+                              <polyline points="5 12 12 5 19 12"></polyline>
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            className="pfm-icon-btn"
+                            disabled={index === fallbackChain.length - 1}
+                            onClick={() => moveDown(index)}
+                            title="Move priority down"
+                            aria-label="Move priority down"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="12" y1="5" x2="12" y2="19"></line>
+                              <polyline points="19 12 12 19 5 12"></polyline>
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            className="pfm-icon-btn danger"
+                            onClick={() => removeCandidate(item._id)}
+                            title="Remove from fallback chain"
+                            aria-label="Remove from fallback chain"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                          </button>
                         </div>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
-                    <div className="d-flex align-items-center gap-3">
-                      <div className="text-end">
-                        <div className="text-muted fs-11px text-uppercase">Cost Price</div>
-                        <div className="fw-bold text-dark fs-13px">
-                          {formatter("NGN").format(itemCost)}
-                        </div>
-                      </div>
+          {/* Section 4: Eligible Backup Candidates */}
+          <div className="pfm-section">
+            <div className="pfm-section-header">
+              <h6 className="pfm-section-title">
+                Eligible Backup Candidates (±1% Selling Price)
+              </h6>
+              <span className="pfm-section-hint">
+                Products for this service matching {formatter("NGN").format(primaryAmount)}
+              </span>
+            </div>
 
-                      <div className="text-end" style={{ minWidth: 90 }}>
-                        <div className="text-muted fs-11px text-uppercase">Margin</div>
-                        <div
-                          className="fw-bold fs-13px"
-                          style={{ color: isLoss ? "#dc2626" : "#059669" }}
-                        >
-                          {itemMargin >= 0 ? "+" : ""}
-                          {formatter("NGN").format(itemMargin)}
-                          {isLoss && (
-                            <span
-                              className="ms-1"
-                              title="Cost exceeds selling price! Requires allowBelowCost on product."
-                            >
-                              ⚠️
+            {loadingCandidates ? (
+              <div style={{ textAlign: "center", padding: "28px 0" }}>
+                <div className="pfm-spinner-dark"></div>
+                <div style={{ color: "#64748b", fontSize: "12px", marginTop: "8px" }}>
+                  Loading eligible candidates...
+                </div>
+              </div>
+            ) : candidatesList.length === 0 ? (
+              <div className="pfm-empty-box" style={{ padding: "16px" }}>
+                <div className="pfm-empty-text">
+                  No matching products found under this service with equivalent selling price (±1%).
+                </div>
+              </div>
+            ) : (
+              <div className="pfm-candidates-scroll">
+                {candidatesList.map((cand) => {
+                  const candId = cand._id || cand.id;
+                  const isSelected = selectedIds.has(candId);
+                  const candCost = Number(cand.providerAmount || 0);
+                  const candMargin = primaryAmount - candCost;
+                  const priceDiff =
+                    Math.abs(cand.amount - primaryAmount) / (primaryAmount || 1);
+
+                  return (
+                    <div key={candId} className="pfm-candidate-card">
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span className="pfm-candidate-name">{cand.name}</span>
+                          <span className="pfm-provider-tag">
+                            {cand.providerId?.name || cand.providerId?.code || "Provider"}
+                          </span>
+                          {priceDiff > 0 && (
+                            <span style={{ fontSize: "11px", color: "#64748b" }}>
+                              ({formatter("NGN").format(cand.amount)})
                             </span>
                           )}
                         </div>
+                        <div className="pfm-candidate-meta">
+                          Cost: <strong>{formatter("NGN").format(candCost)}</strong> • Margin:{" "}
+                          <strong
+                            style={{ color: candMargin >= 0 ? "#059669" : "#dc2626" }}
+                          >
+                            {candMargin >= 0 ? "+" : ""}
+                            {formatter("NGN").format(candMargin)}
+                          </strong>
+                        </div>
                       </div>
 
-                      {/* Reorder & Remove Controls */}
-                      <div className="d-flex align-items-center gap-1 border-start ps-2">
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-icon btn-light"
-                          disabled={index === 0}
-                          onClick={() => moveUp(index)}
-                          title="Move priority up"
-                          style={{ width: 28, height: 28 }}
-                        >
-                          <Icon name="arrow-up" />
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-icon btn-light"
-                          disabled={index === fallbackChain.length - 1}
-                          onClick={() => moveDown(index)}
-                          title="Move priority down"
-                          style={{ width: 28, height: 28 }}
-                        >
-                          <Icon name="arrow-down" />
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-icon btn-outline-danger ms-1"
-                          onClick={() => removeCandidate(item._id)}
-                          title="Remove from fallback chain"
-                          style={{ width: 28, height: 28 }}
-                        >
-                          <Icon name="cross" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Eligible Candidates Section */}
-        <div>
-          <div className="d-flex align-items-center justify-content-between mb-2">
-            <h6 className="fw-bold text-dark mb-0 fs-13px text-uppercase">
-              Eligible Backup Candidates (±1% Selling Price)
-            </h6>
-            <span className="text-muted fs-11px">
-              Products for this service matching {formatter("NGN").format(primaryAmount)}
-            </span>
-          </div>
-
-          {loadingCandidates ? (
-            <div className="text-center py-4 text-muted">
-              <Spinner size="sm" color="primary" className="me-2" />
-              Loading eligible candidates...
-            </div>
-          ) : candidatesList.length === 0 ? (
-            <div className="p-3 rounded border text-center text-muted fs-12px bg-light">
-              No matching products found under this service with equivalent selling price (±1%).
-            </div>
-          ) : (
-            <div
-              className="border rounded p-2 d-flex flex-column gap-2"
-              style={{ maxHeight: 220, overflowY: "auto", background: "#fbfcfd" }}
-            >
-              {candidatesList.map((cand) => {
-                const candId = cand._id || cand.id;
-                const isSelected = selectedIds.has(candId);
-                const candCost = Number(cand.providerAmount || 0);
-                const candMargin = primaryAmount - candCost;
-                const priceDiff =
-                  Math.abs(cand.amount - primaryAmount) / (primaryAmount || 1);
-
-                return (
-                  <div
-                    key={candId}
-                    className="p-2 px-3 rounded border d-flex align-items-center justify-content-between bg-white"
-                  >
-                    <div>
-                      <div className="d-flex align-items-center gap-2">
-                        <span className="fw-bold text-dark fs-13px">{cand.name}</span>
-                        <Badge color="light" className="text-secondary fs-10px">
-                          {cand.providerId?.name || cand.providerId?.code || "Provider"}
-                        </Badge>
-                        {priceDiff > 0 && (
-                          <span className="text-muted fs-11px">
-                            ({formatter("NGN").format(cand.amount)})
-                          </span>
+                      <div>
+                        {isSelected ? (
+                          <span className="pfm-in-chain-badge">✓ In Chain</span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="pfm-add-btn"
+                            onClick={() => addCandidate(cand)}
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="12" y1="5" x2="12" y2="19"></line>
+                              <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add as Fallback
+                          </button>
                         )}
                       </div>
-                      <div className="text-muted fs-11px mt-1">
-                        Cost: <strong>{formatter("NGN").format(candCost)}</strong> • Margin:{" "}
-                        <strong
-                          style={{ color: candMargin >= 0 ? "#059669" : "#dc2626" }}
-                        >
-                          {candMargin >= 0 ? "+" : ""}
-                          {formatter("NGN").format(candMargin)}
-                        </strong>
-                      </div>
                     </div>
-
-                    <div>
-                      {isSelected ? (
-                        <Badge color="success" className="px-2 py-1 fs-11px">
-                          ✓ In Chain
-                        </Badge>
-                      ) : (
-                        <Button
-                          color="primary"
-                          size="sm"
-                          outline
-                          onClick={() => addCandidate(cand)}
-                          style={{ padding: "4px 10px", fontSize: 12 }}
-                        >
-                          <Icon name="plus" className="me-1" />
-                          Add as Fallback
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="d-flex justify-content-end align-items-center gap-2 pt-3 border-top mt-4">
-          <Button color="light" outline onClick={toggle} disabled={isSaving}>
+        {/* Pinned Footer */}
+        <div className="pfm-footer">
+          <button
+            type="button"
+            className="pfm-btn-cancel"
+            onClick={toggle}
+            disabled={isSaving}
+          >
             Cancel
-          </Button>
-          <Button color="primary" onClick={handleSave} disabled={isSaving}>
+          </button>
+          <button
+            type="button"
+            className="pfm-btn-save"
+            onClick={handleSave}
+            disabled={isSaving}
+          >
             {isSaving ? (
               <>
-                <Spinner size="sm" className="me-2" />
-                Saving...
+                <span className="pfm-spinner"></span>
+                <span>Saving...</span>
               </>
             ) : (
               "Save Fallback Configuration"
             )}
-          </Button>
+          </button>
         </div>
-      </ModalBody>
-    </Modal>
+      </div>
+    </div>
   );
 };
 

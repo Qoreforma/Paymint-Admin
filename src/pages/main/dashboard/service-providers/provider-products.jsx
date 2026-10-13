@@ -42,6 +42,7 @@ import { formatDateWithTime, formatter } from "../../../../utils/Utils";
 import LoadingSpinner from "../../../components/spinner";
 import AddProductModal from "./modals/add-product";
 import ConfigureFallbackModal from "./modals/configure-fallback-modal";
+import "./modals/configure-fallback-modal.css";
 
 // ─── Constants ────────────────────────────────────────────────
 const DATA_TYPES_PP = [
@@ -571,7 +572,7 @@ const ServiceProvidersProducts = () => {
                           <DataTableRow>
                             <span>🔥 Hot</span>
                           </DataTableRow>
-                          <DataTableRow size="sm" className="text-center">
+                          <DataTableRow className="text-center" style={{ minWidth: 105 }}>
                             <span>Fallbacks</span>
                           </DataTableRow>
                           <DataTableRow className="nk-tb-col-tools">
@@ -670,25 +671,39 @@ const ServiceProvidersProducts = () => {
                               <DataTableRow>
                                 <HotToggleCell productId={item._id} isHot={!!item.isHot} />
                               </DataTableRow>
-                              <DataTableRow size="sm" className="text-center">
+                              <DataTableRow className="text-center" style={{ minWidth: 105 }}>
                                 <button
                                   type="button"
-                                  className={`btn btn-xs ${
+                                  className={`pf-cfg-btn ${
                                     item.fallbackProducts && item.fallbackProducts.length > 0
-                                      ? "btn-outline-primary"
-                                      : "btn-outline-light text-muted"
-                                  } d-inline-flex align-items-center gap-1`}
-                                  style={{ borderRadius: 6, padding: "2px 8px", fontSize: 11 }}
+                                      ? "pf-cfg-btn-active"
+                                      : ""
+                                  }`}
                                   onClick={() => {
                                     setSelectedFallbackProduct(item);
                                     setFallbackModalOpen(true);
                                   }}
                                   title="Configure Provider Fallback Chain"
                                 >
-                                  <Icon name="swap-alt" style={{ fontSize: 12 }} />
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="pf-cfg-btn-icon"
+                                  >
+                                    <polyline points="17 1 21 5 17 9" />
+                                    <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                                    <polyline points="7 23 3 19 7 15" />
+                                    <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                                  </svg>
                                   <span>
                                     {item.fallbackProducts && item.fallbackProducts.length > 0
-                                      ? `${item.fallbackProducts.length} Chain`
+                                      ? `${item.fallbackProducts.length} in Chain`
                                       : "Configure"}
                                   </span>
                                 </button>
