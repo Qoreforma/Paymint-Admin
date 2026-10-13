@@ -111,6 +111,10 @@ const ServicesTypes = () => {
   };
 
   useEffect(() => {
+    document.body.style.removeProperty("overflow");
+  }, []);
+
+  useEffect(() => {
     reset(formData);
   }, [formData]);
 
@@ -546,14 +550,17 @@ const ServicesTypes = () => {
         </Modal>
 
         {/* Configure Provider Routing & Fallback Modal */}
-        <ConfigureRoutingModal
-          isOpen={isRoutingModalOpen}
-          toggle={() => {
-            setIsRoutingModalOpen(false);
-            setSelectedServiceType(null);
-          }}
-          serviceType={selectedServiceType}
-        />
+        {isRoutingModalOpen && selectedServiceType && (
+          <ConfigureRoutingModal
+            isOpen={isRoutingModalOpen}
+            toggle={() => {
+              setIsRoutingModalOpen(false);
+              setSelectedServiceType(null);
+              document.body.style.removeProperty("overflow");
+            }}
+            serviceType={selectedServiceType}
+          />
+        )}
       </Content>
     </React.Fragment>
   );

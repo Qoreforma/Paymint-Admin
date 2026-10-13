@@ -35,15 +35,12 @@ const ConfigureRoutingModal = ({ isOpen, toggle, serviceType }) => {
     }
   }, [routingData]);
 
-  // Body scroll lock
+  // Ensure body scroll is never trapped
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    }
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.removeProperty("overflow");
     };
-  }, [isOpen]);
+  }, []);
 
   // Escape key close
   useEffect(() => {
