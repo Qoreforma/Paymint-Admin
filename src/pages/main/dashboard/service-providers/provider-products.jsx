@@ -41,6 +41,7 @@ import Head from "../../../../layout/head/Head";
 import { formatDateWithTime, formatter } from "../../../../utils/Utils";
 import LoadingSpinner from "../../../components/spinner";
 import AddProductModal from "./modals/add-product";
+import ConfigureFallbackModal from "./modals/configure-fallback-modal";
 
 // ─── Constants ────────────────────────────────────────────────
 const DATA_TYPES_PP = [
@@ -211,6 +212,8 @@ const ServiceProvidersProducts = () => {
   const [view, setView] = useState({
     add: false, details: false, edit: false, products: false,
   });
+  const [selectedFallbackProduct, setSelectedFallbackProduct] = useState(null);
+  const [fallbackModalOpen, setFallbackModalOpen] = useState(false);
 
   const toggle = (t) =>
     setView({ add: t==="add", details: t==="details", edit: t==="edit", products: t==="products" });
@@ -568,6 +571,9 @@ const ServiceProvidersProducts = () => {
                           <DataTableRow>
                             <span>🔥 Hot</span>
                           </DataTableRow>
+                          <DataTableRow size="sm" className="text-center">
+                            <span>Fallbacks</span>
+                          </DataTableRow>
                           <DataTableRow className="nk-tb-col-tools">
                             <span></span>
                           </DataTableRow>
@@ -664,6 +670,29 @@ const ServiceProvidersProducts = () => {
                               <DataTableRow>
                                 <HotToggleCell productId={item._id} isHot={!!item.isHot} />
                               </DataTableRow>
+                              <DataTableRow size="sm" className="text-center">
+                                <button
+                                  type="button"
+                                  className={`btn btn-xs ${
+                                    item.fallbackProducts && item.fallbackProducts.length > 0
+                                      ? "btn-outline-primary"
+                                      : "btn-outline-light text-muted"
+                                  } d-inline-flex align-items-center gap-1`}
+                                  style={{ borderRadius: 6, padding: "2px 8px", fontSize: 11 }}
+                                  onClick={() => {
+                                    setSelectedFallbackProduct(item);
+                                    setFallbackModalOpen(true);
+                                  }}
+                                  title="Configure Provider Fallback Chain"
+                                >
+                                  <Icon name="swap-alt" style={{ fontSize: 12 }} />
+                                  <span>
+                                    {item.fallbackProducts && item.fallbackProducts.length > 0
+                                      ? `${item.fallbackProducts.length} Chain`
+                                      : "Configure"}
+                                  </span>
+                                </button>
+                              </DataTableRow>
                               <DataTableRow className="nk-tb-col-tools">
                                 <ul className="nk-tb-actions gx-1 my-n1">
                                   <li>
@@ -688,6 +717,20 @@ const ServiceProvidersProducts = () => {
                                             >
                                               <Icon name="edit"></Icon>
                                               <span>Edit</span>
+                                            </DropdownItem>
+                                          </li>
+                                          <li>
+                                            <DropdownItem
+                                              tag="a"
+                                              href="#fallback"
+                                              onClick={(ev) => {
+                                                ev.preventDefault();
+                                                setSelectedFallbackProduct(item);
+                                                setFallbackModalOpen(true);
+                                              }}
+                                            >
+                                              <Icon name="swap-alt"></Icon>
+                                              <span>Manage Fallbacks</span>
                                             </DropdownItem>
                                           </li>
                                         </ul>
@@ -737,6 +780,14 @@ const ServiceProvidersProducts = () => {
         </Block>
 
         <AddProductModal modal={view.products} closeModal={() => onFormCancel()} />
+        <ConfigureFallbackModal
+          isOpen={fallbackModalOpen}
+          toggle={() => {
+            setFallbackModalOpen(!fallbackModalOpen);
+            if (fallbackModalOpen) setSelectedFallbackProduct(null);
+          }}
+          product={selectedFallbackProduct}
+        />
 
         {/* ── Edit Modal ────────────────────────────────────── */}
         <Modal

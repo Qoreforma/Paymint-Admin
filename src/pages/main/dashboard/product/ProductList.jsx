@@ -42,6 +42,7 @@ import {
 } from "../../../../api/product/products";
 import { useGetProviders, useGetServiceTypes } from "../../../../api/service-providers";
 import { useGetServices } from "../../../../api/services";
+import ConfigureFallbackModal from "../service-providers/modals/configure-fallback-modal";
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 const DATA_TYPES = [
@@ -251,7 +252,7 @@ const StatusToggle = ({ productId, isActive }) => {
 };
 
 // ─── Product Detail Modal ───────────────────────────────────────────────────
-const ProductDetailModal = ({ isOpen, toggle, product, onEdit }) => {
+const ProductDetailModal = ({ isOpen, toggle, product, onEdit, onConfigureFallback }) => {
   if (!product) return null;
   const service = product.serviceId;
   const serviceType = service?.serviceTypeId;
@@ -423,6 +424,39 @@ const ProductDetailModal = ({ isOpen, toggle, product, onEdit }) => {
               </div>
             </div>
           )}
+
+          {/* Provider Fallback Chain */}
+          <div className="col-12">
+            <div
+              className="p-3 rounded-3 border d-flex flex-wrap align-items-center justify-content-between gap-2"
+              style={{ background: "#f0fdf4", borderColor: "#bbf7d0" }}
+            >
+              <div>
+                <span className="fw-bold text-dark d-block">
+                  🔄 Provider Fallback Chain
+                </span>
+                <span className="text-muted small">
+                  {product.fallbackProducts && product.fallbackProducts.length > 0
+                    ? `${product.fallbackProducts.length} backup provider(s) configured`
+                    : "No backup fallback configured"}
+                  {product.isFallbackAvailable === false
+                    ? " • (Disabled as backup candidate)"
+                    : ""}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1"
+                onClick={() => {
+                  toggle();
+                  if (onConfigureFallback) onConfigureFallback(product);
+                }}
+              >
+                <Icon name="swap-alt" />
+                <span>Configure Fallbacks</span>
+              </button>
+            </div>
+          </div>
         </div>
       </ModalBody>
 
@@ -921,6 +955,7 @@ const ProductList = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [detailProduct, setDetailProduct] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
+  const [fallbackProduct, setFallbackProduct] = useState(null);
 
   // ── Bulk mutations ──
   const { mutate: bulkToggleStatus, isLoading: isBulkingStatus } = useBulkToggleProductStatus();
@@ -1853,6 +1888,9 @@ const ProductList = () => {
                             />
                           </div>
                         </DataTableRow>
+                        <DataTableRow size="sm" className="text-center">
+                          <span>Fallbacks</span>
+                        </DataTableRow>
                         <DataTableRow className="nk-tb-col-tools">
                           <span></span>
                         </DataTableRow>
@@ -2015,6 +2053,28 @@ const ProductList = () => {
                               <StatusToggle productId={item._id} isActive={!!item.isActive} />
                             </DataTableRow>
 
+                            {/* Fallback Action */}
+                            <DataTableRow size="sm" className="text-center">
+                              <button
+                                type="button"
+                                className={`btn btn-xs ${
+                                  item.fallbackProducts && item.fallbackProducts.length > 0
+                                    ? "btn-outline-primary"
+                                    : "btn-outline-light text-muted"
+                                } d-inline-flex align-items-center gap-1`}
+                                style={{ borderRadius: 6, padding: "2px 8px", fontSize: 11 }}
+                                onClick={() => setFallbackProduct(item)}
+                                title="Configure Provider Fallback Chain"
+                              >
+                                <Icon name="swap-alt" style={{ fontSize: 12 }} />
+                                <span>
+                                  {item.fallbackProducts && item.fallbackProducts.length > 0
+                                    ? `${item.fallbackProducts.length} Chain`
+                                    : "Configure"}
+                                </span>
+                              </button>
+                            </DataTableRow>
+
                             {/* Actions */}
                             <DataTableRow className="nk-tb-col-tools">
                               <ul className="nk-tb-actions gx-1 my-n1">
@@ -2052,6 +2112,19 @@ const ProductList = () => {
                                           >
                                             <Icon name="edit" />
                                             <span>Edit Product</span>
+                                          </DropdownItem>
+                                        </li>
+                                        <li>
+                                          <DropdownItem
+                                            tag="a"
+                                            href="#fallback"
+                                            onClick={(ev) => {
+                                              ev.preventDefault();
+                                              setFallbackProduct(item);
+                                            }}
+                                          >
+                                            <Icon name="swap-alt" />
+                                            <span>Manage Fallbacks</span>
                                           </DropdownItem>
                                         </li>
                                       </ul>
@@ -2129,6 +2202,7 @@ const ProductList = () => {
           toggle={() => setDetailProduct(null)}
           product={detailProduct}
           onEdit={(prod) => setEditProduct(prod)}
+          onConfigureFallback={(prod) => setFallbackProduct(prod)}
         />
 
         {/* Adaptive Edit Modal */}
@@ -2136,6 +2210,13 @@ const ProductList = () => {
           isOpen={!!editProduct}
           toggle={() => setEditProduct(null)}
           product={editProduct}
+        />
+
+        {/* Fallback Configuration Modal */}
+        <ConfigureFallbackModal
+          isOpen={!!fallbackProduct}
+          toggle={() => setFallbackProduct(null)}
+          product={fallbackProduct}
         />
       </Content>
     </React.Fragment>

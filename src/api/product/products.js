@@ -239,6 +239,77 @@ export const useDeleteProduct = (id) => {
   );
 };
 
+// ─── Fallback Management Hooks ───────────────────────────────────────────
+export const useGetProductFallbackCandidates = (productId) => {
+  return useQuery(
+    ["productFallbackCandidates", productId],
+    async () => {
+      const res = await instance.get(`${BACKEND_URLS.product}/${productId}/fallback-candidates`);
+      return res?.data;
+    },
+    {
+      enabled: !!productId,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    }
+  );
+};
+
+export const useUpdateProductFallbacks = (productId) => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (data) =>
+      toast.promise(
+        instance
+          .put(`${BACKEND_URLS.product}/${productId}/fallbacks`, data)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err;
+          }),
+        {
+          loading: "Updating fallback chain...",
+          success: (res) => res?.message || "Fallback configuration updated",
+          error: (err) => err?.response?.data?.message || "Failed to update fallbacks",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["getAllProducts"]);
+        queryClient.invalidateQueries(["getProduct", productId]);
+        queryClient.invalidateQueries(["provider-products"]);
+        queryClient.invalidateQueries(["productFallbackCandidates", productId]);
+      },
+    }
+  );
+};
+
+export const useToggleProductFallbackAvailability = (productId) => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (isFallbackAvailable) =>
+      toast.promise(
+        instance
+          .put(`${BACKEND_URLS.product}/${productId}/fallback-status`, { isFallbackAvailable })
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err;
+          }),
+        {
+          loading: "Updating fallback status...",
+          success: (res) => res?.message || "Fallback availability updated",
+          error: (err) => err?.response?.data?.message || "Failed to update fallback status",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["getAllProducts"]);
+        queryClient.invalidateQueries(["getProduct", productId]);
+        queryClient.invalidateQueries(["provider-products"]);
+      },
+    }
+  );
+};
+
 // ─── Legacy / Compat aliases (kept so existing pages don't break) ────────
 export const useUpdateProductStatus = () => {
   const queryClient = useQueryClient();
