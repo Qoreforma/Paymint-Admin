@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Badge, Modal, ModalBody, Spinner } from "reactstrap";
 import {
   useGetServiceTypeProviderRouting,
   useUpdateServiceTypeProviderRouting,
 } from "../../../../../api/service-providers";
-import { Button, Icon } from "../../../../../components/Component";
+import "../service-types.css";
 
-const ConfigureRoutingModalContent = ({ isOpen, toggle, serviceType }) => {
+const ConfigureRoutingModal = ({ isOpen, toggle, serviceType }) => {
+  if (!isOpen || !serviceType) return null;
+
   const serviceTypeId = serviceType?._id || serviceType?.id;
 
   const { data: routingData, isLoading } =
@@ -34,6 +35,27 @@ const ConfigureRoutingModalContent = ({ isOpen, toggle, serviceType }) => {
     }
   }, [routingData]);
 
+  // Body scroll lock
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // Escape key close
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        toggle();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, toggle]);
+
   const moveUp = (index) => {
     if (index === 0) return;
     const items = [...activeProviders];
@@ -57,7 +79,7 @@ const ConfigureRoutingModalContent = ({ isOpen, toggle, serviceType }) => {
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e, index) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
@@ -84,7 +106,13 @@ const ConfigureRoutingModalContent = ({ isOpen, toggle, serviceType }) => {
   };
 
   const handleSave = () => {
-    // Edge check guard: if no providers are active, confirm with user or proceed
+    if (activeProviders.length === 0) {
+      const confirmSave = window.confirm(
+        "Warning: You are saving with 0 active providers. Incoming transactions for this service will fail until at least one provider is activated. Do you want to proceed?"
+      );
+      if (!confirmSave) return;
+    }
+
     const routingPayload = [
       ...activeProviders.map((p, idx) => ({
         providerId: p.providerId,
@@ -109,80 +137,84 @@ const ConfigureRoutingModalContent = ({ isOpen, toggle, serviceType }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} className="modal-dialog-centered" size="lg">
-      <ModalBody className="bg-white rounded p-4">
-        {/* Header */}
-        <div className="d-flex align-items-center justify-content-between pb-3 border-bottom mb-3">
+    <div className="pm-modal-overlay" onClick={toggle}>
+      <div className="pm-modal-card" onClick={(e) => e.stopPropagation()}>
+        {/* Fixed Header */}
+        <div className="pm-modal-header">
           <div>
-            <h5 className="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-              <span style={{ fontSize: "1.25rem" }}>⚡</span>
+            <h4 className="pm-modal-title">
+              <span>⚡</span>
               Provider Routing & Fallback Cascade
-            </h5>
-            <span className="text-muted fs-12px">
+            </h4>
+            <div className="pm-modal-subtitle">
               Configure primary and fallback execution order for{" "}
-              <strong>{serviceType?.name}</strong> (<code>{serviceType?.code?.toUpperCase()}</code>)
-            </span>
+              <strong style={{ color: "#111827" }}>{serviceType?.name}</strong>{" "}
+              (<code>{serviceType?.code?.toUpperCase()}</code>)
+            </div>
           </div>
           <button
             type="button"
-            className="btn-close"
-            aria-label="Close"
+            className="pm-modal-close-btn"
             onClick={toggle}
-          ></button>
+            aria-label="Close"
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Informational Guidance Banner */}
-        <div
-          className="p-3 rounded mb-3"
-          style={{
-            background: "#f0f7ff",
-            border: "1px solid #cce3fe",
-          }}
-        >
-          <div className="d-flex align-items-start gap-2">
-            <Icon name="info-fill" className="text-primary mt-1 fs-16px" />
-            <div className="fs-12px text-secondary">
-              <strong className="text-dark">How Cascade Fallback Works:</strong>
-              <div className="mt-1">
-                • <strong>🥇 Primary Vendor (#1):</strong> Receives and processes client requests first.
-              </div>
-              <div>
-                • <strong>🥈 Fallback Vendors (#2, #3...):</strong> Automatically invoked in rank order if the primary vendor returns an explicit failure or out-of-stock.
-              </div>
-              <div className="text-muted mt-1">
-                🛡️ <em>Timeouts and network-pending errors immediately halt the cascade to prevent double-vending.</em>
-              </div>
+        {/* Scrollable Body */}
+        <div className="pm-modal-body">
+          {/* Info Box */}
+          <div className="pm-modal-info-box">
+            <strong style={{ display: "block", marginBottom: "4px" }}>
+              ℹ️ How Cascade Fallback Works:
+            </strong>
+            <div>
+              • <strong>🥇 Primary Vendor (#1):</strong> Receives and processes client requests first.
+            </div>
+            <div>
+              • <strong>🥈 Fallback Vendors (#2, #3...):</strong> Automatically invoked in rank order if the primary vendor returns an explicit failure or out-of-stock.
+            </div>
+            <div style={{ marginTop: "4px", color: "#475569", fontSize: "11px" }}>
+              🛡️ <em>Timeouts and network-pending errors halt the cascade to prevent double-vending.</em>
             </div>
           </div>
-        </div>
 
-        {/* Loading Spinner */}
-        {isLoading ? (
-          <div className="text-center py-5">
-            <Spinner color="primary" />
-            <div className="text-muted fs-12px mt-2">Loading provider routing...</div>
-          </div>
-        ) : (
-          <div>
-            {/* Active Routing Section */}
-            <div className="mb-4">
-              <div className="d-flex align-items-center justify-content-between mb-2">
-                <span className="fw-bold fs-13px text-dark">
-                  Active Execution Cascade ({activeProviders.length})
-                </span>
+          {isLoading ? (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <div className="pm-spinner-dark"></div>
+              <div style={{ color: "#6b7280", fontSize: "12px", marginTop: "10px" }}>
+                Loading provider routing...
+              </div>
+            </div>
+          ) : (
+            <div>
+              {/* Section 1: Active Cascade */}
+              <div className="pm-modal-section-title">
+                <span>Active Execution Cascade ({activeProviders.length})</span>
                 {activeProviders.length === 0 && (
-                  <span className="text-danger fs-11px fw-bold">
+                  <span style={{ color: "#dc2626", fontSize: "11px" }}>
                     ⚠️ No active providers! Service will fail incoming requests.
                   </span>
                 )}
               </div>
 
               {activeProviders.length === 0 ? (
-                <div className="border border-dashed rounded p-3 text-center text-muted fs-12px">
+                <div
+                  style={{
+                    border: "1px dashed #d1d5db",
+                    borderRadius: "8px",
+                    padding: "16px",
+                    textAlign: "center",
+                    color: "#6b7280",
+                    fontSize: "12px",
+                    marginBottom: "20px",
+                  }}
+                >
                   No active providers configured. Activate at least one provider from the list below.
                 </div>
               ) : (
-                <div className="d-flex flex-column gap-2">
+                <div className="pm-modal-list">
                   {activeProviders.map((provider, index) => {
                     const isPrimary = index === 0;
                     return (
@@ -190,160 +222,153 @@ const ConfigureRoutingModalContent = ({ isOpen, toggle, serviceType }) => {
                         key={provider.providerId}
                         draggable
                         onDragStart={(e) => handleDragStart(e, index)}
-                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragOver={handleDragOver}
                         onDrop={(e) => handleDrop(e, index)}
-                        className="d-flex align-items-center justify-content-between p-3 rounded border"
-                        style={{
-                          background: isPrimary ? "#f6ffed" : "#fbfbfb",
-                          borderColor: isPrimary ? "#b7eb8f" : "#e5e9f2",
-                          cursor: "grab",
-                          transition: "box-shadow 0.15s ease",
-                        }}
+                        className={`pm-provider-card-active ${isPrimary ? "pm-provider-card-primary" : ""}`}
                       >
-                        <div className="d-flex align-items-center gap-2">
-                          {/* Drag handle */}
-                          <div title="Drag to reorder priority" className="text-muted pe-1">
-                            <Icon name="menu" className="fs-15px" />
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          {/* Drag grip */}
+                          <div
+                            className="pm-drag-handle"
+                            title="Drag to reorder priority"
+                          >
+                            ⋮⋮
                           </div>
 
-                          {/* Priority Rank Badge */}
-                          <Badge
-                            color={isPrimary ? "success" : "info"}
-                            className="badge-dim d-flex align-items-center gap-1"
-                            style={{ fontSize: "12px", minWidth: "120px", padding: "6px 10px" }}
+                          {/* Rank Tag */}
+                          <div
+                            className={`pm-rank-tag ${isPrimary ? "pm-rank-tag-primary" : "pm-rank-tag-fallback"}`}
                           >
                             <span>{isPrimary ? "🥇" : index === 1 ? "🥈" : "🥉"}</span>
-                            <span>{isPrimary ? "Primary (#1)" : `Fallback #${index}`}</span>
-                          </Badge>
+                            <span>{isPrimary ? "Primary (#1)" : `Fallback (#${index + 1})`}</span>
+                          </div>
 
-                          {/* Provider Details */}
-                          <div>
-                            <div className="fw-bold text-dark fs-13px">
-                              {provider.name}
-                            </div>
-                            <div className="text-muted fs-11px">
+                          {/* Provider Info */}
+                          <div className="pm-provider-info">
+                            <span className="pm-provider-name">{provider.name}</span>
+                            <span className="pm-provider-code">
                               Code: <code>{provider.code}</code>
                               {!provider.isProviderActive && (
-                                <Badge color="warning" className="badge-dim ms-2" style={{ fontSize: "10px" }}>
-                                  Provider globally disabled
-                                </Badge>
+                                <span
+                                  style={{
+                                    backgroundColor: "#fef3c7",
+                                    color: "#92400e",
+                                    padding: "1px 6px",
+                                    borderRadius: "4px",
+                                    fontSize: "10px",
+                                    marginLeft: "6px",
+                                  }}
+                                >
+                                  Globally disabled
+                                </span>
                               )}
-                            </div>
+                            </span>
                           </div>
                         </div>
 
-                        {/* Actions: Move Up, Move Down, Deactivate */}
-                        <div className="d-flex align-items-center gap-1">
-                          <Button
-                            size="sm"
-                            color="light"
-                            className="btn-icon btn-white"
+                        {/* Card Buttons */}
+                        <div className="pm-card-actions">
+                          <button
+                            type="button"
+                            className="pm-btn-icon"
                             onClick={() => moveUp(index)}
                             disabled={index === 0}
                             title="Move Priority Up"
                           >
-                            <Icon name="arrow-up" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            color="light"
-                            className="btn-icon btn-white"
+                            ▲
+                          </button>
+                          <button
+                            type="button"
+                            className="pm-btn-icon"
                             onClick={() => moveDown(index)}
                             disabled={index === activeProviders.length - 1}
                             title="Move Priority Down"
                           >
-                            <Icon name="arrow-down" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            color="danger"
-                            outline
-                            className="ms-2"
+                            ▼
+                          </button>
+                          <button
+                            type="button"
+                            className="pm-btn-deactivate"
                             onClick={() => handleDeactivate(provider)}
-                            title="Deactivate Provider"
+                            style={{ marginLeft: "6px" }}
                           >
-                            <Icon name="cross" />
-                            <span className="d-none d-sm-inline ms-1 fs-11px">Deactivate</span>
-                          </Button>
+                            ✕ Deactivate
+                          </button>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               )}
-            </div>
 
-            {/* Inactive Providers Section */}
-            {inactiveProviders.length > 0 && (
-              <div>
-                <span className="fw-bold fs-13px text-muted d-block mb-2">
-                  Available Inactive Providers ({inactiveProviders.length})
-                </span>
-                <div className="d-flex flex-column gap-2">
-                  {inactiveProviders.map((provider) => (
-                    <div
-                      key={provider.providerId}
-                      className="d-flex align-items-center justify-content-between p-2 px-3 rounded border bg-light text-muted"
-                      style={{ opacity: 0.85 }}
-                    >
-                      <div className="d-flex align-items-center gap-2">
-                        <Badge color="light" className="badge-dim text-secondary" style={{ fontSize: "11px" }}>
-                          Inactive
-                        </Badge>
-                        <span className="fw-medium fs-13px text-dark">{provider.name}</span>
-                        <code className="fs-11px">({provider.code})</code>
-                      </div>
-                      <Button
-                        size="sm"
-                        color="primary"
-                        outline
-                        onClick={() => handleActivate(provider)}
+              {/* Section 2: Inactive Providers */}
+              {inactiveProviders.length > 0 && (
+                <div>
+                  <div className="pm-modal-section-title" style={{ color: "#4b5563" }}>
+                    <span>Available Inactive Providers ({inactiveProviders.length})</span>
+                  </div>
+                  <div className="pm-modal-list">
+                    {inactiveProviders.map((provider) => (
+                      <div
+                        key={provider.providerId}
+                        className="pm-provider-card-inactive"
                       >
-                        <Icon name="plus" />
-                        <span className="ms-1 fs-11px">Activate as Fallback</span>
-                      </Button>
-                    </div>
-                  ))}
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span className="pm-rank-tag pm-rank-tag-inactive">
+                            Inactive
+                          </span>
+                          <span style={{ fontWeight: 600, fontSize: "13px", color: "#1f2937" }}>
+                            {provider.name}
+                          </span>
+                          <code style={{ fontSize: "11px", color: "#6b7280" }}>
+                            ({provider.code})
+                          </code>
+                        </div>
+                        <button
+                          type="button"
+                          className="pm-btn-activate"
+                          onClick={() => handleActivate(provider)}
+                        >
+                          + Activate as Fallback
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
 
-        {/* Footer */}
-        <div className="d-flex align-items-center justify-content-between pt-3 border-top mt-4">
-          <Button color="light" onClick={toggle} disabled={isSaving}>
+        {/* Sticky Footer */}
+        <div className="pm-modal-footer">
+          <button
+            type="button"
+            className="pm-btn pm-btn-light"
+            onClick={toggle}
+            disabled={isSaving}
+          >
             Cancel
-          </Button>
-          <Button
-            color="primary"
+          </button>
+          <button
+            type="button"
+            className="pm-btn pm-btn-primary"
             onClick={handleSave}
             disabled={isSaving || isLoading}
-            className="d-flex align-items-center gap-2"
           >
             {isSaving ? (
               <>
-                <Spinner size="sm" />
+                <span className="pm-spinner"></span>
                 <span>Saving Routing...</span>
               </>
             ) : (
-              <>
-                <Icon name="check" />
-                <span>Save Routing Configuration</span>
-              </>
+              <span>✓ Save Routing Configuration</span>
             )}
-          </Button>
+          </button>
         </div>
-      </ModalBody>
-    </Modal>
+      </div>
+    </div>
   );
-};
-
-export const ConfigureRoutingModal = (props) => {
-  if (!props.isOpen || !props.serviceType) {
-    return null;
-  }
-  return <ConfigureRoutingModalContent {...props} />;
 };
 
 export default ConfigureRoutingModal;

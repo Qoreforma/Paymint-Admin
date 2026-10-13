@@ -147,8 +147,8 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
   const selectedIds = new Set(fallbackChain.map((item) => item._id));
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} className="modal-dialog-centered" size="lg">
-      <ModalBody className="bg-white rounded p-4">
+    <Modal isOpen={isOpen} toggle={toggle} className="modal-dialog-centered modal-dialog-scrollable" size="lg">
+      <ModalBody className="bg-white rounded p-4" style={{ maxHeight: "88vh", overflowY: "auto" }}>
         {/* Header */}
         <div className="d-flex align-items-center justify-content-between pb-3 border-bottom mb-3">
           <div>

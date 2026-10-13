@@ -35,6 +35,7 @@ import SortToolTip from "../tables/SortTooltip";
 import Search from "../tables/Search";
 import LoadingSpinner from "../../../components/spinner";
 import ConfigureRoutingModal from "./modals/configure-routing-modal";
+import "./service-types.css";
 
 const ServicesTypes = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -282,20 +283,20 @@ const ServicesTypes = () => {
               </div>
             </div>
             <div className="card-inner-group">
-              <div className="card-inner p-0">
+              <div className="card-inner p-0" style={{ overflowX: "auto" }}>
                 {isLoading ? (
                   <LoadingSpinner />
                 ) : serviceTypes?.data?.length > 0 ? (
                   <>
-                    <DataTableBody className="is-compact">
+                    <DataTableBody>
                       <DataTableHead className="tb-tnx-head bg-white fw-bold text-secondary">
-                        <DataTableRow>
+                        <DataTableRow className="st-table-cell">
                           <span className="tb-tnx-head bg-white text-secondary">Name</span>
                         </DataTableRow>
-                        <DataTableRow>
+                        <DataTableRow className="st-table-cell">
                           <span className="tb-tnx-head bg-white text-secondary">Status</span>
                         </DataTableRow>
-                        <DataTableRow size="md">
+                        <DataTableRow className="st-table-cell">
                           <span className="tb-tnx-head bg-white text-secondary">Active Providers (Fallback Order)</span>
                         </DataTableRow>
 
@@ -318,14 +319,14 @@ const ServicesTypes = () => {
                       </DataTableHead>
                       {serviceTypes?.data?.map((item, idx) => {
                         return (
-                          <DataTableItem key={item.id} className="text-secondary">
-                            <DataTableRow>
+                          <DataTableItem key={item.id} className="text-secondary st-table-row">
+                            <DataTableRow className="st-table-cell">
                               <span className="tb-product">
                                 <span className="title ccap">{item.name}</span>
                               </span>
                             </DataTableRow>
 
-                            <DataTableRow>
+                            <DataTableRow className="st-table-cell">
                               <Badge
                                 className="badge-sm badge-dot has-bg d-sm-inline-flex"
                                 color={statusColor(item.status)}
@@ -334,30 +335,50 @@ const ServicesTypes = () => {
                               </Badge>
                             </DataTableRow>
 
-                            <DataTableRow size="md">
+                            <DataTableRow className="st-table-cell">
                               {item.activeProviders && item.activeProviders.length > 0 ? (
-                                <div className="d-flex flex-wrap gap-1 align-items-center">
-                                  {item.activeProviders.map((p, pIdx) => (
-                                    <Badge
-                                      key={p._id || pIdx}
-                                      color={p.priority === 1 ? "success" : "info"}
-                                      className="badge-dim"
-                                      style={{ fontSize: "11px", padding: "4px 8px" }}
-                                      title={p.priority === 1 ? "Primary Vendor (#1)" : `Fallback Vendor (#${p.priority})`}
-                                    >
-                                      {p.priority === 1 ? "🥇 " : `#${p.priority} `}
-                                      {p.name}
-                                    </Badge>
-                                  ))}
+                                <div
+                                  className="st-providers-wrap st-providers-clickable"
+                                  title="Click to configure provider routing & fallback order"
+                                  onClick={() => {
+                                    setSelectedServiceType(item);
+                                    setIsRoutingModalOpen(true);
+                                  }}
+                                >
+                                  {item.activeProviders.map((p, pIdx) => {
+                                    const isPrimary = pIdx === 0;
+                                    const rank = p.priority || pIdx + 1;
+                                    return (
+                                      <span
+                                        key={p._id || pIdx}
+                                        className={`st-provider-pill ${
+                                          isPrimary ? "st-provider-pill-primary" : "st-provider-pill-fallback"
+                                        }`}
+                                        title={isPrimary ? "Primary Vendor (#1)" : `Fallback Vendor (#${rank})`}
+                                      >
+                                        <span>{isPrimary ? "🥇" : `#${rank}`}</span>
+                                        <span>{p.name}</span>
+                                      </span>
+                                    );
+                                  })}
                                 </div>
                               ) : (
-                                <Badge color="light" className="badge-dim text-muted" style={{ fontSize: "11px" }}>
-                                  No Active Providers
-                                </Badge>
+                                <div
+                                  className="st-providers-wrap st-providers-clickable"
+                                  title="Click to configure provider routing"
+                                  onClick={() => {
+                                    setSelectedServiceType(item);
+                                    setIsRoutingModalOpen(true);
+                                  }}
+                                >
+                                  <span className="st-provider-pill st-provider-pill-empty">
+                                    ⚠️ No Active Providers (Click to configure)
+                                  </span>
+                                </div>
                               )}
                             </DataTableRow>
 
-                            <DataTableRow className="nk-tb-col-tools">
+                            <DataTableRow className="nk-tb-col-tools st-table-cell">
                               <ul className="nk-tb-actions gx-1 my-n1">
                                 <li>
                                   <UncontrolledDropdown>
