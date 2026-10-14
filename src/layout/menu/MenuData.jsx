@@ -13,8 +13,19 @@ const menu = [
   {
     icon: "pie",
     text: "Analytics",
-    link: "/analytics",
     permission: "all",
+    subMenu: [
+      {
+        text: "Service Comparison",
+        link: "/analytics",
+        permission: "all",
+      },
+      {
+        text: "Cohort Retention",
+        link: "/analytics/cohorts",
+        permission: "all",
+      },
+    ],
   },
   {
     icon: "invest",

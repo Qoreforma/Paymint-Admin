@@ -24,3 +24,30 @@ export const useGetServiceComparison = (filters = {}) => {
     }
   );
 };
+
+export const useGetCohortAnalytics = (filters = {}) => {
+  return useQuery(
+    ["cohort-analytics", filters],
+    async () => {
+      const params = new URLSearchParams();
+      if (filters.period) params.append("period", filters.period);
+      if (filters.metric) params.append("metric", filters.metric);
+      if (filters.weeks) params.append("weeks", filters.weeks);
+      if (filters.months) params.append("months", filters.months);
+      if (filters.userType) params.append("userType", filters.userType);
+      if (filters.channel) params.append("channel", filters.channel);
+      if (filters.refresh) params.append("refresh", "true");
+
+      const queryString = params.toString();
+      const endpoint = `${BACKEND_URLS.analytics}/cohorts${queryString ? `?${queryString}` : ""}`;
+
+      const res = await requests.get(endpoint);
+      return res;
+    },
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+};
+

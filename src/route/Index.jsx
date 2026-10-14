@@ -6,6 +6,7 @@ import EcomProducts from "../pages/main/dashboard/product/ProductList";
 // import EcomSettings from "../pages/main/dashboard/settings/Settings";
 import EcomDashboard from "../pages/main/dashboard/index";
 import ServiceComparison from "../pages/main/dashboard/analytics/ServiceComparison";
+import CohortRetention from "../pages/main/dashboard/analytics/CohortRetention";
 import TreasuryDashboard from "../pages/main/dashboard/treasury/TreasuryDashboard";
 import ProductDetailPage from "../pages/main/dashboard/product/ProductDetail";
 import EcomStores from "../pages/main/dashboard/stores/StoreList";
@@ -124,6 +125,8 @@ const routes = (
         <Route path={`/`} element={<Layout />}>
           <Route index element={<EcomDashboard />}></Route>
           <Route path="analytics" element={<ServiceComparison />}></Route>
+          <Route path="analytics/cohorts" element={<CohortRetention />}></Route>
+          <Route path="cohorts" element={<CohortRetention />}></Route>
           <Route path="treasury" element={<TreasuryDashboard />}></Route>
           <Route path="orders">
             <Route path="general" element={<EcomOrder />} />
