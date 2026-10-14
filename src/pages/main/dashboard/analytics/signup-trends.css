@@ -1,0 +1,387 @@
+/* ============================================================
+   PAYMINT SIGNUP TRENDS DASHBOARD STYLES
+   Prefix: sut- (Signup Trends)
+   ============================================================ */
+
+.sut-wrapper {
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 80px;
+}
+
+/* ── HEADER BLOCK ─────────────────────────────────────────── */
+.sut-header-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.sut-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.3px;
+}
+
+.sut-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.sut-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sut-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.sut-btn-outline {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.sut-btn-outline:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.sut-btn-export {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.sut-btn-export:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #64748b;
+  color: #0f172a;
+}
+
+.sut-btn-export-excel {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.sut-btn-export-excel:hover:not(:disabled) {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+  color: #047857;
+}
+
+.sut-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── KPI GRID ─────────────────────────────────────────────── */
+.sut-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1100px) {
+  .sut-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .sut-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sut-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sut-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sut-kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.sut-kpi-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.sut-kpi-icon-primary {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.sut-kpi-icon-success {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.sut-kpi-icon-info {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.sut-kpi-icon-warning {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.sut-kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  line-height: 1.1;
+}
+
+.sut-kpi-subtext {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sut-badge-positive {
+  color: #059669;
+  font-weight: 600;
+  background: #d1fae5;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.sut-badge-negative {
+  color: #dc2626;
+  font-weight: 600;
+  background: #fee2e2;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ── TOOLBAR / CONTROLS ───────────────────────────────────── */
+.sut-toolbar-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sut-control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sut-segmented {
+  display: inline-flex;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.sut-segmented-btn {
+  border: none;
+  background: transparent;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+}
+
+.sut-segmented-btn:hover:not(.active) {
+  color: #0f172a;
+}
+
+.sut-segmented-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.sut-toggle-compare {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  padding: 6px 12px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease-in-out;
+}
+
+.sut-toggle-compare.active {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+/* ── CHART & TABLE CARDS ──────────────────────────────────── */
+.sut-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.sut-card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sut-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.sut-card-subtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.sut-chart-container {
+  padding: 20px;
+  height: 380px;
+  position: relative;
+}
+
+/* ── TABLE STYLES ─────────────────────────────────────────── */
+.sut-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.sut-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.sut-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.sut-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.sut-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.sut-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.sut-cum-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sut-bar-bg {
+  width: 80px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sut-bar-fill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 3px;
+}

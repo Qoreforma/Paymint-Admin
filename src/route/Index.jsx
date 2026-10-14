@@ -7,6 +7,8 @@ import EcomProducts from "../pages/main/dashboard/product/ProductList";
 import EcomDashboard from "../pages/main/dashboard/index";
 import ServiceComparison from "../pages/main/dashboard/analytics/ServiceComparison";
 import CohortRetention from "../pages/main/dashboard/analytics/CohortRetention";
+import SignupTrends from "../pages/main/dashboard/analytics/SignupTrends";
+import UserActivity from "../pages/main/dashboard/analytics/UserActivity";
 import TreasuryDashboard from "../pages/main/dashboard/treasury/TreasuryDashboard";
 import ProductDetailPage from "../pages/main/dashboard/product/ProductDetail";
 import EcomStores from "../pages/main/dashboard/stores/StoreList";
@@ -127,6 +129,8 @@ const routes = (
           <Route path="analytics" element={<ServiceComparison />}></Route>
           <Route path="analytics/cohorts" element={<CohortRetention />}></Route>
           <Route path="cohorts" element={<CohortRetention />}></Route>
+          <Route path="analytics/signup-trends" element={<SignupTrends />}></Route>
+          <Route path="analytics/user-activity" element={<UserActivity />}></Route>
           <Route path="treasury" element={<TreasuryDashboard />}></Route>
           <Route path="orders">
             <Route path="general" element={<EcomOrder />} />

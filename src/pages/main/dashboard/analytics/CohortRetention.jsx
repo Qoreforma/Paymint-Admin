@@ -206,23 +206,23 @@ const CohortRetention = () => {
             onClick={() => refetch()}
             disabled={isFetching}
           >
-            <span>{isFetching ? "Refreshing..." : "Refresh"}</span>
+            <span>{isFetching ? "Refreshing..." : "🔄 Refresh"}</span>
           </button>
           <button
             type="button"
-            className="chr-btn chr-btn-outline"
+            className="chr-btn chr-btn-export"
             onClick={() => handleExport("csv")}
             disabled={isExporting || isLoading || !cohortData}
           >
-            <span>Export CSV</span>
+            <span>📥 Export CSV</span>
           </button>
           <button
             type="button"
-            className="chr-btn chr-btn-success"
+            className="chr-btn chr-btn-export-excel"
             onClick={() => handleExport("xls")}
             disabled={isExporting || isLoading || !cohortData}
           >
-            <span>Export Excel</span>
+            <span>📊 Export Excel</span>
           </button>
         </div>
       </div>
@@ -355,6 +355,28 @@ const CohortRetention = () => {
               </option>
             ))}
           </select>
+
+          {/* Quick Export in Toolbar */}
+          <div className="chr-toolbar-export-group">
+            <button
+              type="button"
+              className="chr-btn chr-btn-export"
+              onClick={() => handleExport("csv")}
+              disabled={isExporting || isLoading || !cohortData}
+              title="Download cohort matrix as CSV"
+            >
+              <span>📥 Export CSV</span>
+            </button>
+            <button
+              type="button"
+              className="chr-btn chr-btn-export-excel"
+              onClick={() => handleExport("xls")}
+              disabled={isExporting || isLoading || !cohortData}
+              title="Download cohort matrix as Excel"
+            >
+              <span>📊 Export Excel</span>
+            </button>
+          </div>
         </div>
       </div>
 

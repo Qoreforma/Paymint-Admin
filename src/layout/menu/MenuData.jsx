@@ -25,6 +25,16 @@ const menu = [
         link: "/analytics/cohorts",
         permission: "all",
       },
+      {
+        text: "Signup Trends",
+        link: "/analytics/signup-trends",
+        permission: "all",
+      },
+      {
+        text: "User Activity",
+        link: "/analytics/user-activity",
+        permission: "all",
+      },
     ],
   },
   {

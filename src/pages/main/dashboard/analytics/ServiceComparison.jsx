@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card } from "reactstrap";
+import exportFromJSON from "export-from-json";
 import {
   Block,
   BlockBetween,
@@ -9,6 +10,7 @@ import {
   BlockTitle,
   Col,
   Row,
+  Icon,
 } from "../../../../components/Component";
 import Content from "../../../../layout/content/Content";
 import Head from "../../../../layout/head/Head";
@@ -68,6 +70,28 @@ const ServiceComparison = () => {
   if (isLoading) return <LoadingSpinner />;
 
   const stats = response?.data?.data || { services: [], providers: [], providersPerService: [] };
+
+  const handleExport = (exportFormat = "csv") => {
+    if (!stats?.providersPerService?.length) return;
+    const fileName = `paymint-service-comparison-${period || "custom"}-${new Date().toISOString().split("T")[0]}`;
+    const exportData = [];
+
+    stats.providersPerService.forEach((group) => {
+      group.providers.forEach((provider) => {
+        exportData.push({
+          "Service": (group.service || "").replaceAll("_", " "),
+          "Provider": provider.name || "",
+          "Transaction Count": provider.count || 0,
+          "Total Volume (NGN)": provider.volume || 0,
+          "Total Profit (NGN)": provider.profit || 0,
+          "Profit Margin (%)": Number((provider.profitMargin || 0).toFixed(2)),
+        });
+      });
+    });
+
+    const exportType = exportFormat === "xls" ? exportFromJSON.types.xls : exportFromJSON.types.csv;
+    exportFromJSON({ data: exportData, fileName, exportType });
+  };
 
   // Data for Service Comparison Pie Chart (By Volume)
   const servicePieData = {
@@ -138,6 +162,30 @@ const ServiceComparison = () => {
                         }}
                       />
                     </li>
+                    <li>
+                      <div className="btn-group">
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-light d-flex align-items-center gap-1"
+                          onClick={() => handleExport("csv")}
+                          disabled={!stats.providersPerService?.length}
+                          title="Export Breakdown as CSV"
+                        >
+                          <Icon name="download-cloud" />
+                          <span>CSV</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-light d-flex align-items-center gap-1"
+                          onClick={() => handleExport("xls")}
+                          disabled={!stats.providersPerService?.length}
+                          title="Export Breakdown as Excel"
+                        >
+                          <Icon name="file-excel" />
+                          <span>Excel</span>
+                        </button>
+                      </div>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -185,6 +233,17 @@ const ServiceComparison = () => {
               <div className="card-title-group">
                 <div className="card-title">
                   <h6 className="title">Detailed Breakdown by Service & Provider</h6>
+                </div>
+                <div className="card-tools">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                    onClick={() => handleExport("csv")}
+                    disabled={!stats.providersPerService?.length}
+                  >
+                    <Icon name="download-cloud" />
+                    <span>Export Breakdown</span>
+                  </button>
                 </div>
               </div>
             </div>
