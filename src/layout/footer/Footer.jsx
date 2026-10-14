@@ -10,7 +10,7 @@ const Footer = () => {
       right: 0,
       zIndex: 1000,
       marginTop: 20,
-      width: "80%",
+      width: "100%",
     }}>
       <div className="container wide-lg" style={{
 
