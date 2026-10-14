@@ -300,6 +300,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
     isHot: false,
     isActive: true,
     allowBelowCost: false,
+    isFallbackAvailable: true,
   });
 
   // Sync state when product opens
@@ -319,6 +320,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
         isHot: !!product.isHot,
         isActive: product.isActive !== false,
         allowBelowCost: !!product.allowBelowCost,
+        isFallbackAvailable: product.isFallbackAvailable !== false,
       });
     }
   }, [product]);
@@ -356,6 +358,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
       isHot: formData.isHot,
       isActive: formData.isActive,
       allowBelowCost: formData.allowBelowCost,
+      isFallbackAvailable: formData.isFallbackAvailable,
     };
 
     if (isDataProduct) {
@@ -386,11 +389,19 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg" centered>
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          maxHeight: "90vh",
+          margin: 0,
+        }}
+      >
         <div
-          className="d-flex align-items-center justify-content-between border-bottom"
+          className="d-flex align-items-center justify-content-between border-bottom flex-shrink-0"
           style={{
-            padding: "24px 28px 18px 28px",
+            padding: "20px 28px",
             background: "#ffffff",
             borderTopLeftRadius: "12px",
             borderTopRightRadius: "12px",
@@ -413,7 +424,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
           />
         </div>
 
-        <ModalBody style={{ padding: "24px 28px 28px 28px" }}>
+        <ModalBody style={{ padding: "20px 28px 24px 28px", overflowY: "auto", flex: "1 1 auto" }}>
           <div className="row g-3">
             {/* Name */}
             <div className="col-md-6">
@@ -604,7 +615,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                   checked={formData.isHot}
                   onChange={handleChange}
                 />
-                <label className="custom-control-label fw-bold text-dark" htmlFor="edit-is-hot">
+                <label className="custom-control-label fw-bold text-dark" htmlFor="edit-is-hot" style={{ cursor: "pointer" }}>
                   🔥 Mark as Hot Product
                 </label>
               </div>
@@ -620,16 +631,55 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
                   checked={formData.isActive}
                   onChange={handleChange}
                 />
-                <label className="custom-control-label fw-bold text-dark" htmlFor="edit-is-active">
-                  Product Active Status
+                <label className="custom-control-label fw-bold text-dark" htmlFor="edit-is-active" style={{ cursor: "pointer" }}>
+                  Product Active Status (Storefront)
                 </label>
+              </div>
+            </div>
+
+            {/* Fallback Availability Switch Card */}
+            <div className="col-12">
+              <div
+                className="rounded border d-flex align-items-center justify-content-between p-3 mt-2"
+                style={{
+                  background: formData.isFallbackAvailable ? "#f0fdf4" : "#fef2f2",
+                  borderColor: formData.isFallbackAvailable ? "#bbf7d0" : "#fecaca",
+                }}
+              >
+                <div className="pe-3" style={{ flex: 1 }}>
+                  <label
+                    className="fw-bold text-dark d-block mb-1"
+                    htmlFor="edit-is-fallback-available"
+                    style={{ fontSize: "0.875rem", cursor: "pointer" }}
+                  >
+                    🔄 Eligible as Fallback for Other Products
+                  </label>
+                  <div className="text-muted small">
+                    When enabled, other products can use this product as an automatic backup fallback. When disabled, other products will skip this product in their fallback chains.
+                  </div>
+                </div>
+                <div className="custom-control custom-switch flex-shrink-0" style={{ margin: 0, paddingLeft: "2.75rem" }}>
+                  <input
+                    type="checkbox"
+                    className="custom-control-input"
+                    id="edit-is-fallback-available"
+                    name="isFallbackAvailable"
+                    checked={formData.isFallbackAvailable}
+                    onChange={handleChange}
+                  />
+                  <label
+                    className="custom-control-label"
+                    htmlFor="edit-is-fallback-available"
+                    style={{ cursor: "pointer" }}
+                  />
+                </div>
               </div>
             </div>
 
             {/* Allow Selling Below Cost Switch */}
             <div className="col-12">
               <div
-                className="rounded border d-flex align-items-center justify-content-between p-3 mt-2"
+                className="rounded border d-flex align-items-center justify-content-between p-3 mt-1"
                 style={{
                   background: formData.allowBelowCost ? "#fffbeb" : "#f8fafc",
                   borderColor: formData.allowBelowCost ? "#fde68a" : "#e2e8f0",
@@ -668,7 +718,7 @@ const ProductEditModal = ({ isOpen, toggle, product }) => {
         </ModalBody>
 
         <div
-          className="d-flex align-items-center justify-content-end gap-2 border-top"
+          className="d-flex align-items-center justify-content-end gap-2 border-top flex-shrink-0"
           style={{
             padding: "16px 28px",
             background: "#f8fafc",

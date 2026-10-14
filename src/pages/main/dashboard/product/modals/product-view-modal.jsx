@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import NoIcon from "../../../../../images/no-image-icon.png";
 import { formatter } from "../../../../../utils/Utils";
+import { useToggleProductFallbackAvailability } from "../../../../../api/product/products";
 import "./product-view-modal.css";
 
 const ProductViewModal = ({
@@ -12,6 +13,30 @@ const ProductViewModal = ({
   onAddToFallback,
   isInFallbackChain = false,
 }) => {
+  const toggleFallback = useToggleProductFallbackAvailability(
+    product?._id || product?.id
+  );
+
+  const [isFallbackAvailable, setIsFallbackAvailable] = useState(
+    product?.isFallbackAvailable !== false
+  );
+
+  useEffect(() => {
+    if (product) {
+      setIsFallbackAvailable(product.isFallbackAvailable !== false);
+    }
+  }, [product]);
+
+  const handleToggleFallback = (e) => {
+    const nextVal = e.target.checked;
+    setIsFallbackAvailable(nextVal);
+    toggleFallback.mutate(nextVal, {
+      onError: () => {
+        setIsFallbackAvailable(!nextVal);
+      },
+    });
+  };
+
   // Lock body scroll while open and restore cleanly on unmount / close
   useEffect(() => {
     if (isOpen) {
@@ -139,6 +164,18 @@ const ProductViewModal = ({
                 Provider: {providerName}
               </span>
             )}
+
+            <span
+              className="pvm-badge"
+              style={{
+                backgroundColor: isFallbackAvailable ? "#f0fdf4" : "#fef2f2",
+                color: isFallbackAvailable ? "#166534" : "#991b1b",
+                border: `1px solid ${isFallbackAvailable ? "#bbf7d0" : "#fecaca"}`,
+                fontWeight: 600,
+              }}
+            >
+              {isFallbackAvailable ? "🔄 Fallback: Eligible" : "🚫 Fallback: Disabled"}
+            </span>
           </div>
 
           {/* Pricing & Financials Grid */}
@@ -298,6 +335,46 @@ const ProductViewModal = ({
                   ✓ In Active Chain
                 </span>
               )}
+            </div>
+
+            {/* Quick Toggle: Fallback Eligibility */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "10px 14px",
+                backgroundColor: "#ffffff",
+                borderRadius: "8px",
+                border: "1px solid #e2e8f0",
+                marginTop: "12px",
+              }}
+            >
+              <div style={{ flex: 1, paddingRight: "12px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b", display: "block", marginBottom: "2px" }}>
+                  Eligible as Fallback for Other Products
+                </span>
+                <span style={{ fontSize: "11px", color: "#64748b", lineHeight: 1.3, display: "block" }}>
+                  {isFallbackAvailable
+                    ? "Enabled: Other products can use this product as an automatic backup."
+                    : "Disabled: Other products will skip this product in their fallback cascades."}
+                </span>
+              </div>
+              <div className="custom-control custom-switch flex-shrink-0" style={{ margin: 0, paddingLeft: "2.75rem" }}>
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id={`pvm-toggle-fallback-${product._id || product.id}`}
+                  checked={isFallbackAvailable}
+                  disabled={toggleFallback.isLoading}
+                  onChange={handleToggleFallback}
+                />
+                <label
+                  className="custom-control-label"
+                  htmlFor={`pvm-toggle-fallback-${product._id || product.id}`}
+                  style={{ cursor: "pointer" }}
+                />
+              </div>
             </div>
 
             {fallbackCount > 0 && Array.isArray(product.fallbackProducts) && (
