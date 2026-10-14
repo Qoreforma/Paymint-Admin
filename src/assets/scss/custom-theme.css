@@ -352,14 +352,72 @@
   color: var(--brand-primary) !important;
 }
 
-/* ── FILTER PANEL CARD ──────────────────────────────────── */
+/* ── FILTER PANEL CARD (Flexible Height & Spacing) ──────────────── */
 .filter-panel-card {
   position: relative !important;
   z-index: 25 !important;
   overflow: visible !important;
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+  display: block !important;
+  box-sizing: border-box !important;
 }
 .filter-panel-card .card-body {
   overflow: visible !important;
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  padding: 24px 28px !important;
+}
+.filter-panel-card .filter-chips-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  align-items: center !important;
+  height: auto !important;
+  min-height: auto !important;
+  width: 100% !important;
+}
+.filter-panel-card .filter-chips-container .btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+}
+
+/* ── PRODUCTS TABLE ROW & CELL FLEXIBILITY ─────────────────────── */
+.products-table-card {
+  position: relative !important;
+  z-index: 10 !important;
+  height: auto !important;
+  min-height: auto !important;
+}
+.products-table-card .nk-tb-item {
+  height: auto !important;
+  min-height: 52px !important;
+}
+.products-table-card .nk-tb-col {
+  vertical-align: middle !important;
+  height: auto !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+.products-table-card .prod-service-type-cell {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px !important;
+  min-width: 140px !important;
+  line-height: normal !important;
+}
+.products-table-card .prod-service-type-cell .badge-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 4px 6px !important;
+  line-height: 1.2 !important;
 }
 
 /* ── MODALS ──────────────────────────────────────────────── */

@@ -980,7 +980,7 @@ const ProductList = () => {
               />
             </div>
 
-            {/* ── Filter Panel Card (Spacious internal padding, distinct chip rows) ── */}
+            {/* ── Filter Panel Card (Flexible Height & Spacing) ── */}
             <Card
               className="filter-panel-card mb-4"
               style={{
@@ -990,9 +990,11 @@ const ProductList = () => {
                 position: "relative",
                 zIndex: 30,
                 overflow: "visible",
+                height: "auto",
+                minHeight: "auto",
               }}
             >
-              <div className="card-body p-4 p-xl-5" style={{ overflow: "visible" }}>
+              <div className="card-body" style={{ overflow: "visible", height: "auto", minHeight: "auto" }}>
                 {/* Top Row: Search, Sort & Quick Selects */}
                 <div className="row g-3 align-items-center mb-3">
                   <div className="col-12 col-md-5 col-lg-4">
@@ -1079,9 +1081,8 @@ const ProductList = () => {
                   </div>
                 </div>
 
-                {/* Second Row: Dimension Dropdown Chips & Reset Button */}
-                <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 pt-4 mt-2">
-                  <div className="d-flex flex-wrap gap-2">
+                {/* Second Row: Dimension Dropdown Chips (Flexible wrap container with clean separator) */}
+                <div className="filter-chips-container mt-3 pt-3 border-top" style={{ height: "auto", minHeight: "auto" }}>
                     {/* Provider */}
                     <UncontrolledDropdown>
                       <DropdownToggle
@@ -1313,7 +1314,6 @@ const ProductList = () => {
                         </DropdownItem>
                       </DropdownMenu>
                     </UncontrolledDropdown>
-                  </div>
                 </div>
 
                 {/* Active Filter Pills – Clean Spacious Box without stray horizontal hairline */}
@@ -1720,51 +1720,96 @@ const ProductList = () => {
 
                             {/* Service / Type */}
                             <DataTableRow size="sm">
-                              <div className="d-flex flex-wrap align-items-center gap-1">
-                                {service?.name && (
-                                  <span
-                                    className="badge text-secondary border bg-light"
-                                    style={{ fontSize: 11, fontWeight: 500 }}
-                                  >
-                                    {service.name}
-                                  </span>
-                                )}
-                                {serviceType?.name && (
-                                  <span
-                                    className="badge"
-                                    style={{
-                                      background: "#ede9fe",
-                                      color: "#7c3aed",
-                                      fontSize: 10,
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    {serviceType.name}
-                                  </span>
-                                )}
-                                {(item.attributes?.dataType || item.productType) && (
-                                  <span
-                                    className="badge"
-                                    style={{ background: "#ecfdf5", color: "#059669", fontSize: 10 }}
-                                  >
-                                    {item.attributes?.dataType || item.productType}
-                                  </span>
-                                )}
-                                {(item.category || item.attributes?.category) && (
-                                  <span
-                                    className="badge"
-                                    style={{
-                                      background: "#fef3c7",
-                                      color: "#b45309",
-                                      fontSize: 10,
-                                      fontWeight: 600,
-                                      textTransform: "capitalize",
-                                    }}
-                                  >
-                                    {item.category || item.attributes?.category}
-                                  </span>
-                                )}
-                              </div>
+                              {(() => {
+                                const serviceName = service?.name;
+                                const typeName = serviceType?.name;
+                                const rawDataType = item.attributes?.dataType || item.productType;
+                                // Deduplicate: don't show rawDataType if it matches serviceType or service name
+                                const showDataType =
+                                  rawDataType &&
+                                  (!typeName || rawDataType.trim().toLowerCase() !== typeName.trim().toLowerCase()) &&
+                                  (!serviceName || rawDataType.trim().toLowerCase() !== serviceName.trim().toLowerCase());
+                                const categoryName = item.category || item.attributes?.category;
+                                const showCategory =
+                                  categoryName &&
+                                  (!typeName || categoryName.trim().toLowerCase() !== typeName.trim().toLowerCase()) &&
+                                  (!serviceName || categoryName.trim().toLowerCase() !== serviceName.trim().toLowerCase()) &&
+                                  (!rawDataType || categoryName.trim().toLowerCase() !== rawDataType.trim().toLowerCase());
+
+                                return (
+                                  <div className="prod-service-type-cell" style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start", minWidth: 140 }}>
+                                    {serviceName && (
+                                      <div className="badge-row" style={{ display: "flex", flexWrap: "wrap", gap: "4px 6px", alignItems: "center" }}>
+                                        <span
+                                          className="badge text-secondary border bg-light"
+                                          style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 6, lineHeight: 1.2, display: "inline-flex", alignItems: "center" }}
+                                        >
+                                          {serviceName}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {(typeName || showDataType || showCategory) && (
+                                      <div className="badge-row" style={{ display: "flex", flexWrap: "wrap", gap: "4px 6px", alignItems: "center" }}>
+                                        {typeName && (
+                                          <span
+                                            className="badge"
+                                            style={{
+                                              background: "#ede9fe",
+                                              color: "#7c3aed",
+                                              fontSize: 10,
+                                              fontWeight: 600,
+                                              padding: "3px 8px",
+                                              borderRadius: 6,
+                                              lineHeight: 1.2,
+                                              display: "inline-flex",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            {typeName}
+                                          </span>
+                                        )}
+                                        {showDataType && (
+                                          <span
+                                            className="badge"
+                                            style={{
+                                              background: "#ecfdf5",
+                                              color: "#059669",
+                                              fontSize: 10,
+                                              fontWeight: 600,
+                                              padding: "3px 8px",
+                                              borderRadius: 6,
+                                              lineHeight: 1.2,
+                                              display: "inline-flex",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            {rawDataType}
+                                          </span>
+                                        )}
+                                        {showCategory && (
+                                          <span
+                                            className="badge"
+                                            style={{
+                                              background: "#fef3c7",
+                                              color: "#b45309",
+                                              fontSize: 10,
+                                              fontWeight: 600,
+                                              textTransform: "capitalize",
+                                              padding: "3px 8px",
+                                              borderRadius: 6,
+                                              lineHeight: 1.2,
+                                              display: "inline-flex",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            {categoryName}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
                             </DataTableRow>
 
                             {/* Provider */}

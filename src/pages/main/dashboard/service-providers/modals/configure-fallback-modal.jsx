@@ -111,6 +111,11 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
     product?.attributes?.validityPeriod ||
     candidateData?.primaryProduct?.validity ||
     "";
+  const primaryDataSize =
+    product?.dataSizeDisplay ||
+    candidateData?.primaryProduct?.dataSizeDisplay ||
+    product?.attributes?.dataSizeDisplay ||
+    "";
 
   // Add candidate to chain
   const addCandidate = (candidate) => {
@@ -421,6 +426,7 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
                   </h6>
                   <span className="pfm-section-hint">
                     Products matching {formatter("NGN").format(primaryAmount)} (±{Math.round(tolerance * 100)}%)
+                    {primaryDataSize ? ` • Size: ${primaryDataSize}` : ""}
                     {primaryValidity ? ` • Duration: ${primaryValidity}` : ""}
                   </span>
                 </div>
@@ -458,6 +464,7 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
               <div className="pfm-empty-box" style={{ padding: "16px" }}>
                 <div className="pfm-empty-text">
                   No matching products found under this service within ±{Math.round(tolerance * 100)}% price
+                  {primaryDataSize ? ` with matching data size (${primaryDataSize})` : ""}
                   {primaryValidity ? ` and matching duration (${primaryValidity})` : ""}.
                 </div>
               </div>
@@ -484,6 +491,15 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
                           <span className="pfm-provider-tag">
                             {cand.providerId?.name || cand.providerId?.code || "Provider"}
                           </span>
+                          {(cand.dataSizeDisplay || cand.attributes?.dataSizeDisplay) && (
+                            <span
+                              className="pfm-validity-tag"
+                              style={{ background: "#e0e7ff", color: "#3730a3", fontWeight: 600 }}
+                              title="Data size"
+                            >
+                              {cand.dataSizeDisplay || cand.attributes?.dataSizeDisplay}
+                            </span>
+                          )}
                           {candValidity && (
                             <span className="pfm-validity-tag" title="Validity duration">
                               {candValidity}
