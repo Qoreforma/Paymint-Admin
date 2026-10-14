@@ -240,11 +240,12 @@ export const useDeleteProduct = (id) => {
 };
 
 // ─── Fallback Management Hooks ───────────────────────────────────────────
-export const useGetProductFallbackCandidates = (productId) => {
+export const useGetProductFallbackCandidates = (productId, tolerance) => {
   return useQuery(
-    ["productFallbackCandidates", productId],
+    ["productFallbackCandidates", productId, tolerance],
     async () => {
-      const res = await instance.get(`${BACKEND_URLS.product}/${productId}/fallback-candidates`);
+      const params = tolerance !== undefined ? { tolerance } : {};
+      const res = await instance.get(`${BACKEND_URLS.product}/${productId}/fallback-candidates`, { params });
       return res?.data?.data || res?.data;
     },
     {

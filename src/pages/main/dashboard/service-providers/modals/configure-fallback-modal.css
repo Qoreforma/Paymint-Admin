@@ -615,6 +615,95 @@
   color: #1e40af;
 }
 
+/* ── Tolerance Selector Pills ─────────────────────────────────────────── */
+.pfm-tolerance-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pfm-tolerance-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.pfm-tolerance-pills {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 2px;
+  border-radius: 7px;
+  border: 1px solid #e2e8f0;
+  gap: 2px;
+}
+
+.pfm-tolerance-pill {
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.2;
+}
+
+.pfm-tolerance-pill:hover {
+  color: #0f172a;
+}
+
+.pfm-tolerance-pill.active {
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ── View Product Button in Candidates List ───────────────────────────── */
+.pfm-view-btn {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.pfm-view-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.pfm-validity-tag {
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid #ddd6fe;
+  margin-left: 4px;
+}
+
+.pfm-candidate-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 /* ── Modal Footer (Pinned at Bottom) ───────────────────────────────────── */
 .pfm-footer {
   padding: 14px 22px;

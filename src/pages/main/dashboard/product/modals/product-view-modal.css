@@ -1,0 +1,466 @@
+/* ==========================================================================
+   Product View Modal Styling
+   Pure HTML Tags, Scoped Custom Classes, 100% Non-Overlapping Vanilla CSS
+   ========================================================================== */
+
+.pvm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(3px);
+  z-index: 100001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: pvmFadeIn 0.15s ease-out;
+  box-sizing: border-box;
+}
+
+@keyframes pvmFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pvm-card {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: pvmScaleIn 0.15s ease-out;
+}
+
+@keyframes pvmScaleIn {
+  from { transform: scale(0.97); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ── Modal Header (Pinned at Top) ──────────────────────────────────────── */
+.pvm-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.pvm-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.pvm-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.pvm-title-wrap {
+  min-width: 0;
+}
+
+.pvm-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.pvm-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pvm-code-badge {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  border: 1px solid #e2e8f0;
+}
+
+.pvm-close-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.pvm-close-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ── Modal Body (Scrollable) ───────────────────────────────────────────── */
+.pvm-body {
+  padding: 22px 24px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.pvm-body::-webkit-scrollbar {
+  width: 6px;
+}
+.pvm-body::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+.pvm-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.pvm-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ── Badges Row ────────────────────────────────────────────────────────── */
+.pvm-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pvm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  line-height: 1.2;
+}
+
+.pvm-badge-active {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.pvm-badge-inactive {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.pvm-badge-hot {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.pvm-badge-service {
+  background-color: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+.pvm-badge-type {
+  background-color: #ede9fe;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+
+.pvm-badge-provider {
+  background-color: #f0fdfa;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+}
+
+/* ── Financial Cards ───────────────────────────────────────────────────── */
+.pvm-financials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 580px) {
+  .pvm-financials-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pvm-fin-card {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pvm-fin-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.pvm-fin-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pvm-fin-profit {
+  color: #059669;
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.pvm-fin-loss {
+  color: #d97706;
+  background-color: #fffbeb;
+  border-color: #fde68a;
+}
+
+/* ── Product Attributes Section ────────────────────────────────────────── */
+.pvm-section-title {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pvm-attrs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 16px;
+}
+
+@media (max-width: 540px) {
+  .pvm-attrs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pvm-attr-item {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pvm-attr-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pvm-attr-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.pvm-desc-item {
+  grid-column: 1 / -1;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* ── Fallback Chain Banner (Zero Overlap) ───────────────────────────────── */
+.pvm-fallback-banner {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.pvm-fb-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pvm-fb-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pvm-fb-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pvm-fb-desc {
+  font-size: 12px;
+  color: #475569;
+}
+
+.pvm-fb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #166534;
+  border: 1px solid #86efac;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.pvm-fb-btn:hover {
+  background-color: #dcfce7;
+  color: #14532d;
+  border-color: #4ade80;
+}
+
+.pvm-fb-chain-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px dashed #bbf7d0;
+}
+
+.pvm-fb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  color: #334155;
+}
+
+.pvm-fb-chip-priority {
+  font-weight: 700;
+  color: #059669;
+}
+
+/* ── Modal Footer (Pinned at Bottom) ───────────────────────────────────── */
+.pvm-footer {
+  padding: 14px 24px;
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.pvm-btn-close {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pvm-btn-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.pvm-btn-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pvm-btn-edit:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.pvm-btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #059669;
+  border: 1px solid #059669;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pvm-btn-add:hover {
+  background: #047857;
+  border-color: #047857;
+}

@@ -4,13 +4,19 @@ import {
   useUpdateProductFallbacks,
 } from "../../../../../api/product/products";
 import { formatter } from "../../../../../utils/Utils";
+import ProductViewModal from "../../product/modals/product-view-modal";
 import "./configure-fallback-modal.css";
 
 const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
   const productId = product?._id || product?.id;
 
+  // Tolerance state (defaults to 10% ±)
+  const [tolerance, setTolerance] = useState(0.10);
+  // Preview product modal state
+  const [previewProduct, setPreviewProduct] = useState(null);
+
   const { data: candidateData, isLoading: loadingCandidates } =
-    useGetProductFallbackCandidates(productId);
+    useGetProductFallbackCandidates(productId, tolerance);
 
   const { mutate: updateFallbacks, isLoading: isSaving } =
     useUpdateProductFallbacks(productId);
@@ -100,6 +106,11 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
   const primaryAmount = Number(product?.amount || 0);
   const primaryCost = Number(product?.providerAmount || 0);
   const primaryProfit = primaryAmount - primaryCost;
+  const primaryValidity =
+    product?.validity ||
+    product?.attributes?.validityPeriod ||
+    candidateData?.primaryProduct?.validity ||
+    "";
 
   // Add candidate to chain
   const addCandidate = (candidate) => {
@@ -301,7 +312,7 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
                         <div className="pfm-item-details">
                           <span className="pfm-item-name">{item.name}</span>
                           <span className="pfm-item-meta">
-                            Provider: <strong>{item.providerName}</strong> • Code: <code>{item.code}</code>
+                            Provider: <strong>{item.providerName}</strong> • Code: <code>{item.code}</code> • SA: <strong>{formatter("NGN").format(item.amount)}</strong>
                           </span>
                         </div>
                       </div>
@@ -336,8 +347,23 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
                           </div>
                         </div>
 
-                        {/* Priority & Delete Controls */}
+                        {/* Priority, Preview & Delete Controls */}
                         <div className="pfm-actions-wrap">
+                          <button
+                            type="button"
+                            className="pfm-icon-btn"
+                            onClick={() => {
+                              const full = candidatesList.find((c) => (c._id || c.id) === item._id) || item;
+                              setPreviewProduct(full);
+                            }}
+                            title="View product details"
+                            aria-label="View product details"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                              <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                          </button>
                           <button
                             type="button"
                             className="pfm-icon-btn"
@@ -388,12 +414,37 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
           {/* Section 4: Eligible Backup Candidates */}
           <div className="pfm-section">
             <div className="pfm-section-header">
-              <h6 className="pfm-section-title">
-                Eligible Backup Candidates (±1% Selling Price)
-              </h6>
-              <span className="pfm-section-hint">
-                Products for this service matching {formatter("NGN").format(primaryAmount)}
-              </span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", flexWrap: "wrap", gap: 8 }}>
+                <div>
+                  <h6 className="pfm-section-title">
+                    Eligible Backup Candidates ({candidatesList.length})
+                  </h6>
+                  <span className="pfm-section-hint">
+                    Products matching {formatter("NGN").format(primaryAmount)} (±{Math.round(tolerance * 100)}%)
+                    {primaryValidity ? ` • Duration: ${primaryValidity}` : ""}
+                  </span>
+                </div>
+
+                <div className="pfm-tolerance-wrap">
+                  <span className="pfm-tolerance-label">Tolerance:</span>
+                  <div className="pfm-tolerance-pills">
+                    {[
+                      { label: "±1%", val: 0.01 },
+                      { label: "±5%", val: 0.05 },
+                      { label: "±10%", val: 0.10 },
+                    ].map((pill) => (
+                      <button
+                        key={pill.val}
+                        type="button"
+                        className={`pfm-tolerance-pill ${tolerance === pill.val ? "active" : ""}`}
+                        onClick={() => setTolerance(pill.val)}
+                      >
+                        {pill.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {loadingCandidates ? (
@@ -406,7 +457,8 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
             ) : candidatesList.length === 0 ? (
               <div className="pfm-empty-box" style={{ padding: "16px" }}>
                 <div className="pfm-empty-text">
-                  No matching products found under this service with equivalent selling price (±1%).
+                  No matching products found under this service within ±{Math.round(tolerance * 100)}% price
+                  {primaryValidity ? ` and matching duration (${primaryValidity})` : ""}.
                 </div>
               </div>
             ) : (
@@ -418,15 +470,25 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
                   const candMargin = primaryAmount - candCost;
                   const priceDiff =
                     Math.abs(cand.amount - primaryAmount) / (primaryAmount || 1);
+                  const candValidity =
+                    cand.validity ||
+                    cand.attributes?.validityPeriod ||
+                    cand.attributes?.validity ||
+                    "";
 
                   return (
                     <div key={candId} className="pfm-candidate-card">
                       <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                           <span className="pfm-candidate-name">{cand.name}</span>
                           <span className="pfm-provider-tag">
                             {cand.providerId?.name || cand.providerId?.code || "Provider"}
                           </span>
+                          {candValidity && (
+                            <span className="pfm-validity-tag" title="Validity duration">
+                              {candValidity}
+                            </span>
+                          )}
                           {priceDiff > 0 && (
                             <span style={{ fontSize: "11px", color: "#64748b" }}>
                               ({formatter("NGN").format(cand.amount)})
@@ -434,7 +496,9 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
                           )}
                         </div>
                         <div className="pfm-candidate-meta">
-                          Cost: <strong>{formatter("NGN").format(candCost)}</strong> • Margin:{" "}
+                          Code: <code>{cand.code || "N/A"}</code> • SA:{" "}
+                          <strong>{formatter("NGN").format(cand.amount)}</strong> • Cost:{" "}
+                          <strong>{formatter("NGN").format(candCost)}</strong> • Margin:{" "}
                           <strong
                             style={{ color: candMargin >= 0 ? "#059669" : "#dc2626" }}
                           >
@@ -444,7 +508,20 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
                         </div>
                       </div>
 
-                      <div>
+                      <div className="pfm-candidate-actions">
+                        <button
+                          type="button"
+                          className="pfm-view-btn"
+                          onClick={() => setPreviewProduct(cand)}
+                          title="View product details"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          <span>View Product</span>
+                        </button>
+
                         {isSelected ? (
                           <span className="pfm-in-chain-badge">✓ In Chain</span>
                         ) : (
@@ -496,6 +573,26 @@ const ConfigureFallbackModalContent = ({ isOpen, toggle, product }) => {
           </button>
         </div>
       </div>
+
+      {/* Product View Modal for Previewing Candidate Details */}
+      <ProductViewModal
+        isOpen={!!previewProduct}
+        toggle={() => setPreviewProduct(null)}
+        product={previewProduct}
+        onAddToFallback={
+          previewProduct && !selectedIds.has(previewProduct._id || previewProduct.id)
+            ? () => {
+                addCandidate(previewProduct);
+                setPreviewProduct(null);
+              }
+            : undefined
+        }
+        isInFallbackChain={
+          previewProduct
+            ? selectedIds.has(previewProduct._id || previewProduct.id)
+            : false
+        }
+      />
     </div>
   );
 };
