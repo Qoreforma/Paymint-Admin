@@ -20,6 +20,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
+import { AnalyticsTopBar, AnalyticsFetchingPill, AnalyticsCardOverlay } from "./AnalyticsLoader";
 import "./signup-trends.css";
 
 ChartJS.register(
@@ -257,12 +258,16 @@ const SignupTrends = () => {
 
   return (
     <div className="sut-wrapper">
+      <AnalyticsTopBar isFetching={isFetching} />
       <Head title="Signup Trends Analytics | Paymint Admin" />
       <Content>
         {/* Header Block */}
         <div className="sut-header-block">
           <div>
-            <h2 className="sut-title">Signup Trends Analytics</h2>
+            <div className="d-flex align-items-center gap-2 mb-1">
+              <h2 className="sut-title mb-0">Signup Trends Analytics</h2>
+              <AnalyticsFetchingPill isFetching={isFetching} label="Crunching signup intake..." />
+            </div>
             <p className="sut-subtitle">
               Acquisition metrics, period-over-period comparison, and zero-gap intake trends in Africa/Lagos (WAT, UTC+1).
             </p>
@@ -281,7 +286,7 @@ const SignupTrends = () => {
               type="button"
               className="sut-btn sut-btn-export"
               onClick={() => handleExport("csv")}
-              disabled={isExporting || isLoading || !trendsData?.series?.length}
+              disabled={isExporting || isLoading || isFetching || !trendsData?.series?.length}
               title="Export Signup Intake Data as CSV (Zero PII)"
             >
               <Icon name="download-cloud" />
@@ -291,7 +296,7 @@ const SignupTrends = () => {
               type="button"
               className="sut-btn sut-btn-export-excel"
               onClick={() => handleExport("xls")}
-              disabled={isExporting || isLoading || !trendsData?.series?.length}
+              disabled={isExporting || isLoading || isFetching || !trendsData?.series?.length}
               title="Export Signup Intake Data as Excel"
             >
               <Icon name="file-excel" />
@@ -301,7 +306,8 @@ const SignupTrends = () => {
         </div>
 
         {/* Top KPI Cards */}
-        <div className="sut-kpi-grid">
+        <div className="sut-kpi-grid analytics-card-relative">
+          <AnalyticsCardOverlay isFetching={isFetching && !isLoading} message="Updating intake KPIs..." />
           <div className="sut-kpi-card">
             <div className="sut-kpi-header">
               <span className="sut-kpi-label">Total New Users</span>
@@ -362,6 +368,7 @@ const SignupTrends = () => {
                   type="button"
                   className={`sut-segmented-btn ${currentPreset === opt.value ? "active" : ""}`}
                   onClick={() => handlePresetChange(opt.value)}
+                  disabled={isFetching}
                 >
                   <span>{opt.label}</span>
                 </button>
@@ -381,6 +388,7 @@ const SignupTrends = () => {
                   type="button"
                   className={`sut-segmented-btn ${granularity === opt.value ? "active" : ""}`}
                   onClick={() => updateParam("granularity", opt.value)}
+                  disabled={isFetching}
                 >
                   <span>{opt.label}</span>
                 </button>
@@ -412,6 +420,7 @@ const SignupTrends = () => {
               type="button"
               className={`sut-toggle-compare ${compare ? "active" : ""}`}
               onClick={() => updateParam("compare", !compare)}
+              disabled={isFetching}
               title="Compare with prior period of equal length"
             >
               <span>{compare ? "☑ Comparing Prior Period" : "☐ Compare Prior Period"}</span>
@@ -420,7 +429,8 @@ const SignupTrends = () => {
         </div>
 
         {/* Main Chart Card */}
-        <div className="sut-card">
+        <div className="sut-card analytics-card-relative">
+          <AnalyticsCardOverlay isFetching={isFetching && !isLoading} message="Updating intake curves..." />
           <div className="sut-card-header">
             <div>
               <h5 className="sut-card-title">New Users Intake Velocity</h5>
@@ -457,7 +467,8 @@ const SignupTrends = () => {
         </div>
 
         {/* Detailed Breakdown Table Card */}
-        <div className="sut-card">
+        <div className="sut-card analytics-card-relative">
+          <AnalyticsCardOverlay isFetching={isFetching && !isLoading} message="Updating intake breakdown..." />
           <div className="sut-card-header">
             <div>
               <h5 className="sut-card-title">Detailed Intake Breakdown Table</h5>

@@ -8,6 +8,7 @@ import { useGetUserActivity, exportUserActivityApi } from "../../../../api/analy
 import LoadingSpinner from "../../../components/spinner";
 import DateRangeFilter from "../tables/date-range-filter";
 import { formatter } from "../../../../utils/Utils";
+import { AnalyticsTopBar, AnalyticsFetchingPill, AnalyticsCardOverlay } from "./AnalyticsLoader";
 import "./user-activity.css";
 
 const TRANSACTED_OPTIONS = [
@@ -129,12 +130,16 @@ const UserActivity = () => {
 
   return (
     <div className="uac-wrapper">
+      <AnalyticsTopBar isFetching={isFetching} />
       <Head title="User Activity Analytics | Paymint Admin" />
       <Content>
         {/* Header Block */}
         <div className="uac-header-block">
           <div>
-            <h2 className="uac-title">User Activity & Retention Behavior</h2>
+            <div className="d-flex align-items-center gap-2 mb-1">
+              <h2 className="uac-title mb-0">User Activity & Retention Behavior</h2>
+              <AnalyticsFetchingPill isFetching={isFetching} label="Loading user activity..." />
+            </div>
             <p className="uac-subtitle">
               Anonymized user lifecycle cohorts, post-signup drop-off, time-to-first-transaction, and spending activity.
             </p>
@@ -152,7 +157,7 @@ const UserActivity = () => {
               type="button"
               className="uac-btn uac-btn-export"
               onClick={() => handleExport("csv")}
-              disabled={isExporting || isLoading || summary.totalUsers === 0}
+              disabled={isExporting || isLoading || isFetching || summary.totalUsers === 0}
               title="Download anonymized activity report as CSV (Zero PII)"
             >
               <Icon name="download-cloud" />
@@ -162,7 +167,7 @@ const UserActivity = () => {
               type="button"
               className="uac-btn uac-btn-export-excel"
               onClick={() => handleExport("xls")}
-              disabled={isExporting || isLoading || summary.totalUsers === 0}
+              disabled={isExporting || isLoading || isFetching || summary.totalUsers === 0}
               title="Download anonymized activity report as Excel"
             >
               <Icon name="file-excel" />
@@ -172,7 +177,8 @@ const UserActivity = () => {
         </div>
 
         {/* Executive Summary Cards Grid */}
-        <div className="uac-kpi-grid">
+        <div className="uac-kpi-grid analytics-card-relative">
+          <AnalyticsCardOverlay isFetching={isFetching && !isLoading} message="Updating activity KPIs..." />
           <div className="uac-kpi-card">
             <div className="uac-kpi-header">
               <span className="uac-kpi-label">Users in Scope</span>
@@ -257,6 +263,7 @@ const UserActivity = () => {
                   type="button"
                   className={`uac-segmented-btn ${transacted === opt.value ? "active" : ""}`}
                   onClick={() => updateFilter("transacted", opt.value)}
+                  disabled={isFetching}
                 >
                   <span>{opt.label}</span>
                 </button>
@@ -268,6 +275,7 @@ const UserActivity = () => {
               className="uac-select"
               value={activityStatus}
               onChange={(e) => updateFilter("activityStatus", e.target.value)}
+              disabled={isFetching}
             >
               {ACTIVITY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -289,7 +297,12 @@ const UserActivity = () => {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
-              <button type="submit" className="uac-btn uac-btn-outline" style={{ padding: "6px 10px" }}>
+              <button
+                type="submit"
+                className="uac-btn uac-btn-outline"
+                style={{ padding: "6px 10px" }}
+                disabled={isFetching}
+              >
                 <Icon name="search" />
               </button>
             </form>
@@ -299,6 +312,7 @@ const UserActivity = () => {
               className="uac-select"
               value={limit}
               onChange={(e) => updateFilter("limit", e.target.value)}
+              disabled={isFetching}
             >
               {LIMIT_OPTIONS.map((l) => (
                 <option key={l} value={l}>
@@ -310,7 +324,8 @@ const UserActivity = () => {
         </div>
 
         {/* User Activity Table Card */}
-        <div className="uac-card">
+        <div className="uac-card analytics-card-relative">
+          <AnalyticsCardOverlay isFetching={isFetching && !isLoading} message="Fetching user records..." />
           <div className="uac-card-header">
             <div>
               <h5 className="uac-card-title">Anonymized User Activity Roster</h5>
@@ -323,7 +338,7 @@ const UserActivity = () => {
                 type="button"
                 className="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
                 onClick={() => handleExport("csv")}
-                disabled={isExporting || isLoading || summary.totalUsers === 0}
+                disabled={isExporting || isLoading || isFetching || summary.totalUsers === 0}
               >
                 <Icon name="download-cloud" />
                 <span>Export Dataset</span>
@@ -450,7 +465,7 @@ const UserActivity = () => {
                   type="button"
                   className="uac-page-btn"
                   onClick={() => updateFilter("page", page - 1)}
-                  disabled={page <= 1}
+                  disabled={page <= 1 || isFetching}
                 >
                   &laquo; Prev
                 </button>
@@ -473,6 +488,7 @@ const UserActivity = () => {
                       type="button"
                       className={`uac-page-btn ${pageNum === page ? "active" : ""}`}
                       onClick={() => updateFilter("page", pageNum)}
+                      disabled={isFetching}
                     >
                       {pageNum}
                     </button>
@@ -483,7 +499,7 @@ const UserActivity = () => {
                   type="button"
                   className="uac-page-btn"
                   onClick={() => updateFilter("page", page + 1)}
-                  disabled={page >= activityData.totalPages}
+                  disabled={page >= activityData.totalPages || isFetching}
                 >
                   Next &raquo;
                 </button>

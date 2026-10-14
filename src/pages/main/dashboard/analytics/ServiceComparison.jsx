@@ -29,6 +29,7 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
+import { AnalyticsTopBar, AnalyticsFetchingPill, AnalyticsCardOverlay } from "./AnalyticsLoader";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -49,7 +50,7 @@ const ServiceComparison = () => {
   const startDate = searchParams.get("startDate") || "";
   const endDate = searchParams.get("endDate") || "";
 
-  const { data: response, isLoading } = useGetServiceComparison({ period, startDate, endDate });
+  const { data: response, isLoading, isFetching } = useGetServiceComparison({ period, startDate, endDate });
 
   const handlePeriodChange = (newPeriod) => {
     setSearchParams((prev) => {
@@ -120,10 +121,14 @@ const ServiceComparison = () => {
     <React.Fragment>
       <Head title="Service Comparison Analytics" />
       <Content>
+        <AnalyticsTopBar isFetching={isFetching} />
         <BlockHead size="sm">
           <BlockBetween>
             <BlockHeadContent>
-              <BlockTitle page>Service & Provider Comparison</BlockTitle>
+              <div className="d-flex align-items-center gap-2 mb-1">
+                <BlockTitle page>Service & Provider Comparison</BlockTitle>
+                <AnalyticsFetchingPill isFetching={isFetching} label="Updating service metrics..." />
+              </div>
               <div className="text-soft">Identify top performing services and providers.</div>
             </BlockHeadContent>
             <BlockHeadContent>
@@ -141,6 +146,7 @@ const ServiceComparison = () => {
                                 : "btn-outline-primary"
                             }`}
                             onClick={() => handlePeriodChange(opt.value)}
+                            disabled={isFetching}
                           >
                             {opt.label}
                           </button>
@@ -168,7 +174,7 @@ const ServiceComparison = () => {
                           type="button"
                           className="btn btn-sm btn-outline-light d-flex align-items-center gap-1"
                           onClick={() => handleExport("csv")}
-                          disabled={!stats.providersPerService?.length}
+                          disabled={!stats.providersPerService?.length || isFetching}
                           title="Export Breakdown as CSV"
                         >
                           <Icon name="download-cloud" />
@@ -178,7 +184,7 @@ const ServiceComparison = () => {
                           type="button"
                           className="btn btn-sm btn-outline-light d-flex align-items-center gap-1"
                           onClick={() => handleExport("xls")}
-                          disabled={!stats.providersPerService?.length}
+                          disabled={!stats.providersPerService?.length || isFetching}
                           title="Export Breakdown as Excel"
                         >
                           <Icon name="file-excel" />
@@ -196,7 +202,8 @@ const ServiceComparison = () => {
         <Block>
           <Row className="g-gs">
             <Col md="6">
-              <Card className="card-bordered h-100">
+              <Card className="card-bordered h-100 analytics-card-relative">
+                <AnalyticsCardOverlay isFetching={isFetching} message="Updating service charts..." />
                 <div className="card-inner">
                   <div className="card-title-group mb-4">
                     <div className="card-title">
@@ -211,7 +218,8 @@ const ServiceComparison = () => {
             </Col>
 
             <Col md="6">
-              <Card className="card-bordered h-100">
+              <Card className="card-bordered h-100 analytics-card-relative">
+                <AnalyticsCardOverlay isFetching={isFetching} message="Updating provider charts..." />
                 <div className="card-inner">
                   <div className="card-title-group mb-4">
                     <div className="card-title">
@@ -228,7 +236,8 @@ const ServiceComparison = () => {
         </Block>
 
         <Block>
-          <Card className="card-bordered">
+          <Card className="card-bordered analytics-card-relative">
+            <AnalyticsCardOverlay isFetching={isFetching} message="Updating service breakdown..." />
             <div className="card-inner border-bottom">
               <div className="card-title-group">
                 <div className="card-title">
@@ -239,7 +248,7 @@ const ServiceComparison = () => {
                     type="button"
                     className="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
                     onClick={() => handleExport("csv")}
-                    disabled={!stats.providersPerService?.length}
+                    disabled={!stats.providersPerService?.length || isFetching}
                   >
                     <Icon name="download-cloud" />
                     <span>Export Breakdown</span>

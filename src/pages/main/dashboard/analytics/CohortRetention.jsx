@@ -4,6 +4,7 @@ import exportFromJSON from "export-from-json";
 import Head from "../../../../layout/head/Head";
 import { useGetCohortAnalytics } from "../../../../api/analytics";
 import LoadingSpinner from "../../../components/spinner";
+import { AnalyticsTopBar, AnalyticsFetchingPill, AnalyticsCardOverlay } from "./AnalyticsLoader";
 import "./cohort-retention.css";
 
 const WEEKS_OPTIONS = [
@@ -189,12 +190,16 @@ const CohortRetention = () => {
 
   return (
     <div className="chr-wrapper">
+      <AnalyticsTopBar isFetching={isFetching} />
       <Head title="Cohort Retention Analysis | Paymint Admin" />
 
       {/* Header Block */}
       <div className="chr-header-block">
         <div>
-          <h2 className="chr-title">Cohort Retention Analysis</h2>
+          <div className="d-flex align-items-center gap-2 mb-1">
+            <h2 className="chr-title mb-0">Cohort Retention Analysis</h2>
+            <AnalyticsFetchingPill isFetching={isFetching} label="Calculating cohorts..." />
+          </div>
           <p className="chr-subtitle">
             Analyze repeat transactions, user lifetime activity, GMV, and platform profitability by weekly signup cohorts.
           </p>
@@ -212,7 +217,7 @@ const CohortRetention = () => {
             type="button"
             className="chr-btn chr-btn-export"
             onClick={() => handleExport("csv")}
-            disabled={isExporting || isLoading || !cohortData}
+            disabled={isExporting || isLoading || isFetching || !cohortData}
           >
             <span>📥 Export CSV</span>
           </button>
@@ -220,7 +225,7 @@ const CohortRetention = () => {
             type="button"
             className="chr-btn chr-btn-export-excel"
             onClick={() => handleExport("xls")}
-            disabled={isExporting || isLoading || !cohortData}
+            disabled={isExporting || isLoading || isFetching || !cohortData}
           >
             <span>📊 Export Excel</span>
           </button>
@@ -229,7 +234,8 @@ const CohortRetention = () => {
 
       {/* Top KPI Summary Cards */}
       {cohortData && (
-        <div className="chr-kpi-grid">
+        <div className="chr-kpi-grid analytics-card-relative">
+          <AnalyticsCardOverlay isFetching={isFetching && !isLoading} message="Updating cohort metrics..." />
           <div className="chr-kpi-card">
             <div className="chr-kpi-header">
               <span className="chr-kpi-label">Total Cohort Signups</span>
@@ -418,7 +424,8 @@ const CohortRetention = () => {
       )}
 
       {/* Heatmap Table Outer Shell */}
-      <div className="chr-table-outer">
+      <div className="chr-table-outer analytics-card-relative">
+        <AnalyticsCardOverlay isFetching={isFetching && !isLoading} message="Calculating cohort matrix..." />
         {isLoading ? (
           <div style={{ padding: "60px 20px", textAlign: "center" }}>
             <LoadingSpinner />
