@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import NoIcon from "../../../../../images/no-image-icon.png";
 import { formatter } from "../../../../../utils/Utils";
 import { useToggleProductFallbackAvailability } from "../../../../../api/product/products";
