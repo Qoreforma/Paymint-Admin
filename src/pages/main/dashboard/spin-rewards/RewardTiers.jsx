@@ -24,7 +24,21 @@ import {
   useCleanupDummyData,
 } from "../../../../api/spinRewards";
 import { usePermission } from "../../../../utils/usePermission";
+import { formatDateWithTime } from "../../../../utils/Utils";
 import WheelEditor from "./WheelEditor";
+
+const formatForDateTimeLocal = (dateStr) => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
 
 const REPEAT_MODE_OPTIONS = [
   { value: "one-time", label: "One-Time (Default)" },
@@ -108,8 +122,8 @@ const RewardTiers = () => {
       perUserCap: tier.perUserCap || "",
       globalBudgetCap: tier.globalBudgetCap || "",
       timeWindowCapHours: tier.timeWindowCapHours || "",
-      validFrom: tier.validFrom ? new Date(tier.validFrom).toISOString().slice(0, 16) : "",
-      validUntil: tier.validUntil ? new Date(tier.validUntil).toISOString().slice(0, 16) : "",
+      validFrom: formatForDateTimeLocal(tier.validFrom),
+      validUntil: formatForDateTimeLocal(tier.validUntil),
       isActive: tier.isActive ?? true,
     });
     setModal({ add: false, edit: true });
@@ -122,6 +136,13 @@ const RewardTiers = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (formData.validFrom && formData.validUntil) {
+      if (new Date(formData.validUntil) <= new Date(formData.validFrom)) {
+        alert("Campaign End date must be after Campaign Start date");
+        return;
+      }
+    }
+
     const payload = {
       name: formData.name.trim(),
       description: formData.description.trim(),
@@ -131,15 +152,21 @@ const RewardTiers = () => {
       ...(formData.repeatMode === "max-N" && formData.maxRepeatCount
         ? { maxRepeatCount: Number(formData.maxRepeatCount) }
         : {}),
-      ...(formData.perUserCap ? { perUserCap: Number(formData.perUserCap) } : {}),
+      ...(formData.perUserCap
+        ? { perUserCap: Number(formData.perUserCap) }
+        : (modal.edit ? { perUserCap: null } : {})),
       ...(formData.globalBudgetCap
         ? { globalBudgetCap: Number(formData.globalBudgetCap) }
-        : {}),
+        : (modal.edit ? { globalBudgetCap: null } : {})),
       ...(formData.timeWindowCapHours
         ? { timeWindowCapHours: Number(formData.timeWindowCapHours) }
-        : {}),
-      ...(formData.validFrom ? { validFrom: new Date(formData.validFrom).toISOString() } : {}),
-      ...(formData.validUntil ? { validUntil: new Date(formData.validUntil).toISOString() } : {}),
+        : (modal.edit ? { timeWindowCapHours: null } : {})),
+      ...(formData.validFrom
+        ? { validFrom: new Date(formData.validFrom).toISOString() }
+        : (modal.edit ? { validFrom: null } : {})),
+      ...(formData.validUntil
+        ? { validUntil: new Date(formData.validUntil).toISOString() }
+        : (modal.edit ? { validUntil: null } : {})),
       ...(modal.edit ? { isActive: formData.isActive } : {}),
     };
 
@@ -226,6 +253,22 @@ const RewardTiers = () => {
                             Active
                           </span>
                         )}
+                        {tier.validUntil && new Date(tier.validUntil) < new Date() ? (
+                          <span className="badge bg-danger-dim text-danger" style={{ fontSize: "10px" }}>
+                            <Icon name="clock" className="me-1" />
+                            Campaign Ended
+                          </span>
+                        ) : tier.validFrom && new Date(tier.validFrom) > new Date() ? (
+                          <span className="badge bg-info-dim text-info" style={{ fontSize: "10px" }}>
+                            <Icon name="clock" className="me-1" />
+                            Upcoming
+                          </span>
+                        ) : (tier.validFrom || tier.validUntil) ? (
+                          <span className="badge bg-success-dim text-success" style={{ fontSize: "10px" }}>
+                            <Icon name="calendar" className="me-1" />
+                            Campaign Active
+                          </span>
+                        ) : null}
                         {hasWheel ? (
                           <span className="badge bg-primary-dim text-primary" style={{ fontSize: "10px" }}>
                             <Icon name="check-circle" className="me-1" />
@@ -247,6 +290,18 @@ const RewardTiers = () => {
                         {tier.repeatMode === "max-N" && ` (Max ${tier.maxRepeatCount}x)`}
                         {tier.perUserCap ? ` • User Cap: ${tier.perUserCap}` : ""}
                         {tier.globalBudgetCap ? ` • Budget Cap: ${tier.globalBudgetCap}` : ""}
+                        {tier.validFrom && (
+                          <>
+                            {" • "}
+                            Campaign Start: <strong className="text-dark">{formatDateWithTime(tier.validFrom)}</strong>
+                          </>
+                        )}
+                        {tier.validUntil && (
+                          <>
+                            {" • "}
+                            Campaign End: <strong className="text-dark">{formatDateWithTime(tier.validUntil)}</strong>
+                          </>
+                        )}
                       </div>
                       {tier.description && (
                         <div className="spin-tier-desc">{tier.description}</div>
@@ -502,12 +557,24 @@ const RewardTiers = () => {
 
                 <Col xs="12" md="6">
                   <div className="form-group">
-                    <label className="form-label" htmlFor="valid-from">
-                      Campaign Start (Optional)
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <label className="form-label mb-0" htmlFor="valid-from">
+                        Campaign Start (Optional)
+                      </label>
+                      {formData.validFrom && (
+                        <button
+                          type="button"
+                          className="btn btn-link btn-sm p-0 text-danger"
+                          style={{ fontSize: "11px", textDecoration: "none" }}
+                          onClick={() => setFormData({ ...formData, validFrom: "" })}
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
                     <input
                       id="valid-from"
-                      className="form-control"
+                      className="form-control mt-1"
                       type="datetime-local"
                       value={formData.validFrom}
                       onChange={(e) =>
@@ -520,12 +587,24 @@ const RewardTiers = () => {
 
                 <Col xs="12" md="6">
                   <div className="form-group">
-                    <label className="form-label" htmlFor="valid-until">
-                      Campaign End (Optional)
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <label className="form-label mb-0" htmlFor="valid-until">
+                        Campaign End (Optional)
+                      </label>
+                      {formData.validUntil && (
+                        <button
+                          type="button"
+                          className="btn btn-link btn-sm p-0 text-danger"
+                          style={{ fontSize: "11px", textDecoration: "none" }}
+                          onClick={() => setFormData({ ...formData, validUntil: "" })}
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
                     <input
                       id="valid-until"
-                      className="form-control"
+                      className="form-control mt-1"
                       type="datetime-local"
                       value={formData.validUntil}
                       onChange={(e) =>

@@ -134,11 +134,11 @@ const SpinRewardsPage = () => {
               <Block className="mb-4">
                 <div
                   className={`card card-bordered p-3 ${isRewardSystemEnabled
-                      ? "border-success bg-success-dim"
-                      : "border-light bg-lighter"
+                    ? "border-success bg-success-dim"
+                    : "border-light bg-lighter"
                     }`}
                 >
-                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 h-auto">
                     <div style={{ flex: "1 1 240px" }}>
                       <div className="d-flex align-items-center gap-2 h-auto">
                         <span
