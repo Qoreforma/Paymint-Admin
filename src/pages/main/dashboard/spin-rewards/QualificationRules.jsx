@@ -90,7 +90,7 @@ const QualificationRules = () => {
     if (modal.add) {
       createRule(payload, { onSuccess: closeModal });
     } else {
-      editRule(payload, { onSuccess: closeModal });
+      editRule({ id: editedId, ...payload }, { onSuccess: closeModal });
     }
   };
 

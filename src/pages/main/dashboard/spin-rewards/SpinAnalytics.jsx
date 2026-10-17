@@ -1,6 +1,5 @@
 import React from "react";
-import { Card, Row, Col, Spinner, Badge } from "reactstrap";
-import { Table } from "antd";
+import { Card, Row, Col, Spinner } from "reactstrap";
 import { useGetRewardAnalytics } from "../../../../api/spinRewards";
 import { Icon } from "../../../../components/Component";
 
@@ -31,51 +30,51 @@ const SpinAnalytics = () => {
       <Row className="g-3 mb-4">
         <Col sm="6" lg="3">
           <Card className="card-bordered text-center bg-light">
-            <div className="card-inner">
+            <div className="card-inner py-3">
               <span className="text-muted small text-uppercase fw-bold">
                 Total Spins Claimed
               </span>
               <h3 className="text-primary mt-2 mb-0 fw-bold">
                 {totalSpins.toLocaleString()}
               </h3>
-              <span className="text-muted fs-12px">All-time across all tiers</span>
+              <span className="text-muted fs-12px">All-time lifetime spins</span>
             </div>
           </Card>
         </Col>
 
         <Col sm="6" lg="3">
           <Card className="card-bordered text-center bg-light">
-            <div className="card-inner">
+            <div className="card-inner py-3">
               <span className="text-muted small text-uppercase fw-bold">
-                Total Payout Value
+                Total Disbursed
               </span>
               <h3 className="text-success mt-2 mb-0 fw-bold">
                 ₦{totalPayoutValue.toLocaleString()}
               </h3>
-              <span className="text-muted fs-12px">Successfully fulfilled</span>
+              <span className="text-muted fs-12px">Combined reward payouts</span>
             </div>
           </Card>
         </Col>
 
         <Col sm="6" lg="3">
           <Card className="card-bordered text-center bg-light">
-            <div className="card-inner">
+            <div className="card-inner py-3">
               <span className="text-muted small text-uppercase fw-bold">
-                Wallet Cash Disbursed
+                Wallet Rewards
               </span>
               <h3 className="text-info mt-2 mb-0 fw-bold">
                 ₦{totalBalanceDisbursed.toLocaleString()}
               </h3>
-              <span className="text-muted fs-12px">Direct wallet credits</span>
+              <span className="text-muted fs-12px">Credited to wallet balance</span>
             </div>
           </Card>
         </Col>
 
         <Col sm="6" lg="3">
           <Card className="card-bordered text-center bg-light">
-            <div className="card-inner">
+            <div className="card-inner py-3">
               <span className="text-muted small text-uppercase fw-bold">
-                Airtime Recharged
+                Airtime Rewards
               </span>
               <h3 className="text-warning mt-2 mb-0 fw-bold">
                 ₦{totalAirtimeDisbursed.toLocaleString()}
@@ -86,30 +85,36 @@ const SpinAnalytics = () => {
         </Col>
       </Row>
 
-      {/* Payout Status Pills */}
+      {/* Payout Status Breakdown */}
       <Card className="card-bordered mb-4">
-        <div className="card-inner">
+        <div className="card-inner p-3">
           <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div>
               <h6 className="mb-0 fw-bold">Fulfillment Status Breakdown</h6>
               <span className="text-muted fs-12px">
-                Real-time monitoring of reward payouts
+                Real-time monitoring of automated reward payouts
               </span>
             </div>
 
-            <div className="d-flex flex-wrap gap-2">
-              <Badge color="success" className="px-3 py-2 fs-13px d-flex align-items-center">
-                <Icon name="check-circle" className="me-1" />
-                <span>Success: {payoutsCountByStatus.success || 0}</span>
-              </Badge>
-              <Badge color="warning" className="px-3 py-2 fs-13px d-flex align-items-center">
-                <Icon name="clock" className="me-1" />
-                <span>Pending: {payoutsCountByStatus.pending || 0}</span>
-              </Badge>
-              <Badge color="danger" className="px-3 py-2 fs-13px d-flex align-items-center">
-                <Icon name="alert-circle" className="me-1" />
-                <span>Failed: {payoutsCountByStatus.failed || 0}</span>
-              </Badge>
+            <div className="spin-status-pills d-flex flex-wrap gap-2">
+              <div className="spin-status-pill success d-flex align-items-center gap-1 px-3 py-2 rounded">
+                <Icon name="check-circle" className="text-success" />
+                <span className="fs-12px fw-bold text-success">
+                  Success: {payoutsCountByStatus.success || 0}
+                </span>
+              </div>
+              <div className="spin-status-pill warning d-flex align-items-center gap-1 px-3 py-2 rounded">
+                <Icon name="clock" className="text-warning" />
+                <span className="fs-12px fw-bold text-warning">
+                  Pending: {payoutsCountByStatus.pending || 0}
+                </span>
+              </div>
+              <div className="spin-status-pill danger d-flex align-items-center gap-1 px-3 py-2 rounded">
+                <Icon name="alert-circle" className="text-danger" />
+                <span className="fs-12px fw-bold text-danger">
+                  Failed: {payoutsCountByStatus.failed || 0}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -123,88 +128,84 @@ const SpinAnalytics = () => {
           No tier analytics data recorded yet.
         </Card>
       ) : (
-        tierBreakdowns.map((tier) => {
-          const columns = [
-            {
-              title: "Segment Label",
-              dataIndex: "label",
-              key: "label",
-              render: (label, row) => (
-                <span className="fw-bold">
-                  {label} (₦{row.rewardValue} {row.rewardType})
+        tierBreakdowns.map((tier) => (
+          <Card key={tier.tierId} className="card-bordered mb-4 overflow-hidden">
+            <div className="card-inner border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-2 bg-lighter">
+              <div>
+                <h6 className="mb-0 fw-bold text-primary">{tier.tierName}</h6>
+                <span className="text-muted fs-12px">
+                  Threshold: {tier.threshold} referrals · Total Spins: {tier.spinsCount}
                 </span>
-              ),
-            },
-            {
-              title: "Configured Tickets",
-              dataIndex: "configuredTicketCount",
-              key: "configuredTicketCount",
-              render: (tickets) => (
-                <span className="badge bg-outline-primary">{tickets || 0}</span>
-              ),
-            },
-            {
-              title: "Actual Wins",
-              dataIndex: "actualWinCount",
-              key: "actualWinCount",
-              render: (wins) => <span className="fw-bold">{wins}</span>,
-            },
-            {
-              title: "Actual Distribution %",
-              dataIndex: "actualWinPercentage",
-              key: "actualWinPercentage",
-              render: (pct) => (
-                <div className="d-flex align-items-center gap-2">
-                  <div
-                    className="progress flex-grow-1"
-                    style={{ height: "6px", width: "80px" }}
-                  >
-                    <div
-                      className="progress-bar bg-success"
-                      role="progressbar"
-                      style={{ width: `${Math.min(pct, 100)}%` }}
-                    />
-                  </div>
-                  <span className="fs-12px fw-bold">{pct}%</span>
-                </div>
-              ),
-            },
-          ];
-
-          return (
-            <Card key={tier.tierId} className="card-bordered mb-4">
-              <div className="card-inner border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
-                <div>
-                  <h6 className="mb-0 fw-bold text-primary">{tier.tierName}</h6>
-                  <span className="text-muted fs-12px">
-                    Threshold: {tier.threshold} referrals · Total Spins:{" "}
-                    {tier.spinsCount}
-                  </span>
-                </div>
-
-                <div className="text-end">
-                  <span className="fs-12px text-muted d-block">
-                    Total Disbursed: ₦{tier.totalDisbursed.toLocaleString()}
-                  </span>
-                  {tier.budgetCap && (
-                    <span className="fs-11px text-muted">
-                      Budget Cap: ₦{tier.budgetCap.toLocaleString()}
-                    </span>
-                  )}
-                </div>
               </div>
 
-              <Table
-                dataSource={tier.actualDistribution}
-                columns={columns}
-                rowKey={(row) => `${row.label}_${row.rewardValue}`}
-                pagination={false}
-                size="middle"
-                scroll={{ x: 650 }}
-              />
-            </Card>
-          );
-        })
+              <div className="d-flex align-items-center gap-2">
+                <span className="badge bg-white text-dark border fs-12px px-3 py-1 shadow-sm">
+                  Total Disbursed: <strong className="text-primary ms-1">₦{tier.totalDisbursed.toLocaleString()}</strong>
+                </span>
+                {tier.budgetCap && (
+                  <span className="badge bg-light text-muted border fs-11px">
+                    Budget Cap: ₦{tier.budgetCap.toLocaleString()}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="table-responsive">
+              <table className="table table-tranx mb-0">
+                <thead className="table-light">
+                  <tr className="tb-tnx-head">
+                    <th>Segment Label</th>
+                    <th style={{ width: "170px" }}>Configured Tickets</th>
+                    <th style={{ width: "130px" }}>Actual Wins</th>
+                    <th style={{ width: "220px" }}>Actual Distribution %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tier.actualDistribution && tier.actualDistribution.length > 0 ? (
+                    tier.actualDistribution.map((row, idx) => (
+                      <tr key={idx} className="tb-tnx-item">
+                        <td>
+                          <span className="fw-bold">
+                            {row.label} (₦{row.rewardValue} {row.rewardType})
+                          </span>
+                        </td>
+                        <td>
+                          <span className="badge bg-outline-primary fs-12px">
+                            {row.configuredTicketCount || 0}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="fw-bold fs-13px">{row.actualWinCount || 0}</span>
+                        </td>
+                        <td>
+                          <div className="d-flex align-items-center gap-2">
+                            <div
+                              className="progress flex-grow-1"
+                              style={{ height: "6px", width: "80px", backgroundColor: "#e2e8f0" }}
+                            >
+                              <div
+                                className="progress-bar bg-success"
+                                role="progressbar"
+                                style={{ width: `${Math.min(row.actualWinPercentage || 0, 100)}%` }}
+                              />
+                            </div>
+                            <span className="fs-12px fw-bold text-dark">{row.actualWinPercentage || 0}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="text-center py-3 text-muted">
+                        No win distribution records yet for this tier.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        ))
       )}
     </div>
   );

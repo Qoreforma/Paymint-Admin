@@ -30,14 +30,159 @@
   box-shadow: 0 1px 3px rgba(15, 61, 172, 0.08) !important;
 }
 
-.spin-btn-wheel:hover {
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 10px rgba(15, 61, 172, 0.16) !important;
+.spin-btn-wheel-active {
+  background-color: var(--brand-primary, #0f3dac) !important;
+  border: 1px solid var(--brand-primary, #0f3dac) !important;
+  color: #ffffff !important;
 }
 
-.spin-btn-wheel:active {
-  transform: translateY(0) !important;
+.spin-btn-wheel-active,
+.spin-btn-wheel-active span,
+.spin-btn-wheel-active .icon {
+  color: #ffffff !important;
 }
+
+.spin-btn-wheel-active:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(15, 61, 172, 0.2) !important;
+  background-color: #0a2d82 !important;
+  color: #ffffff !important;
+}
+
+.spin-btn-wheel-setup {
+  background-color: #f59e0b !important;
+  border: 1px solid #d97706 !important;
+  color: #ffffff !important;
+}
+
+.spin-btn-wheel-setup,
+.spin-btn-wheel-setup span,
+.spin-btn-wheel-setup .icon {
+  color: #ffffff !important;
+}
+
+.spin-btn-wheel-setup:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25) !important;
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+}
+
+/* Button dim global contrast fix for spin rewards */
+.btn-dim.btn-primary {
+  background-color: rgba(15, 61, 172, 0.08) !important;
+  border: 1px solid rgba(15, 61, 172, 0.25) !important;
+  color: var(--brand-primary, #0f3dac) !important;
+}
+
+.btn-dim.btn-primary span,
+.btn-dim.btn-primary .icon {
+  color: var(--brand-primary, #0f3dac) !important;
+}
+
+.btn-dim.btn-primary:hover {
+  background-color: var(--brand-primary, #0f3dac) !important;
+  color: #ffffff !important;
+}
+
+.btn-dim.btn-primary:hover span,
+.btn-dim.btn-primary:hover .icon {
+  color: #ffffff !important;
+}
+
+/* Add segment button in Wheel Editor */
+.spin-btn-add-segment {
+  background-color: rgba(15, 61, 172, 0.08) !important;
+  border: 1px solid rgba(15, 61, 172, 0.25) !important;
+  color: var(--brand-primary, #0f3dac) !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  transition: all 0.2s ease !important;
+}
+
+.spin-btn-add-segment span,
+.spin-btn-add-segment .icon {
+  color: var(--brand-primary, #0f3dac) !important;
+}
+
+.spin-btn-add-segment:hover {
+  background-color: var(--brand-primary, #0f3dac) !important;
+  color: #ffffff !important;
+}
+
+.spin-btn-add-segment:hover span,
+.spin-btn-add-segment:hover .icon {
+  color: #ffffff !important;
+}
+
+/* Seed Referrals debug button */
+.spin-btn-seed {
+  background-color: var(--brand-primary, #0f3dac) !important;
+  border: 1px solid var(--brand-primary, #0f3dac) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+.spin-btn-seed span,
+.spin-btn-seed .icon {
+  color: #ffffff !important;
+}
+
+.spin-btn-seed:hover {
+  background-color: #0a2d82 !important;
+  color: #ffffff !important;
+}
+
+/* Payout status pills in Analytics */
+.spin-status-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spin-status-pill {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+}
+
+.spin-status-pill.success {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #047857;
+}
+
+.spin-status-pill.warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #b45309;
+}
+
+.spin-status-pill.danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #b91c1c;
+}
+
+/* Payout Queue Tabs */
+.spin-payout-tabs .btn {
+  font-size: 12px !important;
+  padding: 5px 12px !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+}
+
 
 /* Icon-only action buttons (Edit & Delete) */
 .spin-btn-icon-sq {

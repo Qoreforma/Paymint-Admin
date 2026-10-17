@@ -257,7 +257,7 @@ const RewardTiers = () => {
                       <Button
                         size="sm"
                         color={hasWheel ? "primary" : "warning"}
-                        className="spin-btn-wheel btn-dim"
+                        className={`spin-btn-wheel ${hasWheel ? "spin-btn-wheel-active" : "spin-btn-wheel-setup"}`}
                         onClick={() => setWheelModal({ open: true, tier })}
                         title={hasWheel ? "Configure Spin Wheel Segments" : "Set Up Spin Wheel"}
                       >
@@ -323,7 +323,7 @@ const RewardTiers = () => {
               <Button
                 color="primary"
                 size="sm"
-                className="btn-dim"
+                className="spin-btn-seed"
                 disabled={isSeeding || !debugEmail}
                 onClick={() => seedReferrals({ email: debugEmail, count: debugCount })}
               >

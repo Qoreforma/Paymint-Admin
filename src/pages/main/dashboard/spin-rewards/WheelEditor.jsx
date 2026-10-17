@@ -516,7 +516,7 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
               {/* Segments Header */}
               <div className="mb-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <h6 className="overline-title mb-0">Wheel Segments ({segments.length})</h6>
-                <Button color="primary" size="sm" type="button" className="btn-dim" onClick={handleAddSegment}>
+                <Button color="primary" size="sm" type="button" className="spin-btn-add-segment" onClick={handleAddSegment}>
                   <Icon name="plus"></Icon>
                   <span>Add Segment</span>
                 </Button>
