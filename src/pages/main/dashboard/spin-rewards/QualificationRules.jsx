@@ -130,179 +130,193 @@ const QualificationRules = () => {
               No qualification rules created yet. Click "Add Rule" to create one.
             </div>
           ) : (
-            rules.map((rule) => {
-              const ruleTypeLabel =
-                RULE_TYPE_OPTIONS.find((opt) => opt.value === rule.type)?.label || rule.type;
+              rules.map((rule) => {
+                const ruleTypeLabel =
+                  RULE_TYPE_OPTIONS.find((opt) => opt.value === rule.type)?.label || rule.type;
 
-              return (
-                <div
-                  key={rule._id}
-                  className="data-item"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleOpenEdit(rule)}
-                >
-                  <div className="data-col">
-                    <span className="data-label fw-bold">
-                      {rule.name}
-                      {!rule.isActive && (
-                        <span className="badge bg-danger ms-2" style={{ fontSize: "10px" }}>
-                          Inactive
+                return (
+                  <div
+                    key={rule._id}
+                    className="spin-tier-item"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleOpenEdit(rule)}
+                  >
+                    <div className="spin-tier-info">
+                      <div className="spin-tier-header">
+                        <span className="spin-tier-title">{rule.name}</span>
+                        {!rule.isActive ? (
+                          <span className="badge bg-danger-dim text-danger" style={{ fontSize: "10px" }}>
+                            Inactive
+                          </span>
+                        ) : (
+                          <span className="badge bg-success-dim text-success" style={{ fontSize: "10px" }}>
+                            Active
+                          </span>
+                        )}
+                        <span className="badge bg-light text-primary" style={{ fontSize: "10px" }}>
+                          {ruleTypeLabel}
                         </span>
-                      )}
-                      <br />
-                      <span className="fw-normal text-muted" style={{ fontSize: "13px" }}>
-                        Type: {ruleTypeLabel}
+                      </div>
+                      <div className="spin-tier-meta">
+                        Type: <strong className="text-dark">{ruleTypeLabel}</strong>
                         {rule.params?.minTransactionValue &&
-                          ` (Min: ₦${Number(rule.params.minTransactionValue).toLocaleString()})`}
-                      </span>
-                    </span>
-                    <span className="data-value text-muted" style={{ fontSize: "12px" }}>
-                      {rule.description || "No description"}
-                    </span>
+                          ` • Min Txn Value: ₦${Number(rule.params.minTransactionValue).toLocaleString()}`}
+                      </div>
+                      {rule.description && (
+                        <div className="spin-tier-desc">{rule.description}</div>
+                      )}
+                    </div>
+                    <div className="spin-tier-actions">
+                      <Button
+                        size="sm"
+                        color="light"
+                        className="btn-icon btn-dim spin-btn-icon-sq"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEdit(rule);
+                        }}
+                        title="Edit Rule"
+                      >
+                        <Icon name="edit" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="data-col data-col-end">
-                    <span className="data-more">
-                      <Icon name="forward-ios"></Icon>
-                    </span>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </Block>
+                );
+              })
+            )}
+          </div>
+        </Block>
 
-      {/* Add / Edit Modal */}
-      <Modal
-        isOpen={modal.add || modal.edit}
-        className="modal-dialog-centered"
-        size="lg"
-        toggle={closeModal}
-      >
-        <a
-          href="#close"
-          onClick={(e) => {
-            e.preventDefault();
-            closeModal();
-          }}
-          className="close"
+        {/* Add / Edit Modal */}
+        <Modal
+          isOpen={modal.add || modal.edit}
+          className="modal-dialog-centered"
+          size="lg"
+          toggle={closeModal}
         >
-          <Icon name="cross-sm"></Icon>
-        </a>
-        <ModalBody>
-          <div className="p-2">
-            <h5 className="title">
-              {modal.add ? "Create Qualification Rule" : `Edit ${formData.name}`}
-            </h5>
-            <form onSubmit={handleSubmit} className="mt-4">
-              <Row className="gy-4">
-                <Col md="6">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="rule-name">
-                      Rule Name <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      id="rule-name"
-                      className="form-control"
-                      type="text"
-                      required
-                      placeholder="e.g. Standard 5 Referrals"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    />
-                  </div>
-                </Col>
-
-                <Col md="6">
-                  <div className="form-group">
-                    <label className="form-label">
-                      Rule Type <span className="text-danger">*</span>
-                    </label>
-                    <RSelect
-                      options={RULE_TYPE_OPTIONS}
-                      value={RULE_TYPE_OPTIONS.find((opt) => opt.value === formData.type)}
-                      onChange={(selected) => setFormData({ ...formData, type: selected.value })}
-                    />
-                  </div>
-                </Col>
-
-                {formData.type === "referee-min-transaction-value" && (
-                  <Col md="6">
+          <a
+            href="#close"
+            onClick={(e) => {
+              e.preventDefault();
+              closeModal();
+            }}
+            className="close"
+          >
+            <Icon name="cross-sm"></Icon>
+          </a>
+          <ModalBody>
+            <div className="p-2">
+              <h5 className="title">
+                {modal.add ? "Create Qualification Rule" : `Edit ${formData.name}`}
+              </h5>
+              <form onSubmit={handleSubmit} className="mt-4">
+                <Row className="gy-3">
+                  <Col xs="12" md="6">
                     <div className="form-group">
-                      <label className="form-label" htmlFor="min-tx-val">
-                        Minimum Transaction Value (₦) <span className="text-danger">*</span>
+                      <label className="form-label" htmlFor="rule-name">
+                        Rule Name <span className="text-danger">*</span>
                       </label>
                       <input
-                        id="min-tx-val"
+                        id="rule-name"
                         className="form-control"
-                        type="number"
-                        min="1"
+                        type="text"
                         required
-                        placeholder="e.g. 5000"
-                        value={formData.minTransactionValue}
-                        onChange={(e) =>
-                          setFormData({ ...formData, minTransactionValue: e.target.value })
-                        }
+                        placeholder="e.g. Standard 5 Referrals"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       />
                     </div>
                   </Col>
-                )}
 
-                <Col md="12">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="rule-desc">
-                      Description
-                    </label>
-                    <textarea
-                      id="rule-desc"
-                      className="form-control"
-                      rows="2"
-                      placeholder="Optional explanation of this rule"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    />
-                  </div>
-                </Col>
-
-                {modal.edit && (
-                  <Col md="6">
-                    <div className="custom-control custom-switch mt-2">
-                      <input
-                        type="checkbox"
-                        className="custom-control-input"
-                        id="rule-active"
-                        checked={formData.isActive}
-                        onChange={(e) =>
-                          setFormData({ ...formData, isActive: e.target.checked })
-                        }
-                      />
-                      <label className="custom-control-label" htmlFor="rule-active">
-                        Rule Active
+                  <Col xs="12" md="6">
+                    <div className="form-group">
+                      <label className="form-label">
+                        Rule Type <span className="text-danger">*</span>
                       </label>
+                      <RSelect
+                        options={RULE_TYPE_OPTIONS}
+                        value={RULE_TYPE_OPTIONS.find((opt) => opt.value === formData.type)}
+                        onChange={(selected) => setFormData({ ...formData, type: selected.value })}
+                      />
                     </div>
                   </Col>
-                )}
 
-                <Col md="12">
-                  <div className="form-group mt-2">
-                    <Button color="primary" type="submit" disabled={isCreating || isEditing}>
-                      {isCreating || isEditing
-                        ? "Saving..."
-                        : modal.add
-                        ? "Create Rule"
-                        : "Update Rule"}
-                    </Button>
-                    <Button
-                      color="light"
-                      type="button"
-                      className="ms-2"
-                      onClick={closeModal}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </Col>
-              </Row>
+                  {formData.type === "referee-min-transaction-value" && (
+                    <Col xs="12" md="6">
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="min-tx-val">
+                          Minimum Transaction Value (₦) <span className="text-danger">*</span>
+                        </label>
+                        <input
+                          id="min-tx-val"
+                          className="form-control"
+                          type="number"
+                          min="1"
+                          required
+                          placeholder="e.g. 5000"
+                          value={formData.minTransactionValue}
+                          onChange={(e) =>
+                            setFormData({ ...formData, minTransactionValue: e.target.value })
+                          }
+                        />
+                      </div>
+                    </Col>
+                  )}
+
+                  <Col xs="12">
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="rule-desc">
+                        Description
+                      </label>
+                      <textarea
+                        id="rule-desc"
+                        className="form-control"
+                        rows="2"
+                        placeholder="Optional explanation of this rule"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      />
+                    </div>
+                  </Col>
+
+                  {modal.edit && (
+                    <Col xs="12" md="6">
+                      <div className="custom-control custom-switch mt-2">
+                        <input
+                          type="checkbox"
+                          className="custom-control-input"
+                          id="rule-active"
+                          checked={formData.isActive}
+                          onChange={(e) =>
+                            setFormData({ ...formData, isActive: e.target.checked })
+                          }
+                        />
+                        <label className="custom-control-label" htmlFor="rule-active">
+                          Rule Active
+                        </label>
+                      </div>
+                    </Col>
+                  )}
+
+                  <Col xs="12">
+                    <div className="form-group mt-2 d-flex flex-wrap gap-2">
+                      <Button color="primary" type="submit" disabled={isCreating || isEditing}>
+                        {isCreating || isEditing
+                          ? "Saving..."
+                          : modal.add
+                          ? "Create Rule"
+                          : "Update Rule"}
+                      </Button>
+                      <Button
+                        color="light"
+                        type="button"
+                        onClick={closeModal}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </Col>
+                </Row>
             </form>
           </div>
         </ModalBody>

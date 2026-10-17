@@ -200,6 +200,7 @@ const SpinAnalytics = () => {
                 rowKey={(row) => `${row.label}_${row.rewardValue}`}
                 pagination={false}
                 size="middle"
+                scroll={{ x: 650 }}
               />
             </Card>
           );

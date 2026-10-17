@@ -180,44 +180,46 @@ const PayoutQueue = () => {
           </div>
 
           {/* Status Filter Buttons */}
-          <ButtonGroup size="sm">
-            <Button
-              color={statusFilter === "failed" ? "danger" : "light"}
-              onClick={() => {
-                setStatusFilter("failed");
-                setPage(1);
-              }}
-            >
-              Failed Payouts
-            </Button>
-            <Button
-              color={statusFilter === "pending" ? "warning" : "light"}
-              onClick={() => {
-                setStatusFilter("pending");
-                setPage(1);
-              }}
-            >
-              Pending
-            </Button>
-            <Button
-              color={statusFilter === "success" ? "success" : "light"}
-              onClick={() => {
-                setStatusFilter("success");
-                setPage(1);
-              }}
-            >
-              Success
-            </Button>
-            <Button
-              color={statusFilter === "" ? "primary" : "light"}
-              onClick={() => {
-                setStatusFilter("");
-                setPage(1);
-              }}
-            >
-              All
-            </Button>
-          </ButtonGroup>
+          <div className="overflow-auto" style={{ maxWidth: "100%" }}>
+            <ButtonGroup size="sm">
+              <Button
+                color={statusFilter === "failed" ? "danger" : "light"}
+                onClick={() => {
+                  setStatusFilter("failed");
+                  setPage(1);
+                }}
+              >
+                Failed Payouts
+              </Button>
+              <Button
+                color={statusFilter === "pending" ? "warning" : "light"}
+                onClick={() => {
+                  setStatusFilter("pending");
+                  setPage(1);
+                }}
+              >
+                Pending
+              </Button>
+              <Button
+                color={statusFilter === "success" ? "success" : "light"}
+                onClick={() => {
+                  setStatusFilter("success");
+                  setPage(1);
+                }}
+              >
+                Success
+              </Button>
+              <Button
+                color={statusFilter === "" ? "primary" : "light"}
+                onClick={() => {
+                  setStatusFilter("");
+                  setPage(1);
+                }}
+              >
+                All
+              </Button>
+            </ButtonGroup>
+          </div>
         </div>
 
         <Table
@@ -225,6 +227,7 @@ const PayoutQueue = () => {
           dataSource={payouts}
           columns={columns}
           rowKey="_id"
+          scroll={{ x: 800 }}
           pagination={{
             current: page,
             pageSize: limit,

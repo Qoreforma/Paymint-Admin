@@ -504,7 +504,7 @@ export const TransactionTable = ({ purpose, userId, showStats }) => {
                                         </>
                                       )}
 
-                                      {(item?.status === "successful" || item?.status === "failed") && (
+                                      {item?.status === "failed" && (
                                         <li>
                                           <DropdownItem
                                             tag="a"

@@ -195,58 +195,73 @@ const RewardTiers = () => {
               No reward tiers configured yet. Click "Add Tier" to create your first milestone.
             </div>
           ) : (
-            tiers.map((tier) => {
-              const hasWheel = wheels.some(
-                (w) =>
-                  w.tierId === tier._id ||
-                  (typeof w.tierId === "object" && w.tierId?._id === tier._id)
-              );
-              const ruleName =
-                typeof tier.qualificationRuleId === "object"
-                  ? tier.qualificationRuleId?.name
-                  : "Rule " + tier.qualificationRuleId;
+              tiers.map((tier) => {
+                const hasWheel = wheels.some(
+                  (w) =>
+                    w.tierId === tier._id ||
+                    (typeof w.tierId === "object" && w.tierId?._id === tier._id)
+                );
+                const targetRuleId =
+                  typeof tier.qualificationRuleId === "object"
+                    ? tier.qualificationRuleId?._id
+                    : tier.qualificationRuleId;
+                const matchedRule = rules.find((r) => r._id === targetRuleId);
+                const ruleName =
+                  matchedRule?.name ||
+                  (typeof tier.qualificationRuleId === "object"
+                    ? tier.qualificationRuleId?.name
+                    : "Milestone Rule");
 
-              return (
-                <div key={tier._id} className="data-item">
-                  <div className="data-col">
-                    <span className="data-label fw-bold">
-                      {tier.name}
-                      {!tier.isActive && (
-                        <span className="badge bg-danger ms-2" style={{ fontSize: "10px" }}>
-                          Inactive
-                        </span>
-                      )}
-                      {hasWheel ? (
-                        <span className="badge bg-success ms-2" style={{ fontSize: "10px" }}>
-                          Wheel Configured
-                        </span>
-                      ) : (
-                        <span className="badge bg-warning text-dark ms-2" style={{ fontSize: "10px" }}>
-                          No Wheel
-                        </span>
-                      )}
-                      <br />
-                      <span className="fw-normal text-muted" style={{ fontSize: "13px" }}>
-                        Threshold: <strong>{tier.referralThreshold} qualifying referrals</strong> | Rule:{" "}
-                        {ruleName} | Mode: <strong>{tier.repeatMode}</strong>
+                return (
+                  <div key={tier._id} className="spin-tier-item">
+                    <div className="spin-tier-info">
+                      <div className="spin-tier-header">
+                        <span className="spin-tier-title">{tier.name}</span>
+                        {!tier.isActive ? (
+                          <span className="badge bg-danger-dim text-danger" style={{ fontSize: "10px" }}>
+                            Inactive
+                          </span>
+                        ) : (
+                          <span className="badge bg-success-dim text-success" style={{ fontSize: "10px" }}>
+                            Active
+                          </span>
+                        )}
+                        {hasWheel ? (
+                          <span className="badge bg-primary-dim text-primary" style={{ fontSize: "10px" }}>
+                            <Icon name="check-circle" className="me-1" />
+                            Wheel Configured
+                          </span>
+                        ) : (
+                          <span className="badge bg-warning-dim text-warning" style={{ fontSize: "10px" }}>
+                            <Icon name="alert-circle" className="me-1" />
+                            No Wheel
+                          </span>
+                        )}
+                      </div>
+                      <div className="spin-tier-meta">
+                        Threshold: <strong className="text-dark">{tier.referralThreshold} qualifying referrals</strong>
+                        {" • "}
+                        Rule: <strong className="text-dark">{ruleName}</strong>
+                        {" • "}
+                        Mode: <strong className="text-dark">{tier.repeatMode}</strong>
                         {tier.repeatMode === "max-N" && ` (Max ${tier.maxRepeatCount}x)`}
-                        {tier.perUserCap && ` | User Cap: ${tier.perUserCap}`}
-                        {tier.globalBudgetCap && ` | Budget Cap: ${tier.globalBudgetCap}`}
-                      </span>
-                    </span>
-                    <span className="data-value text-muted" style={{ fontSize: "12px" }}>
-                      {tier.description || "No description"}
-                    </span>
-                  </div>
+                        {tier.perUserCap ? ` • User Cap: ${tier.perUserCap}` : ""}
+                        {tier.globalBudgetCap ? ` • Budget Cap: ${tier.globalBudgetCap}` : ""}
+                      </div>
+                      {tier.description && (
+                        <div className="spin-tier-desc">{tier.description}</div>
+                      )}
+                    </div>
 
-                  <div className="data-col data-col-end">
-                    <div className="d-flex gap-2">
+                    <div className="spin-tier-actions">
                       <Button
                         size="sm"
-                        color={hasWheel ? "outline-primary" : "outline-warning"}
+                        color={hasWheel ? "primary" : "warning"}
+                        className="spin-btn-wheel btn-dim"
                         onClick={() => setWheelModal({ open: true, tier })}
+                        title={hasWheel ? "Configure Spin Wheel Segments" : "Set Up Spin Wheel"}
                       >
-                        <Icon name="curve-down-right"></Icon>
+                        <Icon name={hasWheel ? "setting-alt" : "curve-down-right"} />
                         <span>{hasWheel ? "Edit Wheel" : "Set Up Wheel"}</span>
                       </Button>
 
@@ -254,74 +269,81 @@ const RewardTiers = () => {
                         <>
                           <Button
                             size="sm"
-                            color="outline-secondary"
+                            color="light"
+                            className="btn-icon btn-dim spin-btn-icon-sq"
                             onClick={() => handleOpenEdit(tier)}
+                            title="Edit Tier Settings"
                           >
-                            <Icon name="edit"></Icon>
+                            <Icon name="edit" />
                           </Button>
                           <Button
                             size="sm"
-                            color="outline-danger"
+                            color="danger"
+                            className="btn-icon btn-dim text-danger spin-btn-icon-sq"
                             onClick={() => handleDelete(tier._id, tier.name)}
+                            title="Delete Tier"
                           >
-                            <Icon name="trash"></Icon>
+                            <Icon name="trash" />
                           </Button>
                         </>
                       )}
                     </div>
                   </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </Block>
-
-      {hasPermission("spin_rewards.manage_tiers") && (
-        <Block>
-          <BlockHead>
-            <BlockTitle tag="h6">Debug Tools</BlockTitle>
-            <BlockDes>
-              <p>Quickly seed referrals to test spin evaluation socket notifications, or clean up dummy data.</p>
-            </BlockDes>
-          </BlockHead>
-          <div className="d-flex align-items-center gap-3 bg-light p-3 rounded">
-            <input
-              type="email"
-              className="form-control w-25"
-              placeholder="Target User Email"
-              value={debugEmail}
-              onChange={(e) => setDebugEmail(e.target.value)}
-            />
-            <input
-              type="number"
-              className="form-control"
-              style={{ width: "100px" }}
-              placeholder="Count"
-              value={debugCount}
-              onChange={(e) => setDebugCount(e.target.value)}
-            />
-            <Button
-              color="primary"
-              disabled={isSeeding || !debugEmail}
-              onClick={() => seedReferrals({ email: debugEmail, count: debugCount })}
-            >
-              <Icon name="play" />
-              <span>{isSeeding ? "Seeding..." : "Seed Referrals"}</span>
-            </Button>
-
-            <Button
-              color="danger"
-              outline
-              disabled={isCleaning}
-              onClick={() => cleanupDummyData()}
-            >
-              <Icon name="trash" />
-              <span>{isCleaning ? "Cleaning..." : "Cleanup Dummy Data"}</span>
-            </Button>
+                );
+              })
+            )}
           </div>
         </Block>
-      )}
+
+        {hasPermission("spin_rewards.manage_tiers") && (
+          <Block>
+            <BlockHead>
+              <BlockTitle tag="h6">Debug Tools</BlockTitle>
+              <BlockDes>
+                <p>Quickly seed referrals to test spin evaluation socket notifications, or clean up dummy data.</p>
+              </BlockDes>
+            </BlockHead>
+            <div className="spin-debug-tools">
+              <input
+                type="email"
+                className="form-control spin-debug-email"
+                placeholder="Target User Email"
+                value={debugEmail}
+                onChange={(e) => setDebugEmail(e.target.value)}
+              />
+              <input
+                type="number"
+                className="form-control spin-debug-count"
+                placeholder="Count"
+                min="1"
+                max="50"
+                value={debugCount}
+                onChange={(e) => setDebugCount(e.target.value)}
+              />
+              <Button
+                color="primary"
+                size="sm"
+                className="btn-dim"
+                disabled={isSeeding || !debugEmail}
+                onClick={() => seedReferrals({ email: debugEmail, count: debugCount })}
+              >
+                <Icon name="play" />
+                <span>{isSeeding ? "Seeding..." : "Seed Referrals"}</span>
+              </Button>
+
+              <Button
+                color="danger"
+                size="sm"
+                outline
+                disabled={isCleaning}
+                onClick={() => cleanupDummyData()}
+              >
+                <Icon name="trash" />
+                <span>{isCleaning ? "Cleaning..." : "Cleanup Dummy Data"}</span>
+              </Button>
+            </div>
+          </Block>
+        )}
 
       {/* Add / Edit Tier Modal */}
       <Modal
@@ -347,7 +369,7 @@ const RewardTiers = () => {
             </h5>
             <form onSubmit={handleSubmit} className="mt-4">
               <Row className="gy-3">
-                <Col md="6">
+                <Col xs="12" md="6">
                   <div className="form-group">
                     <label className="form-label" htmlFor="tier-name">
                       Tier Name <span className="text-danger">*</span>
@@ -364,7 +386,7 @@ const RewardTiers = () => {
                   </div>
                 </Col>
 
-                <Col md="6">
+                <Col xs="12" md="6">
                   <div className="form-group">
                     <label className="form-label" htmlFor="tier-threshold">
                       Referral Threshold <span className="text-danger">*</span>
@@ -384,7 +406,7 @@ const RewardTiers = () => {
                   </div>
                 </Col>
 
-                <Col md="6">
+                <Col xs="12" md="6">
                   <div className="form-group">
                     <label className="form-label">
                       Qualification Rule <span className="text-danger">*</span>
@@ -401,7 +423,7 @@ const RewardTiers = () => {
                   </div>
                 </Col>
 
-                <Col md="6">
+                <Col xs="12" md="6">
                   <div className="form-group">
                     <label className="form-label">
                       Repeat Mode <span className="text-danger">*</span>
@@ -419,7 +441,7 @@ const RewardTiers = () => {
                 </Col>
 
                 {formData.repeatMode === "max-N" && (
-                  <Col md="6">
+                  <Col xs="12" md="6">
                     <div className="form-group">
                       <label className="form-label" htmlFor="max-repeat">
                         Max Spins per User <span className="text-danger">*</span>
@@ -440,7 +462,7 @@ const RewardTiers = () => {
                   </Col>
                 )}
 
-                <Col md="6">
+                <Col xs="12" md="6">
                   <div className="form-group">
                     <label className="form-label" htmlFor="per-user-cap">
                       Per-User Cap (Optional)
@@ -459,7 +481,7 @@ const RewardTiers = () => {
                   </div>
                 </Col>
 
-                <Col md="6">
+                <Col xs="12" md="6">
                   <div className="form-group">
                     <label className="form-label" htmlFor="budget-cap">
                       Global Budget Cap (Optional)
@@ -478,7 +500,7 @@ const RewardTiers = () => {
                   </div>
                 </Col>
 
-                <Col md="6">
+                <Col xs="12" md="6">
                   <div className="form-group">
                     <label className="form-label" htmlFor="valid-from">
                       Campaign Start (Optional)
@@ -496,7 +518,7 @@ const RewardTiers = () => {
                   </div>
                 </Col>
 
-                <Col md="6">
+                <Col xs="12" md="6">
                   <div className="form-group">
                     <label className="form-label" htmlFor="valid-until">
                       Campaign End (Optional)
@@ -513,7 +535,7 @@ const RewardTiers = () => {
                   </div>
                 </Col>
 
-                <Col md="12">
+                <Col xs="12">
                   <div className="form-group">
                     <label className="form-label" htmlFor="tier-desc">
                       Description
@@ -532,7 +554,7 @@ const RewardTiers = () => {
                 </Col>
 
                 {modal.edit && (
-                  <Col md="6">
+                  <Col xs="12" md="6">
                     <div className="custom-control custom-switch mt-2">
                       <input
                         type="checkbox"
@@ -550,8 +572,8 @@ const RewardTiers = () => {
                   </Col>
                 )}
 
-                <Col md="12">
-                  <div className="form-group mt-2">
+                <Col xs="12">
+                  <div className="form-group mt-2 d-flex flex-wrap gap-2">
                     <Button color="primary" type="submit" disabled={isCreating || isEditing}>
                       {isCreating || isEditing
                         ? "Saving..."
@@ -562,7 +584,6 @@ const RewardTiers = () => {
                     <Button
                       color="light"
                       type="button"
-                      className="ms-2"
                       onClick={closeModal}
                     >
                       Cancel
@@ -581,6 +602,7 @@ const RewardTiers = () => {
           isOpen={wheelModal.open}
           toggle={() => setWheelModal({ open: false, tier: null })}
           tier={wheelModal.tier}
+          rules={rules}
         />
       )}
     </React.Fragment>

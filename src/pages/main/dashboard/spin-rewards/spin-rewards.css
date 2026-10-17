@@ -1,0 +1,577 @@
+/* ============================================================
+   SPIN & WIN REWARDS — RESPONSIVE STYLES & CONTROLS
+   ============================================================ */
+
+/* ── BUTTON OVERRIDES & FIXES ───────────────────────────── */
+/* Ensure icons inside buttons inside data-item don't inherit the forced 32px line-height */
+.data-item .btn .icon,
+.spin-tier-item .btn .icon {
+  height: auto !important;
+  line-height: 1 !important;
+  font-size: 1rem !important;
+  vertical-align: middle !important;
+  color: inherit !important;
+}
+
+/* Action button for Configuring / Editing Wheel */
+.spin-btn-wheel {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  border-radius: 7px !important;
+  white-space: nowrap !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 3px rgba(15, 61, 172, 0.08) !important;
+}
+
+.spin-btn-wheel:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(15, 61, 172, 0.16) !important;
+}
+
+.spin-btn-wheel:active {
+  transform: translateY(0) !important;
+}
+
+/* Icon-only action buttons (Edit & Delete) */
+.spin-btn-icon-sq {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 7px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.spin-btn-icon-sq .icon {
+  font-size: 15px !important;
+}
+
+.spin-btn-icon-sq:hover {
+  transform: translateY(-1px) !important;
+}
+
+.spin-btn-icon-sq:active {
+  transform: translateY(0) !important;
+}
+
+/* ── REWARD TIERS LIST & RESPONSIVENESS ─────────────────── */
+.spin-tier-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.15rem 1.25rem;
+  gap: 1.25rem;
+  border-bottom: 1px solid var(--border-light, #e5eaf3);
+  transition: background-color 0.15s ease;
+  background-color: #ffffff;
+}
+
+.spin-tier-item:last-child {
+  border-bottom: none;
+}
+
+.spin-tier-item:hover {
+  background-color: rgba(15, 61, 172, 0.02);
+}
+
+.spin-tier-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.spin-tier-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.spin-tier-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-base, #1c2b46);
+  margin-bottom: 0;
+}
+
+.spin-tier-meta {
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.spin-tier-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.spin-tier-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Mobile adjustments for tiers */
+@media (max-width: 767.98px) {
+  .spin-tier-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+    padding: 1rem;
+  }
+
+  .spin-tier-actions {
+    width: 100%;
+    justify-content: stretch;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #e2e8f0;
+  }
+
+  .spin-tier-actions .spin-btn-wheel {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+/* ── DEBUG TOOLS RESPONSIVENESS ─────────────────────────── */
+.spin-debug-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 12px 16px;
+}
+
+.spin-debug-email {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
+.spin-debug-count {
+  width: 90px;
+  flex: 0 0 90px;
+}
+
+@media (max-width: 575.98px) {
+  .spin-debug-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .spin-debug-email,
+  .spin-debug-count,
+  .spin-debug-tools .btn {
+    width: 100% !important;
+    flex: 1 1 auto;
+  }
+}
+
+/* ── MODAL RESPONSIVENESS (TABLETS, 768px, & PHONES) ─────── */
+/* Ensure modal-xl fills the screen appropriately on tablets and mobile-desktop views */
+.wheel-editor-modal.modal-dialog,
+.modal-dialog.modal-xl {
+  transition: max-width 0.2s ease-in-out !important;
+}
+
+@media (min-width: 576px) and (max-width: 1199.98px) {
+  .wheel-editor-modal.modal-dialog,
+  .modal-dialog.modal-xl {
+    max-width: 95vw !important;
+    width: 95vw !important;
+    margin: 1.25rem auto !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .wheel-editor-modal.modal-dialog,
+  .modal-dialog.modal-xl {
+    max-width: 1120px !important;
+    margin: 1.75rem auto !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .wheel-editor-modal.modal-dialog,
+  .modal-dialog.modal-xl {
+    max-width: calc(100vw - 16px) !important;
+    width: calc(100vw - 16px) !important;
+    margin: 8px auto !important;
+  }
+
+  .wheel-editor-modal .modal-body {
+    padding: 1rem !important;
+  }
+}
+
+/* ── AIRTIME RECIPIENT MODE SELECTOR ─────────────────────── */
+.spin-mode-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.spin-mode-chip {
+  flex: 1 1 130px;
+  padding: 8px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.spin-mode-chip:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.spin-mode-chip.active {
+  border-color: var(--brand-primary, #0f3dac);
+  background-color: rgba(15, 61, 172, 0.05);
+}
+
+.spin-mode-radio-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.spin-mode-chip.active .spin-mode-radio-dot {
+  border-color: var(--brand-primary, #0f3dac);
+}
+
+.spin-mode-radio-dot::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-primary, #0f3dac);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: all 0.15s ease;
+}
+
+.spin-mode-chip.active .spin-mode-radio-dot::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.spin-mode-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.spin-mode-sub {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.2;
+  margin-top: 1px;
+}
+
+/* ── LIVE STATS CARD (INSIDE WHEEL MODAL) ─────────────────── */
+.spin-stats-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.spin-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.spin-stat-title {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.spin-stat-val {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── WHEEL SEGMENTS (RESPONSIVE TABLE + MOBILE CARDS) ────── */
+.spin-table-wrap {
+  min-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.spin-table-wrap table {
+  min-width: 780px;
+}
+
+.spin-color-picker-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+}
+
+.spin-color-picker-btn input[type="color"] {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Mobile Segment Card (displayed on < 768px instead of squished table) */
+.spin-mobile-segments {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .spin-desktop-table {
+    display: none !important;
+  }
+
+  .spin-mobile-segments {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.spin-segment-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.spin-segment-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* ── HORIZONTAL SCROLL TABS ─────────────────────────────── */
+.spin-tabs-nav {
+  display: flex;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 2px solid var(--border-light, #e5eaf3);
+  margin-bottom: 1.25rem;
+  padding-bottom: 2px;
+}
+
+.spin-tabs-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.spin-tabs-nav .nav-item {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.spin-tabs-nav .nav-link {
+  padding: 0.65rem 1.15rem;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: #64748b;
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.spin-tabs-nav .nav-link:hover {
+  color: var(--brand-primary, #0f3dac);
+}
+
+.spin-tabs-nav .nav-link.active {
+  color: var(--brand-primary, #0f3dac);
+  border-bottom: 2px solid var(--brand-primary, #0f3dac);
+  background: transparent;
+}
+
+/* ── MODAL FOOTER ACTIONS RESPONSIVENESS ─────────────────── */
+.spin-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 1rem;
+}
+
+@media (max-width: 575.98px) {
+  .spin-modal-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .spin-modal-footer .spin-modal-btns {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .spin-modal-footer .spin-modal-btns .btn {
+    width: 100%;
+  }
+
+  .spin-modal-footer .spin-modal-hint {
+    text-align: center;
+  }
+}
+
+/* ── CAMPAIGN GROWTH & ECONOMICS PROJECTIONS CARD ───────── */
+.spin-projections-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  margin-bottom: 1.25rem;
+}
+
+.spin-projections-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.spin-projections-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.spin-projections-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 991.98px) {
+  .spin-projections-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .spin-projections-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.spin-projection-item {
+  background: #f8fafc;
+  border: 1px solid #eef2f6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.spin-projection-item:hover {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.spin-proj-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.spin-proj-value {
+  font-size: 16.5px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.spin-proj-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+.spin-autoscale-btn {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  padding: 3px 8px !important;
+  border-radius: 5px !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  line-height: 1.3 !important;
+}
+
+.spin-autoscale-btn .icon {
+  font-size: 12px !important;
+}
+

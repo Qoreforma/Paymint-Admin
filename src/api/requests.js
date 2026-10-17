@@ -26,28 +26,52 @@ export const useGetDepositRequest = (page = 1, limit = 100, status, search) => {
   );
 };
 
+export const useSendDepositOtp = (defaultTransactionID) => {
+  return useMutation(
+    (payload = {}) => {
+      const transactionID = payload?.transactionID || defaultTransactionID;
+      const { transactionID: _, ...body } = payload || {};
+      return toast.promise(
+        instance
+          .post(`/manual-deposits/${transactionID}/send-otp`, body)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err.response?.data || err;
+          }),
+        {
+          success: (data) => data?.message || "OTP sent to your email",
+          loading: "Sending OTP...",
+          error: (error) => error?.message || "Failed to send OTP",
+        },
+      );
+    },
+  );
+};
+
 export const useUpdateDepositRequest = () => {
   const queryClient = useQueryClient();
   return useMutation(
-    ({ transactionID, action }) =>
-      toast.promise(
+    ({ transactionID, action, data = {} }) => {
+      const endpointAction = action === "decline" ? "reject" : action;
+      return toast.promise(
         instance
-          .post(`/manual-deposits/${transactionID}/${action}`)
+          .post(`/manual-deposits/${transactionID}/${endpointAction}`, data)
           .then((res) => res.data)
           .catch((err) => {
-            throw err.response.data;
+            throw err.response?.data || err;
           }),
         {
-          success: (data) => data.message,
-          loading: "Please wait...",
-          error: (error) => error.message,
+          success: (res) => res?.message || `Deposit ${action}ed successfully`,
+          loading: "Processing request...",
+          error: (error) => error?.message || `Failed to ${action} deposit`,
         },
         {
           style: {
             minWidth: "180px",
           },
         },
-      ),
+      );
+    },
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["getDepositRequest"]);
@@ -139,28 +163,52 @@ export const useGetWithdrawalRequest = (page, limit, status, search) => {
   );
 };
 
+export const useSendWithdrawalOtp = (defaultTransactionID) => {
+  return useMutation(
+    (payload = {}) => {
+      const transactionID = payload?.transactionID || defaultTransactionID;
+      const { transactionID: _, ...body } = payload || {};
+      return toast.promise(
+        instance
+          .post(`/manual-withdrawals/${transactionID}/send-otp`, body)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err.response?.data || err;
+          }),
+        {
+          success: (data) => data?.message || "OTP sent to your email",
+          loading: "Sending OTP...",
+          error: (error) => error?.message || "Failed to send OTP",
+        },
+      );
+    },
+  );
+};
+
 export const useUpdateWithdrawalRequest = () => {
   const queryClient = useQueryClient();
   return useMutation(
-    ({ transactionID, action }) =>
-      toast.promise(
+    ({ transactionID, action, data = {} }) => {
+      const endpointAction = action === "decline" ? "reject" : action;
+      return toast.promise(
         instance
-          .post(`/manual-withdrawals/${transactionID}/${action}`)
+          .post(`/manual-withdrawals/${transactionID}/${endpointAction}`, data)
           .then((res) => res.data)
           .catch((err) => {
-            throw err.response.data;
+            throw err.response?.data || err;
           }),
         {
-          success: (data) => data.message,
-          loading: "Please wait...",
-          error: (error) => error.message,
+          success: (res) => res?.message || `Withdrawal ${action}ed successfully`,
+          loading: "Processing request...",
+          error: (error) => error?.message || `Failed to ${action} withdrawal`,
         },
         {
           style: {
             minWidth: "180px",
           },
         },
-      ),
+      );
+    },
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["getDepositRequest"]);

@@ -32,6 +32,8 @@ import { FilterOptions } from "../tables/filter-select";
 import Search from "../tables/Search";
 import SortToolTip from "../tables/SortTooltip";
 import { WalletFilterOptions } from "./data";
+import FinanceActionOtpModal from "../requests/otp-modal";
+import { useSendDepositOtp } from "../../../../api/requests";
 
 const DepositTable = ({ data, type, hideFilter = false, isLoading, updateFunc }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,6 +41,14 @@ const DepositTable = ({ data, type, hideFilter = false, isLoading, updateFunc })
   const itemsPerPage = searchParams.get("limit") ?? 100;
   const currentPage = searchParams.get("page") ?? 1;
   const status = searchParams.get("status") ?? "";
+
+  const [actionModal, setActionModal] = useState({
+    isOpen: false,
+    action: "approve",
+    item: null,
+  });
+
+  const { mutate: sendDepositOtp, isLoading: isSendingOtp } = useSendDepositOtp();
 
   const [formData, setFormData] = useState({
     id: "",
@@ -340,7 +350,11 @@ const DepositTable = ({ data, type, hideFilter = false, isLoading, updateFunc })
                                               href="#edit"
                                               onClick={(ev) => {
                                                 ev.preventDefault();
-                                                updateFunc({ transactionID: item?._id, action: "approve" });
+                                                setActionModal({
+                                                  isOpen: true,
+                                                  action: "approve",
+                                                  item,
+                                                });
                                               }}
                                             >
                                               <Icon name="check"></Icon>
@@ -353,7 +367,11 @@ const DepositTable = ({ data, type, hideFilter = false, isLoading, updateFunc })
                                               href="#edit"
                                               onClick={(ev) => {
                                                 ev.preventDefault();
-                                                updateFunc({ transactionID: item?._id, action: "reject" });
+                                                setActionModal({
+                                                  isOpen: true,
+                                                  action: "reject",
+                                                  item,
+                                                });
                                               }}
                                             >
                                               <Icon name="cross"></Icon>
@@ -472,8 +490,13 @@ const DepositTable = ({ data, type, hideFilter = false, isLoading, updateFunc })
                           color="success"
                           size="md"
                           onClick={() => {
-                            updateFunc({ transactionID: formData.id, action: "approve" });
-                            setView({ details: false });
+                            const currentItem = data?.data?.find((d) => d._id === formData.id) || { _id: formData.id, ...formData };
+                            setActionModal({
+                              isOpen: true,
+                              action: "approve",
+                              item: currentItem,
+                            });
+                            setView((prev) => ({ ...prev, details: false }));
                           }}
                         >
                           Approve
@@ -486,8 +509,13 @@ const DepositTable = ({ data, type, hideFilter = false, isLoading, updateFunc })
                           size="md"
                           type="button"
                           onClick={() => {
-                            updateFunc({ transactionID: formData.id, action: "reject" });
-                            setView({ details: false });
+                            const currentItem = data?.data?.find((d) => d._id === formData.id) || { _id: formData.id, ...formData };
+                            setActionModal({
+                              isOpen: true,
+                              action: "reject",
+                              item: currentItem,
+                            });
+                            setView((prev) => ({ ...prev, details: false }));
                           }}
                         >
                           Reject
@@ -501,6 +529,17 @@ const DepositTable = ({ data, type, hideFilter = false, isLoading, updateFunc })
           </div>
         </ModalBody>
       </Modal>
+
+      <FinanceActionOtpModal
+        isOpen={actionModal.isOpen}
+        onClose={() => setActionModal({ isOpen: false, action: "approve", item: null })}
+        action={actionModal.action}
+        type="deposit"
+        item={actionModal.item}
+        onSendOtp={sendDepositOtp}
+        onSubmit={updateFunc}
+        isSendingOtp={isSendingOtp}
+      />
     </>
   );
 };

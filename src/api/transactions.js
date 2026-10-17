@@ -286,32 +286,108 @@ export const useRequeryTransaction = (initialTransactionID) => {
   );
 };
 
-export const useUpdateTransaction = (transactionID, status) => {
-  const queryClient = useQueryClient();
+export const useSendTransactionOtp = (defaultTransactionID) => {
   return useMutation(
-    () =>
-      toast.promise(
+    (payload = {}) => {
+      const transactionID = payload?.transactionID || defaultTransactionID;
+      const { transactionID: _, ...body } = payload || {};
+      return toast.promise(
         instance
-          .put(`/transactions/${transactionID}/status/${status}`)
+          .post(`/transactions/${transactionID}/send-otp`, body)
           .then((res) => res.data)
           .catch((err) => {
-            throw err.response.data;
+            throw err.response?.data || err;
           }),
         {
-          success: (data) => data.message,
+          success: (data) => data?.message || "OTP sent to your email",
+          loading: "Sending OTP...",
+          error: (error) => error?.message || "Failed to send OTP",
+        },
+      );
+    },
+  );
+};
+
+export const useUpdateTransaction = (defaultTransactionID, defaultStatus) => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (payload = {}) => {
+      const transactionID = payload?.transactionID || defaultTransactionID;
+      const status = payload?.status || defaultStatus;
+      const body = {
+        otp: payload?.otp,
+        ...(payload?.note ? { note: payload.note } : {}),
+      };
+      return toast.promise(
+        instance
+          .put(`/transactions/${transactionID}/status/${status}`, body)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err.response?.data || err;
+          }),
+        {
+          success: (data) => data?.message || "Status updated successfully",
           loading: "Please wait...",
-          error: (error) => error.message,
+          error: (error) => error?.message || "Failed to update status",
         },
         {
           style: {
             minWidth: "180px",
           },
         },
+      );
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["getAllTransaction"]);
+        queryClient.invalidateQueries(["getWalletTransactions"]);
+        queryClient.invalidateQueries(["getServiceTransactionsOverview"]);
+      },
+    },
+  );
+};
+
+export const useSendBulkUpdateOtp = () => {
+  return useMutation(
+    (data) =>
+      toast.promise(
+        instance
+          .post("/transactions/bulk-update/send-otp", data)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err.response?.data || err;
+          }),
+        {
+          success: (data) => data?.message || "OTP sent to your email",
+          loading: "Sending OTP...",
+          error: (error) => error?.message || "Failed to send OTP",
+        },
+      ),
+  );
+};
+
+export const useBulkUpdateTransactions = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (data) =>
+      toast.promise(
+        instance
+          .post("/transactions/bulk-update", data)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err.response?.data || err;
+          }),
+        {
+          success: (data) => data?.message || "Bulk update completed",
+          loading: "Processing bulk update...",
+          error: (error) => error?.message || "Failed to update transactions",
+        },
       ),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["getAllTransaction"]);
         queryClient.invalidateQueries(["getWalletTransactions"]);
+        queryClient.invalidateQueries(["getServiceTransactionsOverview"]);
       },
     },
   );

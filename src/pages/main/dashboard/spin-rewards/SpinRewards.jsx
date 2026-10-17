@@ -23,6 +23,7 @@ import {
   useWipeAllSpinAndWinProgress,
 } from "../../../../api/spinRewards";
 import { usePermission } from "../../../../utils/usePermission";
+import "./spin-rewards.css";
 
 const SpinRewardsPage = () => {
   const { hasPermission } = usePermission();
@@ -139,8 +140,8 @@ const SpinRewardsPage = () => {
                       : "border-light bg-lighter"
                   }`}
                 >
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div>
+                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div style={{ flex: "1 1 240px" }}>
                       <div className="d-flex align-items-center gap-2">
                         <span
                           className={`badge ${
@@ -159,7 +160,7 @@ const SpinRewardsPage = () => {
                     </div>
 
                     {hasPermission("spin_rewards.toggle_flag") && (
-                      <div className="custom-control custom-switch custom-control-lg">
+                      <div className="custom-control custom-switch custom-control-lg flex-shrink-0">
                         <input
                           type="checkbox"
                           className="custom-control-input"
@@ -181,7 +182,7 @@ const SpinRewardsPage = () => {
               </Block>
 
               {/* Navigation Tabs */}
-              <Nav tabs className="mb-3">
+              <Nav tabs className="spin-tabs-nav mb-3">
                 <NavItem>
                   <NavLink
                     className={activeTab === "analytics" ? "active" : ""}

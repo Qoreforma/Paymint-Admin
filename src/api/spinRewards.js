@@ -239,6 +239,8 @@ export const useGetWheelConfigByTier = (tierId) => {
     {
       enabled: !!tierId,
       retry: false,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
     }
   );
 };
