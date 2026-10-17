@@ -40,26 +40,48 @@ instance.interceptors.request.use(
   async (config) => {
     const access_token = Cookies.get("access_token");
 
-    if (config?.auth?.includes("auth")) {
+    // Skip Authorization header for auth endpoints
+    if (config?.url?.includes("/auth/login") || config?.url?.includes("/auth/refresh")) {
       return config;
     }
-    config.headers = {
-      Authorization: `Bearer ${access_token}`,
-      ...(config.data instanceof FormData ? {} : { "Content-Type": "application/json" }),
-    };
-    // console.log(config);
+    config.headers = config.headers || {};
+    if (access_token) {
+      config.headers["Authorization"] = `Bearer ${access_token}`;
+    }
+    if (!(config.data instanceof FormData)) {
+      config.headers["Content-Type"] = "application/json";
+    }
     return config;
   },
   (error) => {
-    Promise.reject(error);
+    return Promise.reject(error);
   },
 );
+
+// Concurrency mutex and queued request handler for token refresh
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 //RESPONSE INTERCEPTOR FOR API CALLS
 instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
 
     // Skip refresh logic for auth endpoints
     const authExcludedRoutes = [BACKEND_URLS.auth.login, BACKEND_URLS.auth.refreshToken];
@@ -69,17 +91,40 @@ instance.interceptors.response.use(
     }
 
     if (error?.response?.status === 401 && !originalRequest._retry) {
+      // If a refresh is already in flight, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest._retry = true;
+            if (originalRequest.headers) {
+              originalRequest.headers["Authorization"] = `Bearer ${token}`;
+            }
+            return instance(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
-        await useRefreshToken();
+        const newAccessToken = await useRefreshToken();
+        processQueue(null, newAccessToken);
+        if (originalRequest.headers) {
+          originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        }
         return instance(originalRequest);
       } catch (refreshError) {
+        processQueue(refreshError, null);
         Cookies.remove("refresh_token");
         Cookies.remove("access_token");
         window.location.replace("/auth-login");
 
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

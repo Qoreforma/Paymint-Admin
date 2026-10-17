@@ -7,7 +7,6 @@ import { userState } from "../atoms/userState";
 import { instance } from "./httpConfig";
 import BACKEND_URLS from "./urls";
 
-const inThreeHours = new Date(new Date().getTime() + 2 * 60 * 60 * 1000);
 
 export const useLogin = () => {
   const location = useLocation();
@@ -40,8 +39,9 @@ export const useLogin = () => {
           console.log({ admin });
           console.log("Admin going to recoil:", JSON.stringify(admin));
           setUser(admin);
-          Cookies.set("access_token", accessToken, { expires: inThreeHours });
-          Cookies.set("refresh_token", refreshToken, { expires: 1 });
+          const accessExpires = new Date(Date.now() + 2 * 60 * 60 * 1000);
+          Cookies.set("access_token", accessToken, { expires: accessExpires });
+          Cookies.set("refresh_token", refreshToken, { expires: 20 });
           navigate(redirectPath);
         }
       },
@@ -149,24 +149,33 @@ export const useGetUser = () => {
 
 export const useRefreshToken = async () => {
   console.log("Refreshing token called");
-  const inThreeHours = new Date(new Date().getTime() + 2 * 60 * 60 * 1000);
-
-  // const navigate = useNavigate();
   const refreshToken = Cookies.get("refresh_token");
+
+  if (!refreshToken || refreshToken === "undefined") {
+    throw new Error("No refresh token available");
+  }
+
   try {
     const response = await instance.post(`${BACKEND_URLS.auth.refreshToken}`, {
-      refreshToken: refreshToken ? refreshToken : "",
+      refreshToken,
     });
-    Cookies.set("access_token", response?.data?.data?.accessToken, { expires: inThreeHours });
-    Cookies.set("refresh_token", response?.data?.data?.refreshToken, { expires: 1 });
+    const { accessToken, refreshToken: newRefreshToken } = response?.data?.data || {};
+
+    const accessExpires = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    if (accessToken) {
+      Cookies.set("access_token", accessToken, { expires: accessExpires });
+    }
+    if (newRefreshToken) {
+      Cookies.set("refresh_token", newRefreshToken, { expires: 20 });
+    }
+
+    return accessToken;
   } catch (error) {
-    console.log(error.response.status);
-    if (error.response.status === 401) {
-      console.error(error);
+    console.error("Token refresh failed:", error?.response?.status || error);
+    if (error?.response?.status === 401) {
       Cookies.remove("refresh_token");
       Cookies.remove("access_token");
     }
-    console.error(error);
     throw error;
   }
 };
@@ -223,8 +232,9 @@ export const useVerify2FA = () => {
         const { admin, tokens } = data?.data?.data;
         const { accessToken, refreshToken } = tokens;
         setUser(admin);
-        Cookies.set("access_token", accessToken, { expires: inThreeHours });
-        Cookies.set("refresh_token", refreshToken, { expires: 1 });
+        const accessExpires = new Date(Date.now() + 2 * 60 * 60 * 1000);
+        Cookies.set("access_token", accessToken, { expires: accessExpires });
+        Cookies.set("refresh_token", refreshToken, { expires: 20 });
         navigate(redirectPath);
       },
     },
