@@ -26,69 +26,53 @@ const SpinAnalytics = () => {
 
   return (
     <div className="py-2">
-      {/* KPI Cards */}
-      <Row className="g-3 mb-4">
-        <Col sm="6" lg="3">
-          <Card className="card-bordered text-center bg-light">
-            <div className="card-inner py-3">
-              <span className="text-muted small text-uppercase fw-bold">
-                Total Spins Claimed
-              </span>
-              <h3 className="text-primary mt-2 mb-0 fw-bold">
-                {totalSpins.toLocaleString()}
-              </h3>
-              <span className="text-muted fs-12px">All-time lifetime spins</span>
-            </div>
-          </Card>
-        </Col>
+      {/* Responsive KPI Grid (adapts cleanly whether aside is open or closed) */}
+      <div className="spin-kpi-grid">
+        <div className="spin-kpi-card">
+          <span className="text-muted small text-uppercase fw-bold d-block">
+            Total Spins Claimed
+          </span>
+          <h3 className="text-primary mt-2 mb-0 fw-bold">
+            {totalSpins.toLocaleString()}
+          </h3>
+          <span className="text-muted fs-12px">All-time lifetime spins</span>
+        </div>
 
-        <Col sm="6" lg="3">
-          <Card className="card-bordered text-center bg-light">
-            <div className="card-inner py-3">
-              <span className="text-muted small text-uppercase fw-bold">
-                Total Disbursed
-              </span>
-              <h3 className="text-success mt-2 mb-0 fw-bold">
-                ₦{totalPayoutValue.toLocaleString()}
-              </h3>
-              <span className="text-muted fs-12px">Combined reward payouts</span>
-            </div>
-          </Card>
-        </Col>
+        <div className="spin-kpi-card">
+          <span className="text-muted small text-uppercase fw-bold d-block">
+            Total Disbursed
+          </span>
+          <h3 className="text-success mt-2 mb-0 fw-bold">
+            ₦{totalPayoutValue.toLocaleString()}
+          </h3>
+          <span className="text-muted fs-12px">Combined reward payouts</span>
+        </div>
 
-        <Col sm="6" lg="3">
-          <Card className="card-bordered text-center bg-light">
-            <div className="card-inner py-3">
-              <span className="text-muted small text-uppercase fw-bold">
-                Wallet Rewards
-              </span>
-              <h3 className="text-info mt-2 mb-0 fw-bold">
-                ₦{totalBalanceDisbursed.toLocaleString()}
-              </h3>
-              <span className="text-muted fs-12px">Credited to wallet balance</span>
-            </div>
-          </Card>
-        </Col>
+        <div className="spin-kpi-card">
+          <span className="text-muted small text-uppercase fw-bold d-block">
+            Wallet Rewards
+          </span>
+          <h3 className="text-info mt-2 mb-0 fw-bold">
+            ₦{totalBalanceDisbursed.toLocaleString()}
+          </h3>
+          <span className="text-muted fs-12px">Credited to wallet balance</span>
+        </div>
 
-        <Col sm="6" lg="3">
-          <Card className="card-bordered text-center bg-light">
-            <div className="card-inner py-3">
-              <span className="text-muted small text-uppercase fw-bold">
-                Airtime Rewards
-              </span>
-              <h3 className="text-warning mt-2 mb-0 fw-bold">
-                ₦{totalAirtimeDisbursed.toLocaleString()}
-              </h3>
-              <span className="text-muted fs-12px">Airtime top-up value</span>
-            </div>
-          </Card>
-        </Col>
-      </Row>
+        <div className="spin-kpi-card">
+          <span className="text-muted small text-uppercase fw-bold d-block">
+            Airtime Rewards
+          </span>
+          <h3 className="text-warning mt-2 mb-0 fw-bold">
+            ₦{totalAirtimeDisbursed.toLocaleString()}
+          </h3>
+          <span className="text-muted fs-12px">Airtime top-up value</span>
+        </div>
+      </div>
 
       {/* Payout Status Breakdown */}
-      <Card className="card-bordered mb-4">
+      <Card className="card-bordered mb-4 spin-fulfillment-card">
         <div className="card-inner p-3">
-          <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 h-auto">
             <div>
               <h6 className="mb-0 fw-bold">Fulfillment Status Breakdown</h6>
               <span className="text-muted fs-12px">
@@ -121,7 +105,9 @@ const SpinAnalytics = () => {
       </Card>
 
       {/* Per-Tier Win Distribution Tables */}
-      <h6 className="fw-bold mb-3">Tier Win Distribution Accuracy</h6>
+      <div className="mt-4 pt-1 mb-3">
+        <h6 className="fw-bold mb-0">Tier Win Distribution Accuracy</h6>
+      </div>
 
       {tierBreakdowns.length === 0 ? (
         <Card className="card-bordered p-4 text-center text-muted">
@@ -130,7 +116,7 @@ const SpinAnalytics = () => {
       ) : (
         tierBreakdowns.map((tier) => (
           <Card key={tier.tierId} className="card-bordered mb-4 overflow-hidden">
-            <div className="card-inner border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-2 bg-lighter">
+            <div className="card-inner border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-2 bg-lighter h-auto">
               <div>
                 <h6 className="mb-0 fw-bold text-primary">{tier.tierName}</h6>
                 <span className="text-muted fs-12px">
@@ -151,7 +137,7 @@ const SpinAnalytics = () => {
             </div>
 
             <div className="table-responsive">
-              <table className="table table-tranx mb-0">
+              <table className="table table-tranx mb-0" style={{ minWidth: "520px" }}>
                 <thead className="table-light">
                   <tr className="tb-tnx-head">
                     <th>Segment Label</th>

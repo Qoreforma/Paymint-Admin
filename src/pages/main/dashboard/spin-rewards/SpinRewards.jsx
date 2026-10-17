@@ -79,9 +79,8 @@ const SpinRewardsPage = () => {
         <Card>
           <div className="card-aside-wrap">
             <div
-              className={`card-aside card-aside-left user-aside toggle-slide toggle-slide-left toggle-break-lg ${
-                sm ? "content-active" : ""
-              }`}
+              className={`card-aside card-aside-left user-aside toggle-slide toggle-slide-left toggle-break-lg ${sm ? "content-active" : ""
+                }`}
             >
               <UserProfileAside updateSm={updateSm} sm={sm} />
             </div>
@@ -114,10 +113,10 @@ const SpinRewardsPage = () => {
                       <div className={`toggle-expand-content ${sm ? "expanded" : ""}`}>
                         <ul className="nk-block-tools g-3">
                           <li className="nk-block-tools-opt">
-                            <Button 
-                              color="danger" 
-                              outline 
-                              onClick={handleWipeProgress} 
+                            <Button
+                              color="danger"
+                              outline
+                              onClick={handleWipeProgress}
                               disabled={isWiping}
                             >
                               <Icon name="trash" />
@@ -134,19 +133,17 @@ const SpinRewardsPage = () => {
               {/* Global Feature Flag Card */}
               <Block className="mb-4">
                 <div
-                  className={`card card-bordered p-3 ${
-                    isRewardSystemEnabled
+                  className={`card card-bordered p-3 ${isRewardSystemEnabled
                       ? "border-success bg-success-dim"
                       : "border-light bg-lighter"
-                  }`}
+                    }`}
                 >
                   <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div style={{ flex: "1 1 240px" }}>
-                      <div className="d-flex align-items-center gap-2">
+                      <div className="d-flex align-items-center gap-2 h-auto">
                         <span
-                          className={`badge ${
-                            isRewardSystemEnabled ? "bg-success" : "bg-secondary"
-                          }`}
+                          className={`badge ${isRewardSystemEnabled ? "bg-success" : "bg-secondary"
+                            }`}
                         >
                           {isRewardSystemEnabled ? "ACTIVE" : "INACTIVE"}
                         </span>

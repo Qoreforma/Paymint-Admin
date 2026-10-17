@@ -384,9 +384,8 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
                     <div className="spin-stat-row">
                       <span className="spin-stat-title">Ticket Allocation</span>
                       <span
-                        className={`spin-stat-val px-2 py-0.5 rounded ${
-                          isSumValid ? "bg-success-dim text-success" : "bg-danger-dim text-danger"
-                        }`}
+                        className={`spin-stat-val px-2 py-0.5 rounded ${isSumValid ? "bg-success-dim text-success" : "bg-danger-dim text-danger"
+                          }`}
                       >
                         {totalAllocatedTickets} / {currentPoolSize}
                       </span>
@@ -401,9 +400,8 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
                       <span className="spin-stat-title">Status</span>
                       <div className="d-flex align-items-center gap-1">
                         <span
-                          className={`badge ${
-                            isSumValid ? "bg-success" : "bg-warning text-dark"
-                          }`}
+                          className={`badge ${isSumValid ? "bg-success" : "bg-warning text-dark"
+                            }`}
                           style={{ fontSize: "11px" }}
                         >
                           <Icon name={isSumValid ? "check-circle" : "alert-circle"} className="me-1" />
@@ -516,9 +514,9 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
               {/* Segments Header */}
               <div className="mb-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <h6 className="overline-title mb-0">Wheel Segments ({segments.length})</h6>
-                <Button color="primary" size="sm" type="button" className="spin-btn-add-segment" onClick={handleAddSegment}>
+                <Button color="primary" size="sm" type="button" className="spin-btn-add-segment text-white" onClick={handleAddSegment}>
                   <Icon name="plus"></Icon>
-                  <span>Add Segment</span>
+                  <span className="text-white">Add Segment</span>
                 </Button>
               </div>
 
@@ -626,7 +624,7 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
                                 )
                               }
                             />
-                            </td>
+                          </td>
 
                           {/* Odds */}
                           <td>
@@ -801,19 +799,22 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
                   {isExisting ? "Changes apply immediately to future spins." : "A new wheel configuration will be initialized."}
                 </div>
                 <div className="spin-modal-btns d-flex gap-2">
-                  <Button color="light" type="button" onClick={toggle}>
+                  <Button color="light" type="button" onClick={toggle}
+                    className="spin-btn-submit text-white"
+                  >
                     Cancel
                   </Button>
                   <Button
                     color="primary"
                     type="submit"
                     disabled={!isSumValid || isCreating || isEditing}
+                    className="spin-btn-submit text-white"
                   >
                     {isCreating || isEditing
                       ? "Saving Wheel..."
                       : isExisting
-                      ? "Update Wheel Configuration"
-                      : "Save Wheel Configuration"}
+                        ? "Update Wheel Configuration"
+                        : "Save Wheel Configuration"}
                   </Button>
                 </div>
               </div>

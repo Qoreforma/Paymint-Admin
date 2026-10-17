@@ -720,3 +720,49 @@
   font-size: 12px !important;
 }
 
+/* ── SPLIT LAYOUT & INNER CONTAINER RESPONSIVENESS ──────── */
+.card-aside-wrap .card-inner.card-inner-lg {
+  padding: 1.25rem 1.5rem !important;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 575.98px) {
+  .card-aside-wrap .card-inner.card-inner-lg {
+    padding: 1rem 0.85rem !important;
+  }
+}
+
+/* Responsive KPI Grid that adapts smoothly whether aside is open or closed */
+.spin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.spin-kpi-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 1rem 0.85rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.spin-kpi-card:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.spin-fulfillment-card {
+  margin-bottom: 1.5rem !important;
+}
+
+.spin-tier-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+

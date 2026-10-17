@@ -58,7 +58,7 @@ const PayoutQueue = () => {
       <Card className="card-bordered overflow-hidden">
         {/* Header with Title and Filter Tabs */}
         <div className="card-inner border-bottom p-3">
-          <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 h-auto">
             <div>
               <h6 className="mb-0 fw-bold">Reward Payouts Queue</h6>
               <span className="text-muted fs-12px">
@@ -70,11 +70,10 @@ const PayoutQueue = () => {
             <div className="spin-payout-tabs d-flex flex-wrap gap-1">
               <button
                 type="button"
-                className={`btn btn-sm ${
-                  statusFilter === "failed"
-                    ? "btn-danger fw-bold"
-                    : "btn-outline-light text-dark"
-                }`}
+                className={`btn btn-sm ${statusFilter === "failed"
+                  ? "btn-danger fw-bold"
+                  : "btn-outline-light text-dark"
+                  }`}
                 onClick={() => {
                   setStatusFilter("failed");
                   setPage(1);
@@ -85,11 +84,10 @@ const PayoutQueue = () => {
               </button>
               <button
                 type="button"
-                className={`btn btn-sm ${
-                  statusFilter === "pending"
-                    ? "btn-warning fw-bold text-dark"
-                    : "btn-outline-light text-dark"
-                }`}
+                className={`btn btn-sm ${statusFilter === "pending"
+                  ? "btn-warning fw-bold text-dark"
+                  : "btn-outline-light text-dark"
+                  }`}
                 onClick={() => {
                   setStatusFilter("pending");
                   setPage(1);
@@ -100,11 +98,10 @@ const PayoutQueue = () => {
               </button>
               <button
                 type="button"
-                className={`btn btn-sm ${
-                  statusFilter === "success"
-                    ? "btn-success fw-bold"
-                    : "btn-outline-light text-dark"
-                }`}
+                className={`btn btn-sm ${statusFilter === "success"
+                  ? "btn-success fw-bold"
+                  : "btn-outline-light text-dark"
+                  }`}
                 onClick={() => {
                   setStatusFilter("success");
                   setPage(1);
@@ -115,11 +112,10 @@ const PayoutQueue = () => {
               </button>
               <button
                 type="button"
-                className={`btn btn-sm ${
-                  statusFilter === ""
-                    ? "btn-primary fw-bold"
-                    : "btn-outline-light text-dark"
-                }`}
+                className={`btn btn-sm ${statusFilter === ""
+                  ? "btn-primary fw-bold"
+                  : "btn-outline-light text-dark"
+                  }`}
                 onClick={() => {
                   setStatusFilter("");
                   setPage(1);
@@ -199,13 +195,12 @@ const PayoutQueue = () => {
                     {/* Status */}
                     <td>
                       <span
-                        className={`badge fs-11px px-2 py-1 ${
-                          row.status === "success"
-                            ? "bg-success"
-                            : row.status === "failed"
+                        className={`badge fs-11px px-2 py-1 ${row.status === "success"
+                          ? "bg-success"
+                          : row.status === "failed"
                             ? "bg-danger"
                             : "bg-warning text-dark"
-                        }`}
+                          }`}
                       >
                         {row.status}
                       </span>
