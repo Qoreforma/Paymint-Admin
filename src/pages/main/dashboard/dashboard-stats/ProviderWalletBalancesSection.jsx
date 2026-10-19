@@ -83,11 +83,11 @@ export default function ProviderWalletBalancesSection() {
   };
 
   return (
-    <div className="provider-balances-wrapper">
+    <div className="provider-balances-wrapper mt-[20px]">
       {/* Section Header */}
-      <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3">
+      <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3 h-auto">
         <div>
-          <h5 className="mb-0 d-flex align-items-center gap-2">
+          <h5 className="mb-0 d-flex align-items-center gap-2 h-auto">
             <span className="fw-bold text-dark">Upstream Provider Wallet Balances</span>
             {criticalCount > 0 ? (
               <Badge color="danger" pill className="px-2 py-1" style={{ fontSize: "11px", animation: "pulse 1.5s infinite" }}>
@@ -220,23 +220,23 @@ export default function ProviderWalletBalancesSection() {
             const isUrgent = p.balanceStatus === "urgent";
             const isWarning = p.balanceStatus === "warning";
             const isCurrentlyChecking = checkingCode === p.code && isCheckingSingle;
-            const isMuted = p.isBalanceAlertsPaused || p.isActive === false;
+            const isMuted = Boolean(p.isBalanceAlertsPaused);
 
             const cardStatusClass = isCritical
               ? "card-status-critical"
               : isUrgent
-              ? "card-status-urgent"
-              : isWarning
-              ? "card-status-warning"
-              : "card-status-healthy";
+                ? "card-status-urgent"
+                : isWarning
+                  ? "card-status-warning"
+                  : "card-status-healthy";
 
             const valStatusClass = isCritical
               ? "val-critical"
               : isUrgent
-              ? "val-urgent"
-              : isWarning
-              ? "val-warning"
-              : "val-healthy";
+                ? "val-urgent"
+                : isWarning
+                  ? "val-warning"
+                  : "val-healthy";
 
             return (
               <div

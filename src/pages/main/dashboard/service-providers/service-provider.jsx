@@ -65,26 +65,10 @@ function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking, onU
   const directCheckProviders = ["vtung", "vtu.ng", "smeplug", "quicklysim", "pairgate", "bigisub", "coolsub"];
   const canCheckDirectly = directCheckProviders.includes(code);
 
-  const isMuted = isAlertsPaused || !provider.active;
+  const isMuted = Boolean(isAlertsPaused);
 
   const handleTogglePause = (e) => {
-    const nextVal = e.target.checked;
-    setIsAlertsPaused(nextVal);
-    updateSettings(
-      {
-        code,
-        payload: {
-          isBalanceAlertsPaused: nextVal,
-        },
-      },
-      {
-        onSuccess: () => {
-          if (onUpdateProviderData) {
-            onUpdateProviderData({ isBalanceAlertsPaused: nextVal });
-          }
-        },
-      }
-    );
+    setIsAlertsPaused(e.target.checked);
   };
 
   const handleSaveThresholds = (e) => {
@@ -144,64 +128,55 @@ function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking, onU
   };
 
   return (
-    <div className="mt-4 p-3 rounded-3 border bg-light">
-      <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3">
-        <div>
-          <h6 className="mb-0 d-flex align-items-center gap-2 flex-wrap">
-            <span>Upstream Wallet Liquidity</span>
-            {getStatusBadge(provider.balanceStatus)}
-            {isMuted && (
-              <span className="badge badge-dim bg-secondary" title="Email and Slack low balance alerts muted">
-                <Icon name="bell-off" className="me-1" />
-                Alerts Muted
-              </span>
-            )}
-          </h6>
-          <span className="text-muted small" style={{ fontSize: "11px" }}>
-            Tracked via {provider.balanceSource === "api_poll" ? "Dedicated Upstream Endpoint" : "Live Transaction Responses"}
-          </span>
-        </div>
+    <div className="mt-4 p-3 p-sm-4 rounded-3 border bg-light h-auto">
+      {/* Header Bar with Divider */}
+      <div className="pb-3 mb-3 border-bottom h-auto">
+        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 h-auto">
+          <div className="h-auto">
+            <div className="d-flex align-items-center gap-2 flex-wrap h-auto mb-1">
+              <span className="fw-bold text-dark fs-15px">Upstream Wallet Liquidity</span>
+              {getStatusBadge(provider.balanceStatus)}
+              {isMuted && (
+                <span className="badge badge-dim bg-secondary" title="Email and Slack low balance alerts muted">
+                  <Icon name="bell-off" className="me-1" />
+                  Alerts Muted
+                </span>
+              )}
+            </div>
+            <div className="text-muted" style={{ fontSize: "11px", lineHeight: "1.3" }}>
+              Tracked via {provider.balanceSource === "api_poll" ? "Dedicated Upstream Endpoint" : "Live Transaction Responses"}
+            </div>
+          </div>
 
-        <div className="d-flex align-items-center gap-2 flex-wrap justify-content-sm-end">
-          <button
-            type="button"
-            className="btn btn-xs btn-white bg-white border d-inline-flex align-items-center gap-1 shadow-sm"
-            onClick={() => setShowSettings(!showSettings)}
-            style={{ fontSize: "11px", fontWeight: 600, padding: "4px 10px", lineHeight: 1, whiteSpace: "nowrap" }}
-            title="Configure custom alert thresholds"
-          >
-            <Icon name="setting" className="text-primary" style={{ fontSize: "12px", lineHeight: 1 }} />
-            <span style={{ lineHeight: 1, whiteSpace: "nowrap" }}>{showSettings ? "Close Settings" : "Alert Settings"}</span>
-          </button>
-
-          {canCheckDirectly && (
+          <div className="d-flex align-items-center gap-2 flex-wrap h-auto mt-2 mt-md-0">
             <button
               type="button"
-              className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm"
-              onClick={() => onCheckBalance(code)}
-              disabled={isChecking}
-              style={{ fontSize: "11px", fontWeight: 600, padding: "4px 10px", lineHeight: 1, whiteSpace: "nowrap" }}
+              className="btn btn-sm btn-white bg-white border shadow-sm d-inline-flex align-items-center gap-1.5 h-auto"
+              onClick={() => setShowSettings(!showSettings)}
+              style={{ fontSize: "12px", fontWeight: 600, padding: "6px 12px", minHeight: "34px", borderRadius: "6px" }}
+              title="Configure custom alert thresholds"
             >
-              {isChecking ? (
-                <Spinner size="sm" style={{ width: 11, height: 11 }} />
-              ) : (
-                <svg
-                  style={{ width: 11, height: 11, flexShrink: 0 }}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-              )}
-              <span style={{ lineHeight: 1, whiteSpace: "nowrap" }}>{isChecking ? "Checking..." : "Check Balance Now"}</span>
+              <Icon name="setting" className="text-primary" />
+              <span>{showSettings ? "Close Settings" : "Alert Settings"}</span>
             </button>
-          )}
+
+            {canCheckDirectly && (
+              <button
+                type="button"
+                className="btn btn-sm btn-primary shadow-sm d-inline-flex align-items-center gap-1.5 h-auto"
+                onClick={() => onCheckBalance(code)}
+                disabled={isChecking}
+                style={{ fontSize: "12px", fontWeight: 600, padding: "6px 14px", minHeight: "34px", borderRadius: "6px" }}
+              >
+                {isChecking ? (
+                  <Spinner size="sm" className="spinner-border-sm" />
+                ) : (
+                  <Icon name="reload" />
+                )}
+                <span>{isChecking ? "Checking..." : "Check Balance Now"}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -233,13 +208,13 @@ function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking, onU
           </div>
 
           <form onSubmit={handleSaveThresholds}>
-            <div className="d-flex align-items-center justify-content-between p-2 mb-3 bg-light rounded-2 border">
+            <div className="d-flex align-items-center justify-content-between p-3 mb-3 bg-light rounded-2 border">
               <div>
                 <div className="fw-bold text-dark" style={{ fontSize: "12px" }}>
                   Pause Low-Balance Notifications
                 </div>
-                <div className="text-muted" style={{ fontSize: "11px" }}>
-                  Temporarily silence email and Slack alerts if you are not currently using this provider.
+                <div className="text-muted" style={{ fontSize: "11px", marginTop: "2px" }}>
+                  Silence email &amp; Slack threshold alerts for this provider. Click "Save Settings" below to apply.
                 </div>
               </div>
               <div className="custom-control custom-switch">
@@ -252,8 +227,8 @@ function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking, onU
                   disabled={isSavingSettings}
                 />
                 <label className="custom-control-label" htmlFor={`pause-alerts-${code}`}>
-                  <span className={`fw-medium ${isAlertsPaused ? "text-danger" : "text-success"}`} style={{ fontSize: "12px" }}>
-                    {isAlertsPaused ? "Muted" : "Active"}
+                  <span className={`fw-bold ms-1 ${isAlertsPaused ? "text-danger" : "text-success"}`} style={{ fontSize: "12px" }}>
+                    {isAlertsPaused ? "🔕 Muted (Alerts Paused)" : "🔔 Active (Alerts Enabled)"}
                   </span>
                 </label>
               </div>
@@ -313,32 +288,32 @@ function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking, onU
               </div>
             </div>
 
-            <div className="d-flex align-items-center justify-content-end gap-2">
+            <div className="d-flex align-items-center justify-content-end gap-2 pt-2 border-top">
               <button
                 type="button"
-                className="btn btn-xs btn-light"
+                className="btn btn-sm btn-light border h-auto"
                 onClick={() => {
                   setWarningVal("");
                   setUrgentVal("");
                   setCriticalVal("");
                 }}
                 disabled={isSavingSettings}
-                style={{ fontSize: "11px" }}
+                style={{ fontSize: "12px", padding: "6px 14px", minHeight: "34px", borderRadius: "6px" }}
               >
                 Reset to Defaults
               </button>
               <button
                 type="submit"
-                className="btn btn-xs btn-primary d-inline-flex align-items-center gap-1 shadow-sm"
+                className="btn btn-sm btn-primary shadow-sm d-inline-flex align-items-center gap-1.5 h-auto"
                 disabled={isSavingSettings}
-                style={{ fontSize: "11px", fontWeight: 600, padding: "4px 12px", lineHeight: 1 }}
+                style={{ fontSize: "12px", fontWeight: 600, padding: "6px 16px", minHeight: "34px", borderRadius: "6px" }}
               >
                 {isSavingSettings ? (
-                  <Spinner size="sm" style={{ width: 11, height: 11 }} />
+                  <Spinner size="sm" className="spinner-border-sm" />
                 ) : (
-                  <Icon name="check" style={{ fontSize: "12px", lineHeight: 1 }} />
+                  <Icon name="check" className="fs-14px" />
                 )}
-                <span style={{ lineHeight: 1 }}>{isSavingSettings ? "Saving..." : "Save Settings"}</span>
+                <span>{isSavingSettings ? "Saving..." : "Save Settings"}</span>
               </button>
             </div>
           </form>
@@ -346,9 +321,9 @@ function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking, onU
       )}
 
       {/* 2-column info cards */}
-      <div className="row g-3">
-        <div className="col-12 col-sm-6">
-          <div className="p-3 bg-white rounded-2 border h-100">
+      <div className="row g-3 h-auto">
+        <div className="col-12 col-sm-6 h-auto">
+          <div className="p-3 bg-white rounded-2 border h-auto d-flex flex-column justify-content-between" style={{ minHeight: "120px" }}>
             <span className="sub-text" style={{ fontSize: "11px" }}>Current Live Balance</span>
             <div
               className={`fw-bold mt-1 ${
@@ -370,8 +345,8 @@ function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking, onU
           </div>
         </div>
 
-        <div className="col-12 col-sm-6">
-          <div className="p-3 bg-white rounded-2 border h-100">
+        <div className="col-12 col-sm-6 h-auto">
+          <div className="p-3 bg-white rounded-2 border h-auto" style={{ minHeight: "120px" }}>
             <div className="d-flex align-items-center justify-content-between mb-1">
               <span className="sub-text" style={{ fontSize: "11px" }}>Active Alert Levels</span>
               {hasCustomThresholds ? (
@@ -889,11 +864,11 @@ const ServiceProviders = () => {
                                   {formatter(item?.balanceCurrency || "NGN").format(item?.currentBalance || 0)}
                                 </div>
                                 <div className="d-flex align-items-center gap-1 flex-wrap" style={{ lineHeight: "1" }}>
-                                  {(item?.isBalanceAlertsPaused || item?.isActive === false) && (
+                                  {Boolean(item?.isBalanceAlertsPaused) && (
                                     <span
                                       className="badge badge-dim bg-light text-muted border"
                                       style={{ fontSize: "9px", padding: "1px 5px", lineHeight: "1.2", whiteSpace: "nowrap" }}
-                                      title={item?.isBalanceAlertsPaused ? "Alerts silenced for this provider" : "Provider is inactive"}
+                                      title="Low-balance alerts paused for this provider"
                                     >
                                       🔕 Muted
                                     </span>
