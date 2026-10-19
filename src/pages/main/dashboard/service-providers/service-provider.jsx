@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Card, DropdownItem, DropdownMenu, DropdownToggle, Modal, ModalBody, UncontrolledDropdown } from "reactstrap";
+import { Card, DropdownItem, DropdownMenu, DropdownToggle, Modal, ModalBody, Spinner, UncontrolledDropdown } from "reactstrap";
 import {
   useDeleteProviders,
   useGetProviders,
@@ -9,6 +9,9 @@ import {
   useUpdateProviders,
   useToggleProviderServiceType,
   useDeleteProviderProducts,
+  useCheckProviderBalance,
+  useGetProviderBalanceLogs,
+  useRefreshProviderBalances,
 } from "../../../../api/service-providers";
 import {
   Block,
@@ -29,7 +32,7 @@ import {
 import NoIcon from "../../../../images/no-image-icon.png";
 import Content from "../../../../layout/content/Content";
 import Head from "../../../../layout/head/Head";
-import { formatDate, formatDateWithHyphen, formatDateWithTime } from "../../../../utils/Utils";
+import { formatDate, formatDateWithHyphen, formatDateWithTime, formatter } from "../../../../utils/Utils";
 import LoadingSpinner from "../../../components/spinner";
 import Search from "../tables/Search";
 import SortToolTip from "../tables/SortTooltip";
@@ -38,6 +41,176 @@ import EditProductTypes from "./edit-product-types";
 import ServiceProviderModal from "./form-modal";
 import AddProductModal from "./modals/add-product";
 import { usePermission } from "../../../../utils/usePermission";
+
+function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking }) {
+  const code = (provider.code || provider.name || "").toLowerCase().trim();
+  const { data: logsResponse, isLoading: isLoadingLogs } = useGetProviderBalanceLogs(code);
+  const logs = logsResponse?.data || [];
+
+  const directCheckProviders = ["vtung", "vtu.ng", "smeplug", "quicklysim", "pairgate", "bigisub"];
+  const canCheckDirectly = directCheckProviders.includes(code);
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "critical":
+        return <span className="badge badge-dim bg-danger">Critical (&lt;₦2k)</span>;
+      case "urgent":
+        return <span className="badge badge-dim bg-warning">Urgent (&lt;₦5k)</span>;
+      case "warning":
+        return <span className="badge badge-dim bg-info">Low (&lt;₦10k)</span>;
+      default:
+        return <span className="badge badge-dim bg-success">Healthy</span>;
+    }
+  };
+
+  return (
+    <div className="mt-4 p-3 rounded-3 border bg-light">
+      <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3">
+        <div>
+          <h6 className="mb-0 d-flex align-items-center gap-2">
+            <span>Upstream Wallet Liquidity</span>
+            {getStatusBadge(provider.balanceStatus)}
+          </h6>
+          <span className="text-muted small" style={{ fontSize: "11px" }}>
+            Tracked via {provider.balanceSource === "api_poll" ? "Dedicated Upstream Endpoint" : "Live Transaction Responses"}
+          </span>
+        </div>
+
+        {canCheckDirectly && (
+          <button
+            type="button"
+            className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm"
+            onClick={() => onCheckBalance(code)}
+            disabled={isChecking}
+          >
+            {isChecking ? <Spinner size="sm" /> : <Icon name="reload" />}
+            <span>{isChecking ? "Checking..." : "Check Balance Now"}</span>
+          </button>
+        )}
+      </div>
+
+      <div className="row g-3">
+        <div className="col-12 col-sm-6">
+          <div className="p-3 bg-white rounded-2 border">
+            <span className="sub-text" style={{ fontSize: "11px" }}>Current Live Balance</span>
+            <div
+              className={`fw-bold mt-1 ${
+                provider.balanceStatus === "critical"
+                  ? "text-danger"
+                  : provider.balanceStatus === "urgent"
+                  ? "text-warning"
+                  : "text-dark"
+              }`}
+              style={{ fontSize: "20px" }}
+            >
+              {formatter(provider.balanceCurrency || "NGN").format(provider.currentBalance || 0)}
+            </div>
+            <div className="text-muted mt-1" style={{ fontSize: "11px" }}>
+              {provider.lastBalanceCheckedAt
+                ? `Last updated: ${formatDateWithTime(provider.lastBalanceCheckedAt)}`
+                : "Awaiting update"}
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 col-sm-6">
+          <div className="p-3 bg-white rounded-2 border">
+            <span className="sub-text" style={{ fontSize: "11px" }}>Monitoring & Alert Levels</span>
+            <div className="mt-1" style={{ fontSize: "12px" }}>
+              <div className="d-flex justify-content-between py-0.5 border-bottom">
+                <span className="text-muted">Warning Alert:</span>
+                <span className="fw-medium text-info">&lt; ₦10,000</span>
+              </div>
+              <div className="d-flex justify-content-between py-0.5 border-bottom">
+                <span className="text-muted">Urgent Alert:</span>
+                <span className="fw-medium text-warning">&lt; ₦5,000</span>
+              </div>
+              <div className="d-flex justify-content-between py-0.5">
+                <span className="text-muted">Critical (30m Esc):</span>
+                <span className="fw-medium text-danger">&lt; ₦2,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Funding & Alert Activity Log */}
+      <div className="mt-3">
+        <div className="fw-bold text-dark mb-1" style={{ fontSize: "12px" }}>
+          Recent Liquidity Events & Top-ups
+        </div>
+        {isLoadingLogs ? (
+          <div className="text-center py-2 text-muted" style={{ fontSize: "12px" }}>
+            <Spinner size="sm" color="primary" className="me-1" /> Loading liquidity events...
+          </div>
+        ) : logs.length === 0 ? (
+          <div className="p-2 bg-white rounded-2 border text-center text-muted" style={{ fontSize: "11px" }}>
+            No threshold alerts or top-up logs recorded yet for this provider.
+          </div>
+        ) : (
+          <div className="table-responsive bg-white rounded-2 border" style={{ maxHeight: "180px", overflowY: "auto" }}>
+            <table className="table table-sm table-tranx mb-0" style={{ fontSize: "11px" }}>
+              <thead>
+                <tr className="bg-light">
+                  <th className="py-1">Event</th>
+                  <th className="py-1">Shift</th>
+                  <th className="py-1">Amount</th>
+                  <th className="py-1">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((log) => {
+                  const isTopUp = log.eventType === "funded" || log.eventType === "top_up";
+                  const isAlert = log.eventType === "threshold_alert";
+                  const shiftAmount = log.difference || log.amountFunded || 0;
+                  const alertLevel = log.level || log.thresholdLevel || "alert";
+
+                  return (
+                    <tr key={log._id}>
+                      <td className="py-1">
+                        {isTopUp ? (
+                          <span className="badge badge-dim bg-success" style={{ fontSize: "9px" }}>
+                            Top-Up
+                          </span>
+                        ) : isAlert ? (
+                          <span
+                            className={`badge badge-dim ${
+                              alertLevel === "critical"
+                                ? "bg-danger"
+                                : alertLevel === "urgent"
+                                ? "bg-warning"
+                                : "bg-info"
+                            }`}
+                            style={{ fontSize: "9px" }}
+                          >
+                            Alert ({alertLevel})
+                          </span>
+                        ) : (
+                          <span className="badge badge-dim bg-light text-dark" style={{ fontSize: "9px" }}>
+                            Check
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-1">
+                        ₦{Number(log.previousBalance || 0).toLocaleString()} → ₦{Number(log.newBalance || 0).toLocaleString()}
+                      </td>
+                      <td className="py-1 fw-bold">
+                        {shiftAmount > 0 ? `+₦${Number(shiftAmount).toLocaleString()}` : "—"}
+                      </td>
+                      <td className="py-1 text-muted">
+                        {formatDateWithTime(log.createdAt)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const ServiceProviders = () => {
   const { hasPermission } = usePermission();
@@ -61,14 +234,22 @@ const ServiceProviders = () => {
   const { mutate: deleteProvider } = useDeleteProviders(editId);
   const { mutate: updateProvider } = useUpdateProviders(editId);
   const { mutateAsync: toggleServiceType, isPending } = useToggleProviderServiceType();
+  const { mutate: checkBalance, isLoading: isCheckingBalance } = useCheckProviderBalance();
+  const { mutate: refreshBalances, isLoading: isRefreshingBalances } = useRefreshProviderBalances();
 
   const [formData, setFormData] = useState({
     id: "",
     name: "",
+    code: "",
     logo: "",
     active: false,
     product_type: [],
     created_at: "",
+    currentBalance: 0,
+    balanceCurrency: "NGN",
+    balanceStatus: "healthy",
+    balanceSource: "api_poll",
+    lastBalanceCheckedAt: null,
   });
 
   const [view, setView] = useState({
@@ -95,10 +276,18 @@ const ServiceProviders = () => {
   // resets forms
   const resetForm = () => {
     setFormData({
+      id: "",
       name: "",
+      code: "",
       logo: "",
+      active: false,
       product_type: [],
       created_at: "",
+      currentBalance: 0,
+      balanceCurrency: "NGN",
+      balanceStatus: "healthy",
+      balanceSource: "api_poll",
+      lastBalanceCheckedAt: null,
     });
     setServiceTypes([]);
     setErrorMessage("");
@@ -111,10 +300,16 @@ const ServiceProviders = () => {
         setFormData({
           id: item?._id,
           name: item?.name,
+          code: item?.code,
           logo: item?.logo,
           active: item?.isActive,
           product_type: item?.serviceType,
           created_at: item?.createdAt,
+          currentBalance: item?.currentBalance || 0,
+          balanceCurrency: item?.balanceCurrency || "NGN",
+          balanceStatus: item?.balanceStatus || "healthy",
+          balanceSource: item?.balanceSource || "api_poll",
+          lastBalanceCheckedAt: item?.lastBalanceCheckedAt,
         });
         setServiceTypes(item?.serviceType || []);
       }
@@ -229,6 +424,21 @@ const ServiceProviders = () => {
                   <ul className="btn-toolbar gx-1">
                     <li>
                       <Button
+                        color="light"
+                        outline
+                        className="btn-sm btn-white d-inline-flex align-items-center gap-1 shadow-sm"
+                        onClick={() => refreshBalances()}
+                        disabled={isRefreshingBalances}
+                        title="Poll live balances for all supported upstream gateways"
+                        style={{ height: "34px", fontSize: "12px" }}
+                      >
+                        {isRefreshingBalances ? <Spinner size="sm" /> : <Icon name="reload" className="text-primary" />}
+                        <span className="d-none d-sm-inline">{isRefreshingBalances ? "Polling..." : "Refresh Balances"}</span>
+                      </Button>
+                    </li>
+                    <li className="btn-toolbar-sep"></li>
+                    <li>
+                      <Button
                         href="#search"
                         onClick={(ev) => {
                           ev.preventDefault();
@@ -331,6 +541,9 @@ const ServiceProviders = () => {
                           <span className="tb-tnx-head bg-white text-secondary">Service Count</span>
                         </DataTableRow>
                         <DataTableRow size="md">
+                          <span className="tb-tnx-head bg-white text-secondary">Wallet Balance</span>
+                        </DataTableRow>
+                        <DataTableRow size="md">
                           <span className="tb-tnx-head bg-white text-secondary">Date Added</span>
                         </DataTableRow>
                         <DataTableRow size="md">
@@ -399,6 +612,35 @@ const ServiceProviders = () => {
                             </DataTableRow>
                             <DataTableRow size="md">
                               <span className="text-capitalize"> {item?.serviceType.length}</span>
+                            </DataTableRow>
+                            <DataTableRow size="md">
+                              <div className="d-flex flex-column">
+                                <span className="fw-bold text-dark" style={{ fontSize: "13px" }}>
+                                  {formatter(item?.balanceCurrency || "NGN").format(item?.currentBalance || 0)}
+                                </span>
+                                <div className="d-flex align-items-center gap-1 mt-0.5">
+                                  {item?.balanceStatus === "critical" ? (
+                                    <span className="badge badge-dim bg-danger" style={{ fontSize: "10px", padding: "1px 5px" }}>
+                                      Critical (&lt;₦2k)
+                                    </span>
+                                  ) : item?.balanceStatus === "urgent" ? (
+                                    <span className="badge badge-dim bg-warning" style={{ fontSize: "10px", padding: "1px 5px" }}>
+                                      Urgent (&lt;₦5k)
+                                    </span>
+                                  ) : item?.balanceStatus === "warning" ? (
+                                    <span className="badge badge-dim bg-info" style={{ fontSize: "10px", padding: "1px 5px" }}>
+                                      Low (&lt;₦10k)
+                                    </span>
+                                  ) : (
+                                    <span className="badge badge-dim bg-success" style={{ fontSize: "10px", padding: "1px 5px" }}>
+                                      Healthy
+                                    </span>
+                                  )}
+                                  <span className="text-muted" style={{ fontSize: "10px" }}>
+                                    {item?.balanceSource === "transaction_meta" ? "Txn" : "API"}
+                                  </span>
+                                </div>
+                              </div>
                             </DataTableRow>
                             <DataTableRow size="md">
                               <span>{formatDateWithHyphen(item.createdAt)}</span>
@@ -662,6 +904,13 @@ const ServiceProviders = () => {
                     <span className="caption-text">{formatDateWithHyphen(formData.created_at)}</span>
                   </Col>
                 </Row>
+
+                {/* Upstream Wallet Liquidity & Real-time Balance Card */}
+                <ProviderLiquidityDetailCard
+                  provider={formData}
+                  onCheckBalance={(code) => checkBalance(code)}
+                  isChecking={isCheckingBalance}
+                />
 
                 <div className="mt-4">
                   <h2 className="text-primary fw-bold fs-16px">Service Types</h2>

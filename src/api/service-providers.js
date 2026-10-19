@@ -839,3 +839,111 @@ export const useBulkUpdateApiDiscount = (id) => {
     },
   );
 };
+
+// ***************************** PROVIDER WALLET BALANCES *************************//
+
+export const useGetProviderBalances = () => {
+  return useQuery(
+    ["ProviderBalances"],
+    async () => {
+      try {
+        const response = await instance.get(`${BACKEND_URLS.providers}/balances`);
+        return response.data;
+      } catch (error) {
+        console.error("Failed to fetch provider balances:", error);
+        throw error;
+      }
+    },
+    {
+      refetchInterval: 30000,
+      refetchOnWindowFocus: true,
+      staleTime: 10000,
+    }
+  );
+};
+
+export const useRefreshProviderBalances = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    () =>
+      toast.promise(
+        instance
+          .post(`${BACKEND_URLS.providers}/balances/refresh`)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err.response?.data || err;
+          }),
+        {
+          success: (data) => data.message || "Provider balances refreshed successfully",
+          loading: "Polling provider balances...",
+          error: (error) => error?.message || "Failed to refresh provider balances",
+        },
+        {
+          style: {
+            minWidth: "220px",
+          },
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["ProviderBalances"]);
+        queryClient.invalidateQueries(["Providers"]);
+      },
+    }
+  );
+};
+
+export const useCheckProviderBalance = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (code) =>
+      toast.promise(
+        instance
+          .post(`${BACKEND_URLS.providers}/${code}/check-balance`)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err.response?.data || err;
+          }),
+        {
+          success: (data) => data.message || "Balance checked successfully",
+          loading: "Checking provider balance...",
+          error: (error) => error?.message || "Failed to check provider balance",
+        },
+        {
+          style: {
+            minWidth: "220px",
+          },
+        }
+      ),
+    {
+      onSuccess: (_, code) => {
+        queryClient.invalidateQueries(["ProviderBalances"]);
+        queryClient.invalidateQueries(["Providers"]);
+        queryClient.invalidateQueries(["ProviderBalanceLogs", code]);
+      },
+    }
+  );
+};
+
+export const useGetProviderBalanceLogs = (code) => {
+  return useQuery(
+    ["ProviderBalanceLogs", code],
+    async () => {
+      try {
+        const response = await instance.get(`${BACKEND_URLS.providers}/${code}/balance-logs`);
+        return response.data;
+      } catch (error) {
+        console.error(`Failed to fetch balance logs for ${code}:`, error);
+        throw error;
+      }
+    },
+    {
+      enabled: !!code,
+      refetchOnWindowFocus: false,
+      staleTime: 15000,
+    }
+  );
+};
+

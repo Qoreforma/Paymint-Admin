@@ -2,6 +2,7 @@ import React from "react";
 import { Card, Row, Col, Spinner } from "reactstrap";
 import { useGetRewardAnalytics } from "../../../../api/spinRewards";
 import { Icon } from "../../../../components/Component";
+import { formatDateWithHyphen } from "../../../../utils/Utils";
 
 const SpinAnalytics = () => {
   const { data: analytics, isLoading } = useGetRewardAnalytics();
@@ -20,19 +21,139 @@ const SpinAnalytics = () => {
     totalPayoutValue = 0,
     totalBalanceDisbursed = 0,
     totalAirtimeDisbursed = 0,
+    totalTicketsEarned = 0,
+    totalPendingTickets = 0,
+    activeCampaign = null,
     payoutsCountByStatus = { pending: 0, success: 0, failed: 0 },
     tierBreakdowns = [],
   } = analytics || {};
 
   return (
     <div className="py-2">
+      {/* ── Active Campaign Spotlight Card ─────────────────────────── */}
+      {activeCampaign?.hasActiveTier ? (
+        <Card className="card-bordered mb-4 border-success bg-success-dim shadow-sm">
+          <div className="card-inner p-3">
+            <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 h-auto pb-2 border-bottom border-success border-opacity-25 mb-3">
+              <div className="d-flex flex-wrap align-items-center gap-2">
+                <span className="badge bg-success text-white px-2 py-1 fs-11px fw-bold">
+                  <Icon name="activity" className="me-1" />
+                  LIVE CAMPAIGN
+                </span>
+                <h5 className="mb-0 fw-bold text-dark">{activeCampaign.tierName}</h5>
+                <span className="badge bg-white text-dark border fs-11px">
+                  Threshold: {activeCampaign.threshold} referrals / spin
+                </span>
+              </div>
+              <div className="text-muted fs-12px">
+                <Icon name="calendar" className="me-1" />
+                {activeCampaign.campaignStart || activeCampaign.campaignEnd ? (
+                  <span>
+                    Campaign Window:{" "}
+                    <strong>
+                      {activeCampaign.campaignStart ? formatDateWithHyphen(activeCampaign.campaignStart) : "Launch"}
+                      {" – "}
+                      {activeCampaign.campaignEnd ? formatDateWithHyphen(activeCampaign.campaignEnd) : "Ongoing"}
+                    </strong>
+                  </span>
+                ) : (
+                  <span><strong>Ongoing Campaign</strong> (No Expiry Date)</span>
+                )}
+              </div>
+            </div>
+
+            {/* 4 Spotlight Metric Pills */}
+            <Row className="g-2">
+              <Col xs="6" sm="3">
+                <div className="bg-white p-2 rounded border text-center shadow-xs">
+                  <span className="text-muted fs-11px text-uppercase fw-bold d-block">
+                    Campaign Referrals
+                  </span>
+                  <h4 className="text-primary fw-bold my-1">
+                    {(activeCampaign.totalCampaignReferrals || 0).toLocaleString()}
+                  </h4>
+                  <span className="text-muted fs-11px">Referees joined during campaign</span>
+                </div>
+              </Col>
+              <Col xs="6" sm="3">
+                <div className="bg-white p-2 rounded border text-center shadow-xs">
+                  <span className="text-muted fs-11px text-uppercase fw-bold d-block">
+                    Active Referrers
+                  </span>
+                  <h4 className="text-info fw-bold my-1">
+                    {(activeCampaign.activeReferrersCount || 0).toLocaleString()}
+                  </h4>
+                  <span className="text-muted fs-11px">Users actively referring</span>
+                </div>
+              </Col>
+              <Col xs="6" sm="3">
+                <div className="bg-white p-2 rounded border text-center shadow-xs">
+                  <span className="text-muted fs-11px text-uppercase fw-bold d-block">
+                    Spins Unlocked
+                  </span>
+                  <h4 className="text-success fw-bold my-1">
+                    {(activeCampaign.ticketsEarned || 0).toLocaleString()}
+                  </h4>
+                  <span className="text-muted fs-11px">Milestone tickets earned</span>
+                </div>
+              </Col>
+              <Col xs="6" sm="3">
+                <div className="bg-white p-2 rounded border text-center shadow-xs">
+                  <span className="text-muted fs-11px text-uppercase fw-bold d-block">
+                    Pending Spins
+                  </span>
+                  <h4 className="text-warning fw-bold my-1">
+                    {(activeCampaign.pendingTickets || 0).toLocaleString()}
+                  </h4>
+                  <span className="text-muted fs-11px">Waiting to be spun by users</span>
+                </div>
+              </Col>
+            </Row>
+          </div>
+        </Card>
+      ) : (
+        <Card className="card-bordered mb-4 border-light bg-lighter">
+          <div className="card-inner p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div className="d-flex align-items-center gap-2">
+              <span className="badge bg-secondary text-white">NO ACTIVE CAMPAIGN</span>
+              <span className="text-muted fs-13px">
+                No reward tier is currently within an active campaign date window.
+              </span>
+            </div>
+            <span className="text-muted fs-12px">Configure active dates in the Reward Tiers & Wheels tab</span>
+          </div>
+        </Card>
+      )}
+
       {/* Responsive KPI Grid (adapts cleanly whether aside is open or closed) */}
       <div className="spin-kpi-grid">
         <div className="spin-kpi-card">
           <span className="text-muted small text-uppercase fw-bold d-block">
-            Total Spins Claimed
+            Campaign Referrals
           </span>
           <h3 className="text-primary mt-2 mb-0 fw-bold">
+            {(activeCampaign?.totalCampaignReferrals ?? 0).toLocaleString()}
+          </h3>
+          <span className="text-muted fs-12px">
+            {activeCampaign?.tierName ? `In ${activeCampaign.tierName}` : "Active campaign total"}
+          </span>
+        </div>
+
+        <div className="spin-kpi-card">
+          <span className="text-muted small text-uppercase fw-bold d-block">
+            Unclaimed Spins
+          </span>
+          <h3 className="text-warning mt-2 mb-0 fw-bold">
+            {totalPendingTickets.toLocaleString()}
+          </h3>
+          <span className="text-muted fs-12px">Tickets pending user spin</span>
+        </div>
+
+        <div className="spin-kpi-card">
+          <span className="text-muted small text-uppercase fw-bold d-block">
+            Total Spins Claimed
+          </span>
+          <h3 className="text-info mt-2 mb-0 fw-bold">
             {totalSpins.toLocaleString()}
           </h3>
           <span className="text-muted fs-12px">All-time lifetime spins</span>
@@ -52,7 +173,7 @@ const SpinAnalytics = () => {
           <span className="text-muted small text-uppercase fw-bold d-block">
             Wallet Rewards
           </span>
-          <h3 className="text-info mt-2 mb-0 fw-bold">
+          <h3 className="text-primary mt-2 mb-0 fw-bold">
             ₦{totalBalanceDisbursed.toLocaleString()}
           </h3>
           <span className="text-muted fs-12px">Credited to wallet balance</span>
@@ -106,7 +227,7 @@ const SpinAnalytics = () => {
 
       {/* Per-Tier Win Distribution Tables */}
       <div className="mt-4 pt-1 mb-3">
-        <h6 className="fw-bold mb-0">Tier Win Distribution Accuracy</h6>
+        <h6 className="fw-bold mb-0">Tier Win Distribution Accuracy & Referrals</h6>
       </div>
 
       {tierBreakdowns.length === 0 ? (
@@ -118,10 +239,36 @@ const SpinAnalytics = () => {
           <Card key={tier.tierId} className="card-bordered mb-4 overflow-hidden">
             <div className="card-inner border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-2 bg-lighter h-auto">
               <div>
-                <h6 className="mb-0 fw-bold text-primary">{tier.tierName}</h6>
-                <span className="text-muted fs-12px">
-                  Threshold: {tier.threshold} referrals · Total Spins: {tier.spinsCount}
-                </span>
+                <div className="d-flex align-items-center gap-2 mb-1">
+                  <h6 className="mb-0 fw-bold text-primary">{tier.tierName}</h6>
+                  {tier.isActive ? (
+                    <span className="badge bg-success-dim text-success" style={{ fontSize: "10px" }}>
+                      Active
+                    </span>
+                  ) : (
+                    <span className="badge bg-light text-muted border" style={{ fontSize: "10px" }}>
+                      Inactive
+                    </span>
+                  )}
+                  {tier.validFrom || tier.validUntil ? (
+                    <span className="text-muted fs-11px">
+                      ({tier.validFrom ? formatDateWithHyphen(tier.validFrom) : "Launch"} – {tier.validUntil ? formatDateWithHyphen(tier.validUntil) : "Ongoing"})
+                    </span>
+                  ) : null}
+                </div>
+                <div className="text-muted fs-12px d-flex flex-wrap align-items-center gap-2">
+                  <span>Threshold: <strong className="text-dark">{tier.threshold} refs / spin</strong></span>
+                  <span>•</span>
+                  <span>Total Referrals: <strong className="text-primary">{tier.totalReferrals?.toLocaleString() ?? 0}</strong></span>
+                  <span>•</span>
+                  <span>Active Referrers: <strong className="text-dark">{tier.activeReferrersCount?.toLocaleString() ?? 0}</strong></span>
+                  <span>•</span>
+                  <span>Spins Earned: <strong className="text-dark">{tier.ticketsEarned?.toLocaleString() ?? 0}</strong></span>
+                  <span>•</span>
+                  <span>Spins Claimed: <strong className="text-dark">{tier.spinsCount?.toLocaleString() ?? 0}</strong></span>
+                  <span>•</span>
+                  <span>Pending Spins: <strong className="text-warning">{tier.pendingTickets?.toLocaleString() ?? 0}</strong></span>
+                </div>
               </div>
 
               <div className="d-flex align-items-center gap-2">

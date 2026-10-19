@@ -16,6 +16,7 @@ import Content from "../../../layout/content/Content";
 import Head from "../../../layout/head/Head";
 import {
   AllServicesStats,
+  ProviderWalletBalancesSection,
   ServicesStatsSection,
   WalletBalances,
   WalletStatsSection,
@@ -335,6 +336,11 @@ const Dashboard = () => {
                     </Badge>
                   </h5>
                   <WalletStatsSection data={data?.wallet_transaction} />
+                </div>
+
+                {/* Upstream Provider Wallet Balances & Liquidity */}
+                <div>
+                  <ProviderWalletBalancesSection />
                 </div>
 
                 <div>
