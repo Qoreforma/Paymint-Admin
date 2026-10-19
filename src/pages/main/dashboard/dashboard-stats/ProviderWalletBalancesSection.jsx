@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Badge, Card, Spinner } from "reactstrap";
-import { Col, Icon, Row } from "../../../../components/Component";
+import { Badge, Spinner } from "reactstrap";
+import { Icon } from "../../../../components/Component";
 import { formatter, formatDateWithTime } from "../../../../utils/Utils";
 import {
   useGetProviderBalances,
@@ -9,6 +9,7 @@ import {
   useCheckProviderBalance,
 } from "../../../../api/service-providers";
 import NoIcon from "../../../../images/no-image-icon.png";
+import "./ProviderWalletBalancesSection.css";
 
 export default function ProviderWalletBalancesSection() {
   const { data: response, isLoading, isFetching } = useGetProviderBalances();
@@ -37,46 +38,57 @@ export default function ProviderWalletBalancesSection() {
     });
   };
 
-  const getStatusBadge = (status) => {
+  const formatShortTime = (dateStr) => {
+    if (!dateStr) return "Awaiting update";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "Awaiting update";
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch {
+      return "Updated";
+    }
+  };
+
+  const renderStatusPill = (status) => {
     switch (status) {
       case "critical":
         return (
-          <span className="badge badge-dim bg-danger" style={{ fontSize: "11px", fontWeight: 600 }}>
-            <Icon name="alert-circle" className="me-1" />
-            Critical (&lt;₦2k)
+          <span className="provider-status-pill status-pill-critical" title="Critical: Balance below ₦2,000">
+            <span className="status-dot"></span>
+            <span>Crit (&lt;₦2k)</span>
           </span>
         );
       case "urgent":
         return (
-          <span className="badge badge-dim bg-warning" style={{ fontSize: "11px", fontWeight: 600 }}>
-            <Icon name="alert-circle" className="me-1" />
-            Urgent (&lt;₦5k)
+          <span className="provider-status-pill status-pill-urgent" title="Urgent: Balance below ₦5,000">
+            <span className="status-dot"></span>
+            <span>Urg (&lt;₦5k)</span>
           </span>
         );
       case "warning":
         return (
-          <span className="badge badge-dim bg-info" style={{ fontSize: "11px", fontWeight: 600 }}>
-            <Icon name="info-fill" className="me-1" />
-            Low (&lt;₦10k)
+          <span className="provider-status-pill status-pill-warning" title="Low: Balance below ₦10,000">
+            <span className="status-dot"></span>
+            <span>Low (&lt;₦10k)</span>
           </span>
         );
       default:
         return (
-          <span className="badge badge-dim bg-success" style={{ fontSize: "11px", fontWeight: 600 }}>
-            <Icon name="check-circle" className="me-1" />
-            Healthy
+          <span className="provider-status-pill status-pill-healthy" title="Healthy Liquidity">
+            <span className="status-dot"></span>
+            <span>Healthy</span>
           </span>
         );
     }
   };
 
   return (
-    <div className="mb-2">
+    <div className="provider-balances-wrapper">
       {/* Section Header */}
       <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3">
         <div>
           <h5 className="mb-0 d-flex align-items-center gap-2">
-            <span>Upstream Provider Wallet Balances</span>
+            <span className="fw-bold text-dark">Upstream Provider Wallet Balances</span>
             {criticalCount > 0 ? (
               <Badge color="danger" pill className="px-2 py-1" style={{ fontSize: "11px", animation: "pulse 1.5s infinite" }}>
                 {criticalCount} Critical
@@ -125,12 +137,9 @@ export default function ProviderWalletBalancesSection() {
       </div>
 
       {/* Summary KPI Strip */}
-      <Row className="g-3 mb-3">
-        <Col sm={6} lg={3}>
-          <div
-            className="p-3 bg-white rounded-3 border shadow-sm h-100 d-flex align-items-center justify-content-between"
-            style={{ borderLeft: "4px solid #3b82f6" }}
-          >
+      <div className="row g-2 g-xl-3 mb-3">
+        <div className="col-6 col-lg-3">
+          <div className="provider-kpi-card kpi-total">
             <div>
               <div className="text-muted text-uppercase fw-bold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
                 Total Upstream Float
@@ -139,28 +148,14 @@ export default function ProviderWalletBalancesSection() {
                 {formatter("NGN").format(totalUpstreamFloat)}
               </div>
             </div>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                background: "rgba(59, 130, 246, 0.12)",
-                color: "#2563eb",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <div className="provider-kpi-icon">
               <Icon name="coins" />
             </div>
           </div>
-        </Col>
+        </div>
 
-        <Col sm={6} lg={3}>
-          <div
-            className="p-3 bg-white rounded-3 border shadow-sm h-100 d-flex align-items-center justify-content-between"
-            style={{ borderLeft: "4px solid #10b981" }}
-          >
+        <div className="col-6 col-lg-3">
+          <div className="provider-kpi-card kpi-healthy">
             <div>
               <div className="text-muted text-uppercase fw-bold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
                 Healthy Liquidity
@@ -169,28 +164,14 @@ export default function ProviderWalletBalancesSection() {
                 {healthyCount} <span className="text-muted fw-normal" style={{ fontSize: "12px" }}>/ {providers.length}</span>
               </div>
             </div>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                background: "rgba(16, 185, 129, 0.12)",
-                color: "#10b981",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <div className="provider-kpi-icon">
               <Icon name="check-circle" />
             </div>
           </div>
-        </Col>
+        </div>
 
-        <Col sm={6} lg={3}>
-          <div
-            className="p-3 bg-white rounded-3 border shadow-sm h-100 d-flex align-items-center justify-content-between"
-            style={{ borderLeft: "4px solid #f59e0b" }}
-          >
+        <div className="col-6 col-lg-3">
+          <div className="provider-kpi-card kpi-warning">
             <div>
               <div className="text-muted text-uppercase fw-bold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
                 Low Balance (&lt;₦10k)
@@ -199,28 +180,14 @@ export default function ProviderWalletBalancesSection() {
                 {warningCount + urgentCount}
               </div>
             </div>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                background: "rgba(245, 158, 11, 0.12)",
-                color: "#f59e0b",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <div className="provider-kpi-icon">
               <Icon name="alert-circle" />
             </div>
           </div>
-        </Col>
+        </div>
 
-        <Col sm={6} lg={3}>
-          <div
-            className="p-3 bg-white rounded-3 border shadow-sm h-100 d-flex align-items-center justify-content-between"
-            style={{ borderLeft: "4px solid #ef4444" }}
-          >
+        <div className="col-6 col-lg-3">
+          <div className="provider-kpi-card kpi-critical">
             <div>
               <div className="text-muted text-uppercase fw-bold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
                 Critical Liquidity (&lt;₦2k)
@@ -229,25 +196,14 @@ export default function ProviderWalletBalancesSection() {
                 {criticalCount}
               </div>
             </div>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                background: "rgba(239, 68, 68, 0.12)",
-                color: "#ef4444",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <div className="provider-kpi-icon">
               <Icon name="cross-circle" />
             </div>
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
 
-      {/* Provider Cards Grid */}
+      {/* 6-Columns Provider Cards Grid */}
       {isLoading ? (
         <div className="p-4 bg-white rounded-3 border text-center text-muted">
           <Spinner size="sm" color="primary" className="me-2" />
@@ -258,112 +214,126 @@ export default function ProviderWalletBalancesSection() {
           No active bill payment providers found.
         </div>
       ) : (
-        <Row className="g-3">
+        <div className="provider-balance-grid">
           {providers.map((p) => {
             const isCritical = p.balanceStatus === "critical";
             const isUrgent = p.balanceStatus === "urgent";
             const isWarning = p.balanceStatus === "warning";
             const isCurrentlyChecking = checkingCode === p.code && isCheckingSingle;
+            const isMuted = p.isBalanceAlertsPaused || p.isActive === false;
+
+            const cardStatusClass = isCritical
+              ? "card-status-critical"
+              : isUrgent
+              ? "card-status-urgent"
+              : isWarning
+              ? "card-status-warning"
+              : "card-status-healthy";
+
+            const valStatusClass = isCritical
+              ? "val-critical"
+              : isUrgent
+              ? "val-urgent"
+              : isWarning
+              ? "val-warning"
+              : "val-healthy";
 
             return (
-              <Col key={p._id || p.code} sm={6} lg={4} xl={3}>
-                <div
-                  className="bg-white rounded-3 border shadow-sm p-3 h-100 d-flex flex-column justify-content-between"
-                  style={{
-                    borderTop: isCritical
-                      ? "3px solid #ef4444"
-                      : isUrgent
-                      ? "3px solid #f97316"
-                      : isWarning
-                      ? "3px solid #f59e0b"
-                      : "3px solid #10b981",
-                    transition: "transform 0.15s ease, box-shadow 0.15s ease",
-                  }}
-                >
-                  {/* Provider Header */}
-                  <div>
-                    <div className="d-flex align-items-center justify-content-between mb-2">
-                      <div className="d-flex align-items-center gap-2">
-                        <img
-                          src={p.logo || NoIcon}
-                          alt={p.name}
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 6,
-                            objectFit: "contain",
-                            border: "1px solid #e2e8f0",
-                          }}
-                        />
-                        <div className="fw-bold text-dark text-truncate" style={{ fontSize: "13px", maxWidth: "120px" }} title={p.name}>
-                          {p.name}
-                        </div>
-                      </div>
-                      {getStatusBadge(p.balanceStatus)}
-                    </div>
-
-                    {/* Balance Display */}
-                    <div className="mt-2 mb-2">
-                      <div className="text-muted" style={{ fontSize: "11px", fontWeight: 500 }}>
-                        Current Balance
-                      </div>
-                      <div
-                        className={`fw-bold mt-0.5 ${
-                          isCritical ? "text-danger" : isUrgent ? "text-warning" : "text-dark"
-                        }`}
-                        style={{ fontSize: "19px", letterSpacing: "-0.3px", lineHeight: 1.2 }}
-                      >
-                        {formatter(p.balanceCurrency || "NGN").format(p.currentBalance || 0)}
-                      </div>
+              <div
+                key={p._id || p.code}
+                className={`provider-balance-card ${cardStatusClass}`}
+              >
+                {/* Header: Logo, Name & Status Pill */}
+                <div className="card-header-row">
+                  <div className="provider-identity" title={p.name}>
+                    <img
+                      src={p.logo || NoIcon}
+                      alt={p.name}
+                      className="provider-logo-img"
+                    />
+                    <div className="provider-name-text">
+                      {p.name}
                     </div>
                   </div>
 
-                  {/* Provider Footer Meta */}
-                  <div className="pt-2 border-top mt-2 d-flex align-items-center justify-content-between">
-                    <div>
-                      <div className="d-flex align-items-center gap-1">
-                        <span
-                          className="badge rounded-pill"
-                          style={{
-                            fontSize: "9px",
-                            padding: "2px 6px",
-                            background: p.balanceSource === "api_poll" ? "#e0e7ff" : "#f1f5f9",
-                            color: p.balanceSource === "api_poll" ? "#3730a3" : "#475569",
-                          }}
-                        >
-                          {p.balanceSource === "api_poll" ? "Direct API" : "Txn Meta"}
-                        </span>
-                      </div>
-                      <div className="text-muted mt-1" style={{ fontSize: "10px" }}>
-                        {p.lastBalanceCheckedAt
-                          ? `Updated ${formatDateWithTime(p.lastBalanceCheckedAt)}`
-                          : "Awaiting update"}
-                      </div>
-                    </div>
-
-                    {p.canCheckBalanceDirectly && (
-                      <button
-                        type="button"
-                        onClick={(e) => handleCheckSingle(p.code, e)}
-                        disabled={isCurrentlyChecking}
-                        className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1"
-                        style={{ fontSize: "11px", padding: "3px 8px" }}
-                        title="Query live balance from provider API"
+                  <div className="card-badges-group">
+                    {isMuted && (
+                      <span
+                        className="muted-mini-badge"
+                        title={p.isBalanceAlertsPaused ? "Alerts paused by admin" : "Provider is inactive"}
                       >
-                        {isCurrentlyChecking ? (
-                          <Spinner size="sm" />
-                        ) : (
-                          <Icon name="reload" />
-                        )}
-                        <span>{isCurrentlyChecking ? "..." : "Check"}</span>
-                      </button>
+                        🔕
+                      </span>
                     )}
+                    {renderStatusPill(p.balanceStatus)}
                   </div>
                 </div>
-              </Col>
+
+                {/* Body: Wallet Balance */}
+                <div className="card-body-balance">
+                  <div className="balance-title-label">Wallet Balance</div>
+                  <div
+                    className={`balance-amount-display ${valStatusClass}`}
+                    title={formatter(p.balanceCurrency || "NGN").format(p.currentBalance || 0)}
+                  >
+                    {formatter(p.balanceCurrency || "NGN").format(p.currentBalance || 0)}
+                  </div>
+                </div>
+
+                {/* Footer: Source, Time & Check Action */}
+                <div className="card-footer-meta">
+                  <div className="meta-source-group">
+                    <span className={`source-tag ${p.balanceSource === "api_poll" ? "tag-api" : "tag-meta"}`}>
+                      {p.balanceSource === "api_poll" ? "API" : "Txn"}
+                    </span>
+                    <span
+                      className="meta-time-text"
+                      title={p.lastBalanceCheckedAt ? formatDateWithTime(p.lastBalanceCheckedAt) : "Awaiting update"}
+                    >
+                      {p.lastBalanceCheckedAt ? `Upd ${formatShortTime(p.lastBalanceCheckedAt)}` : "Waiting"}
+                    </span>
+                  </div>
+
+                  {p.canCheckBalanceDirectly ? (
+                    <button
+                      type="button"
+                      onClick={(e) => handleCheckSingle(p.code, e)}
+                      disabled={isCurrentlyChecking}
+                      className="provider-check-action-btn"
+                      title="Query live balance directly from provider API"
+                    >
+                      {isCurrentlyChecking ? (
+                        <span className="btn-mini-spinner" />
+                      ) : (
+                        <svg
+                          className="check-svg-icon"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2.5"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                          />
+                        </svg>
+                      )}
+                      <span>{isCurrentlyChecking ? "..." : "Check"}</span>
+                    </button>
+                  ) : (
+                    <span
+                      className="auto-synced-pill"
+                      title="Balance synced automatically from live transaction responses"
+                    >
+                      Auto
+                    </span>
+                  )}
+                </div>
+              </div>
             );
           })}
-        </Row>
+        </div>
       )}
     </div>
   );

@@ -947,3 +947,39 @@ export const useGetProviderBalanceLogs = (code) => {
   );
 };
 
+export const useUpdateProviderBalanceSettings = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    ({ code, payload }) =>
+      toast.promise(
+        instance
+          .patch(`${BACKEND_URLS.providers}/${code}/balance-settings`, payload)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err.response?.data || err;
+          }),
+        {
+          success: (data) => data.message || "Balance settings updated successfully",
+          loading: "Saving balance settings...",
+          error: (error) => error?.message || "Failed to update balance settings",
+        },
+        {
+          style: {
+            minWidth: "220px",
+          },
+        }
+      ),
+    {
+      onSuccess: (_, { code }) => {
+        queryClient.invalidateQueries(["ProviderBalances"]);
+        queryClient.invalidateQueries(["Providers"]);
+        if (code) {
+          queryClient.invalidateQueries(["ProviderBalanceLogs", code]);
+        }
+      },
+    }
+  );
+};
+
+

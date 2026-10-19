@@ -12,6 +12,7 @@ import {
   useCheckProviderBalance,
   useGetProviderBalanceLogs,
   useRefreshProviderBalances,
+  useUpdateProviderBalanceSettings,
 } from "../../../../api/service-providers";
 import {
   Block,
@@ -42,22 +43,101 @@ import ServiceProviderModal from "./form-modal";
 import AddProductModal from "./modals/add-product";
 import { usePermission } from "../../../../utils/usePermission";
 
-function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking }) {
+function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking, onUpdateProviderData }) {
   const code = (provider.code || provider.name || "").toLowerCase().trim();
   const { data: logsResponse, isLoading: isLoadingLogs } = useGetProviderBalanceLogs(code);
+  const { mutate: updateSettings, isLoading: isSavingSettings } = useUpdateProviderBalanceSettings();
   const logs = logsResponse?.data || [];
 
-  const directCheckProviders = ["vtung", "vtu.ng", "smeplug", "quicklysim", "pairgate", "bigisub"];
+  const [isAlertsPaused, setIsAlertsPaused] = useState(Boolean(provider.isBalanceAlertsPaused));
+  const [showSettings, setShowSettings] = useState(false);
+  const [warningVal, setWarningVal] = useState(provider.balanceThresholds?.warning ?? "");
+  const [urgentVal, setUrgentVal] = useState(provider.balanceThresholds?.urgent ?? "");
+  const [criticalVal, setCriticalVal] = useState(provider.balanceThresholds?.critical ?? "");
+
+  useEffect(() => {
+    setIsAlertsPaused(Boolean(provider.isBalanceAlertsPaused));
+    setWarningVal(provider.balanceThresholds?.warning ?? "");
+    setUrgentVal(provider.balanceThresholds?.urgent ?? "");
+    setCriticalVal(provider.balanceThresholds?.critical ?? "");
+  }, [provider.code, provider.isBalanceAlertsPaused, provider.balanceThresholds]);
+
+  const directCheckProviders = ["vtung", "vtu.ng", "smeplug", "quicklysim", "pairgate", "bigisub", "coolsub"];
   const canCheckDirectly = directCheckProviders.includes(code);
+
+  const isMuted = isAlertsPaused || !provider.active;
+
+  const handleTogglePause = (e) => {
+    const nextVal = e.target.checked;
+    setIsAlertsPaused(nextVal);
+    updateSettings(
+      {
+        code,
+        payload: {
+          isBalanceAlertsPaused: nextVal,
+        },
+      },
+      {
+        onSuccess: () => {
+          if (onUpdateProviderData) {
+            onUpdateProviderData({ isBalanceAlertsPaused: nextVal });
+          }
+        },
+      }
+    );
+  };
+
+  const handleSaveThresholds = (e) => {
+    e.preventDefault();
+    const thresholdsPayload = {
+      warning: warningVal !== "" && !isNaN(Number(warningVal)) ? Number(warningVal) : null,
+      urgent: urgentVal !== "" && !isNaN(Number(urgentVal)) ? Number(urgentVal) : null,
+      critical: criticalVal !== "" && !isNaN(Number(criticalVal)) ? Number(criticalVal) : null,
+    };
+
+    updateSettings(
+      {
+        code,
+        payload: {
+          isBalanceAlertsPaused,
+          balanceThresholds: thresholdsPayload,
+        },
+      },
+      {
+        onSuccess: () => {
+          if (onUpdateProviderData) {
+            onUpdateProviderData({
+              isBalanceAlertsPaused,
+              balanceThresholds: {
+                warning: thresholdsPayload.warning ?? undefined,
+                urgent: thresholdsPayload.urgent ?? undefined,
+                critical: thresholdsPayload.critical ?? undefined,
+              },
+            });
+          }
+          setShowSettings(false);
+        },
+      }
+    );
+  };
+
+  const effectiveWarning = provider.balanceThresholds?.warning || 10000;
+  const effectiveUrgent = provider.balanceThresholds?.urgent || 5000;
+  const effectiveCritical = provider.balanceThresholds?.critical || 2000;
+  const hasCustomThresholds = Boolean(
+    provider.balanceThresholds?.warning ||
+    provider.balanceThresholds?.urgent ||
+    provider.balanceThresholds?.critical
+  );
 
   const getStatusBadge = (status) => {
     switch (status) {
       case "critical":
-        return <span className="badge badge-dim bg-danger">Critical (&lt;₦2k)</span>;
+        return <span className="badge badge-dim bg-danger">Critical (&lt;₦{Number(effectiveCritical).toLocaleString()})</span>;
       case "urgent":
-        return <span className="badge badge-dim bg-warning">Urgent (&lt;₦5k)</span>;
+        return <span className="badge badge-dim bg-warning">Urgent (&lt;₦{Number(effectiveUrgent).toLocaleString()})</span>;
       case "warning":
-        return <span className="badge badge-dim bg-info">Low (&lt;₦10k)</span>;
+        return <span className="badge badge-dim bg-info">Low (&lt;₦{Number(effectiveWarning).toLocaleString()})</span>;
       default:
         return <span className="badge badge-dim bg-success">Healthy</span>;
     }
@@ -67,31 +147,208 @@ function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking }) {
     <div className="mt-4 p-3 rounded-3 border bg-light">
       <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3">
         <div>
-          <h6 className="mb-0 d-flex align-items-center gap-2">
+          <h6 className="mb-0 d-flex align-items-center gap-2 flex-wrap">
             <span>Upstream Wallet Liquidity</span>
             {getStatusBadge(provider.balanceStatus)}
+            {isMuted && (
+              <span className="badge badge-dim bg-secondary" title="Email and Slack low balance alerts muted">
+                <Icon name="bell-off" className="me-1" />
+                Alerts Muted
+              </span>
+            )}
           </h6>
           <span className="text-muted small" style={{ fontSize: "11px" }}>
             Tracked via {provider.balanceSource === "api_poll" ? "Dedicated Upstream Endpoint" : "Live Transaction Responses"}
           </span>
         </div>
 
-        {canCheckDirectly && (
+        <div className="d-flex align-items-center gap-2 flex-wrap justify-content-sm-end">
           <button
             type="button"
-            className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm"
-            onClick={() => onCheckBalance(code)}
-            disabled={isChecking}
+            className="btn btn-xs btn-white bg-white border d-inline-flex align-items-center gap-1 shadow-sm"
+            onClick={() => setShowSettings(!showSettings)}
+            style={{ fontSize: "11px", fontWeight: 600, padding: "4px 10px", lineHeight: 1, whiteSpace: "nowrap" }}
+            title="Configure custom alert thresholds"
           >
-            {isChecking ? <Spinner size="sm" /> : <Icon name="reload" />}
-            <span>{isChecking ? "Checking..." : "Check Balance Now"}</span>
+            <Icon name="setting" className="text-primary" style={{ fontSize: "12px", lineHeight: 1 }} />
+            <span style={{ lineHeight: 1, whiteSpace: "nowrap" }}>{showSettings ? "Close Settings" : "Alert Settings"}</span>
           </button>
-        )}
+
+          {canCheckDirectly && (
+            <button
+              type="button"
+              className="btn btn-xs btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm"
+              onClick={() => onCheckBalance(code)}
+              disabled={isChecking}
+              style={{ fontSize: "11px", fontWeight: 600, padding: "4px 10px", lineHeight: 1, whiteSpace: "nowrap" }}
+            >
+              {isChecking ? (
+                <Spinner size="sm" style={{ width: 11, height: 11 }} />
+              ) : (
+                <svg
+                  style={{ width: 11, height: 11, flexShrink: 0 }}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              )}
+              <span style={{ lineHeight: 1, whiteSpace: "nowrap" }}>{isChecking ? "Checking..." : "Check Balance Now"}</span>
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* Muted Notification Banner */}
+      {isAlertsPaused && (
+        <div className="alert alert-warning py-1.5 px-3 mb-3 d-flex align-items-center justify-content-between" style={{ fontSize: "11px", borderRadius: "6px" }}>
+          <div className="d-flex align-items-center gap-2">
+            <Icon name="bell-off" className="fs-14px" />
+            <span>
+              <strong>Alerts are Paused:</strong> Email and Slack low balance notifications are currently silenced for this provider.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Threshold & Settings Drawer */}
+      {showSettings && (
+        <div className="p-3 mb-3 bg-white rounded-2 border shadow-sm">
+          <div className="d-flex align-items-center justify-content-between pb-2 mb-2 border-bottom">
+            <div className="fw-bold text-dark" style={{ fontSize: "13px" }}>
+              <Icon name="setting-alt" className="me-1 text-primary" />
+              Configure Alert Settings & Thresholds
+            </div>
+            {hasCustomThresholds && (
+              <span className="badge badge-dim bg-info" style={{ fontSize: "10px" }}>
+                Custom Active
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSaveThresholds}>
+            <div className="d-flex align-items-center justify-content-between p-2 mb-3 bg-light rounded-2 border">
+              <div>
+                <div className="fw-bold text-dark" style={{ fontSize: "12px" }}>
+                  Pause Low-Balance Notifications
+                </div>
+                <div className="text-muted" style={{ fontSize: "11px" }}>
+                  Temporarily silence email and Slack alerts if you are not currently using this provider.
+                </div>
+              </div>
+              <div className="custom-control custom-switch">
+                <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id={`pause-alerts-${code}`}
+                  checked={isAlertsPaused}
+                  onChange={handleTogglePause}
+                  disabled={isSavingSettings}
+                />
+                <label className="custom-control-label" htmlFor={`pause-alerts-${code}`}>
+                  <span className={`fw-medium ${isAlertsPaused ? "text-danger" : "text-success"}`} style={{ fontSize: "12px" }}>
+                    {isAlertsPaused ? "Muted" : "Active"}
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div className="text-muted mb-2" style={{ fontSize: "11px" }}>
+              Leave inputs blank to automatically use system global defaults (Warning: ₦10,000, Urgent: ₦5,000, Critical: ₦2,000).
+            </div>
+
+            <div className="row g-2 mb-3">
+              <div className="col-12 col-sm-4">
+                <label className="form-label mb-1" style={{ fontSize: "11px" }}>
+                  Warning Threshold (₦)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="100"
+                  className="form-control form-control-sm"
+                  placeholder="Default: 10,000"
+                  value={warningVal}
+                  onChange={(e) => setWarningVal(e.target.value)}
+                  style={{ fontSize: "12px" }}
+                />
+              </div>
+
+              <div className="col-12 col-sm-4">
+                <label className="form-label mb-1" style={{ fontSize: "11px" }}>
+                  Urgent Threshold (₦)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="100"
+                  className="form-control form-control-sm"
+                  placeholder="Default: 5,000"
+                  value={urgentVal}
+                  onChange={(e) => setUrgentVal(e.target.value)}
+                  style={{ fontSize: "12px" }}
+                />
+              </div>
+
+              <div className="col-12 col-sm-4">
+                <label className="form-label mb-1" style={{ fontSize: "11px" }}>
+                  Critical Threshold (₦)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="100"
+                  className="form-control form-control-sm"
+                  placeholder="Default: 2,000"
+                  value={criticalVal}
+                  onChange={(e) => setCriticalVal(e.target.value)}
+                  style={{ fontSize: "12px" }}
+                />
+              </div>
+            </div>
+
+            <div className="d-flex align-items-center justify-content-end gap-2">
+              <button
+                type="button"
+                className="btn btn-xs btn-light"
+                onClick={() => {
+                  setWarningVal("");
+                  setUrgentVal("");
+                  setCriticalVal("");
+                }}
+                disabled={isSavingSettings}
+                style={{ fontSize: "11px" }}
+              >
+                Reset to Defaults
+              </button>
+              <button
+                type="submit"
+                className="btn btn-xs btn-primary d-inline-flex align-items-center gap-1 shadow-sm"
+                disabled={isSavingSettings}
+                style={{ fontSize: "11px", fontWeight: 600, padding: "4px 12px", lineHeight: 1 }}
+              >
+                {isSavingSettings ? (
+                  <Spinner size="sm" style={{ width: 11, height: 11 }} />
+                ) : (
+                  <Icon name="check" style={{ fontSize: "12px", lineHeight: 1 }} />
+                )}
+                <span style={{ lineHeight: 1 }}>{isSavingSettings ? "Saving..." : "Save Settings"}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* 2-column info cards */}
       <div className="row g-3">
         <div className="col-12 col-sm-6">
-          <div className="p-3 bg-white rounded-2 border">
+          <div className="p-3 bg-white rounded-2 border h-100">
             <span className="sub-text" style={{ fontSize: "11px" }}>Current Live Balance</span>
             <div
               className={`fw-bold mt-1 ${
@@ -114,20 +371,27 @@ function ProviderLiquidityDetailCard({ provider, onCheckBalance, isChecking }) {
         </div>
 
         <div className="col-12 col-sm-6">
-          <div className="p-3 bg-white rounded-2 border">
-            <span className="sub-text" style={{ fontSize: "11px" }}>Monitoring & Alert Levels</span>
+          <div className="p-3 bg-white rounded-2 border h-100">
+            <div className="d-flex align-items-center justify-content-between mb-1">
+              <span className="sub-text" style={{ fontSize: "11px" }}>Active Alert Levels</span>
+              {hasCustomThresholds ? (
+                <span className="badge badge-dim bg-info" style={{ fontSize: "9px" }}>Custom</span>
+              ) : (
+                <span className="badge badge-dim bg-light text-muted" style={{ fontSize: "9px" }}>Default</span>
+              )}
+            </div>
             <div className="mt-1" style={{ fontSize: "12px" }}>
               <div className="d-flex justify-content-between py-0.5 border-bottom">
                 <span className="text-muted">Warning Alert:</span>
-                <span className="fw-medium text-info">&lt; ₦10,000</span>
+                <span className="fw-medium text-info">&lt; ₦{Number(effectiveWarning).toLocaleString()}</span>
               </div>
               <div className="d-flex justify-content-between py-0.5 border-bottom">
                 <span className="text-muted">Urgent Alert:</span>
-                <span className="fw-medium text-warning">&lt; ₦5,000</span>
+                <span className="fw-medium text-warning">&lt; ₦{Number(effectiveUrgent).toLocaleString()}</span>
               </div>
               <div className="d-flex justify-content-between py-0.5">
                 <span className="text-muted">Critical (30m Esc):</span>
-                <span className="fw-medium text-danger">&lt; ₦2,000</span>
+                <span className="fw-medium text-danger">&lt; ₦{Number(effectiveCritical).toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -250,6 +514,8 @@ const ServiceProviders = () => {
     balanceStatus: "healthy",
     balanceSource: "api_poll",
     lastBalanceCheckedAt: null,
+    isBalanceAlertsPaused: false,
+    balanceThresholds: {},
   });
 
   const [view, setView] = useState({
@@ -288,6 +554,8 @@ const ServiceProviders = () => {
       balanceStatus: "healthy",
       balanceSource: "api_poll",
       lastBalanceCheckedAt: null,
+      isBalanceAlertsPaused: false,
+      balanceThresholds: {},
     });
     setServiceTypes([]);
     setErrorMessage("");
@@ -310,6 +578,8 @@ const ServiceProviders = () => {
           balanceStatus: item?.balanceStatus || "healthy",
           balanceSource: item?.balanceSource || "api_poll",
           lastBalanceCheckedAt: item?.lastBalanceCheckedAt,
+          isBalanceAlertsPaused: item?.isBalanceAlertsPaused || false,
+          balanceThresholds: item?.balanceThresholds || {},
         });
         setServiceTypes(item?.serviceType || []);
       }
@@ -614,29 +884,38 @@ const ServiceProviders = () => {
                               <span className="text-capitalize"> {item?.serviceType.length}</span>
                             </DataTableRow>
                             <DataTableRow size="md">
-                              <div className="d-flex flex-column">
-                                <span className="fw-bold text-dark" style={{ fontSize: "13px" }}>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "5px", padding: "4px 0", minWidth: "120px" }}>
+                                <div className="fw-bold text-dark" style={{ fontSize: "13px", lineHeight: "1.2", letterSpacing: "-0.2px" }}>
                                   {formatter(item?.balanceCurrency || "NGN").format(item?.currentBalance || 0)}
-                                </span>
-                                <div className="d-flex align-items-center gap-1 mt-0.5">
+                                </div>
+                                <div className="d-flex align-items-center gap-1 flex-wrap" style={{ lineHeight: "1" }}>
+                                  {(item?.isBalanceAlertsPaused || item?.isActive === false) && (
+                                    <span
+                                      className="badge badge-dim bg-light text-muted border"
+                                      style={{ fontSize: "9px", padding: "1px 5px", lineHeight: "1.2", whiteSpace: "nowrap" }}
+                                      title={item?.isBalanceAlertsPaused ? "Alerts silenced for this provider" : "Provider is inactive"}
+                                    >
+                                      🔕 Muted
+                                    </span>
+                                  )}
                                   {item?.balanceStatus === "critical" ? (
-                                    <span className="badge badge-dim bg-danger" style={{ fontSize: "10px", padding: "1px 5px" }}>
+                                    <span className="badge badge-dim bg-danger" style={{ fontSize: "10px", padding: "1px 6px", lineHeight: "1.2", whiteSpace: "nowrap" }}>
                                       Critical (&lt;₦2k)
                                     </span>
                                   ) : item?.balanceStatus === "urgent" ? (
-                                    <span className="badge badge-dim bg-warning" style={{ fontSize: "10px", padding: "1px 5px" }}>
+                                    <span className="badge badge-dim bg-warning" style={{ fontSize: "10px", padding: "1px 6px", lineHeight: "1.2", whiteSpace: "nowrap" }}>
                                       Urgent (&lt;₦5k)
                                     </span>
                                   ) : item?.balanceStatus === "warning" ? (
-                                    <span className="badge badge-dim bg-info" style={{ fontSize: "10px", padding: "1px 5px" }}>
+                                    <span className="badge badge-dim bg-info" style={{ fontSize: "10px", padding: "1px 6px", lineHeight: "1.2", whiteSpace: "nowrap" }}>
                                       Low (&lt;₦10k)
                                     </span>
                                   ) : (
-                                    <span className="badge badge-dim bg-success" style={{ fontSize: "10px", padding: "1px 5px" }}>
+                                    <span className="badge badge-dim bg-success" style={{ fontSize: "10px", padding: "1px 6px", lineHeight: "1.2", whiteSpace: "nowrap" }}>
                                       Healthy
                                     </span>
                                   )}
-                                  <span className="text-muted" style={{ fontSize: "10px" }}>
+                                  <span className="badge badge-dim bg-light text-muted" style={{ fontSize: "9px", padding: "1px 4px", lineHeight: "1.2", whiteSpace: "nowrap" }}>
                                     {item?.balanceSource === "transaction_meta" ? "Txn" : "API"}
                                   </span>
                                 </div>
@@ -910,6 +1189,7 @@ const ServiceProviders = () => {
                   provider={formData}
                   onCheckBalance={(code) => checkBalance(code)}
                   isChecking={isCheckingBalance}
+                  onUpdateProviderData={(updates) => setFormData((prev) => ({ ...prev, ...updates }))}
                 />
 
                 <div className="mt-4">
