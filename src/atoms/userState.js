@@ -1,22 +1,34 @@
 import { atom } from "recoil";
 
-//FOR PERSISTANCE WITH LOCAL STORAGE
-const localStorageEffect =
+// FOR PERSISTENCE WITH SESSION STORAGE (cleared on tab/window close)
+const sessionStorageEffect =
   (key) =>
   ({ setSelf, onSet }) => {
-    const savedValue = localStorage.getItem(key);
+    if (typeof window === "undefined") return;
+
+    // Clear legacy localStorage data if any exists
+    localStorage.removeItem(key);
+
+    const savedValue = sessionStorage.getItem(key);
     if (savedValue != null) {
-      setSelf(JSON.parse(savedValue));
+      try {
+        setSelf(JSON.parse(savedValue));
+      } catch (e) {
+        sessionStorage.removeItem(key);
+      }
     }
 
     onSet((newValue, _, isReset) => {
-      console.log({ newValue });
-      isReset ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(newValue));
+      if (isReset || !newValue) {
+        sessionStorage.removeItem(key);
+      } else {
+        sessionStorage.setItem(key, JSON.stringify(newValue));
+      }
     });
   };
 
 export const userState = atom({
   key: "userState",
   default: {},
-  effects: [localStorageEffect("payminttwo_admin")],
+  effects: [sessionStorageEffect("payminttwo_admin")],
 });

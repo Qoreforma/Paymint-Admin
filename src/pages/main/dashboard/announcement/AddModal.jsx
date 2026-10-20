@@ -12,7 +12,7 @@ import { Button, Col, Icon, RSelect, RASelect } from "../../../../components/Com
 import { formatDateTimeNumeric, formatDateToISO } from "../../../../utils/Utils";
 import toast from "react-hot-toast";
 import BACKEND_URLS from "../../../../api/urls";
-import Cookies from "js-cookie";
+import tokenStorage from "../../../../utils/tokenStorage";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { TRANSACTION_TYPE_OPTIONS } from "../../../../utils/constants";
@@ -61,7 +61,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
     },
   });
 
-  const access_token = Cookies.get("access_token");
+  const access_token = tokenStorage.getAccessToken();
 
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedChannels, setSelectedChannels] = useState([]);

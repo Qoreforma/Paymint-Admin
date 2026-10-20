@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { redirect, useLocation, useNavigate } from "react-router-dom";
 import { useResetRecoilState, useSetRecoilState } from "recoil";
 import { userState } from "../atoms/userState";
+import tokenStorage from "../utils/tokenStorage";
 import { instance } from "./httpConfig";
 import BACKEND_URLS from "./urls";
 
@@ -13,8 +13,6 @@ export const useLogin = () => {
   const navigate = useNavigate();
   const redirectPath = location.state?.path || "/";
   const setUser = useSetRecoilState(userState);
-  const inOneHour = new Date(new Date().getTime() + 60 * 60 * 1000);
-  // const inTenSeconds = new Date(new Date().getTime() + 10000);
 
   return useMutation(
     async (values) => {
@@ -36,12 +34,8 @@ export const useLogin = () => {
           console.log({ data });
           const { admin, tokens } = data.data;
           const { accessToken, refreshToken } = tokens;
-          console.log({ admin });
-          console.log("Admin going to recoil:", JSON.stringify(admin));
           setUser(admin);
-          const accessExpires = new Date(Date.now() + 2 * 60 * 60 * 1000);
-          Cookies.set("access_token", accessToken, { expires: accessExpires });
-          Cookies.set("refresh_token", refreshToken, { expires: 20 });
+          tokenStorage.setTokens({ accessToken, refreshToken });
           navigate(redirectPath);
         }
       },
@@ -149,7 +143,7 @@ export const useGetUser = () => {
 
 export const useRefreshToken = async () => {
   console.log("Refreshing token called");
-  const refreshToken = Cookies.get("refresh_token");
+  const refreshToken = tokenStorage.getRefreshToken();
 
   if (!refreshToken || refreshToken === "undefined") {
     throw new Error("No refresh token available");
@@ -161,20 +155,18 @@ export const useRefreshToken = async () => {
     });
     const { accessToken, refreshToken: newRefreshToken } = response?.data?.data || {};
 
-    const accessExpires = new Date(Date.now() + 2 * 60 * 60 * 1000);
-    if (accessToken) {
-      Cookies.set("access_token", accessToken, { expires: accessExpires });
-    }
-    if (newRefreshToken) {
-      Cookies.set("refresh_token", newRefreshToken, { expires: 20 });
+    if (accessToken || newRefreshToken) {
+      tokenStorage.setTokens({
+        accessToken: accessToken || undefined,
+        refreshToken: newRefreshToken || undefined,
+      });
     }
 
     return accessToken;
   } catch (error) {
     console.error("Token refresh failed:", error?.response?.status || error);
     if (error?.response?.status === 401) {
-      Cookies.remove("refresh_token");
-      Cookies.remove("access_token");
+      tokenStorage.clear();
     }
     throw error;
   }
@@ -185,9 +177,9 @@ export const useLogout = () => {
   const resetUser = useResetRecoilState(userState);
   return useMutation(
     async () => {
-      const refreshToken = Cookies.get("refresh_token");
+      const refreshToken = tokenStorage.getRefreshToken();
       return instance
-        .post(`${BACKEND_URLS.auth.logout}`)
+        .post(`${BACKEND_URLS.auth.logout}`, { refreshToken })
         .then((res) => res.data)
         .catch((err) => {
           throw err;
@@ -195,13 +187,15 @@ export const useLogout = () => {
     },
     {
       onSuccess: () => {
-        Cookies.remove("access_token");
-        Cookies.remove("refresh_token");
+        tokenStorage.clear();
         resetUser();
         navigate("/auth-login", { replace: true });
       },
       onError: (err) => {
-        console.error(err);
+        console.error("Logout request error, clearing local session:", err);
+        tokenStorage.clear();
+        resetUser();
+        navigate("/auth-login", { replace: true });
       },
     },
   );
@@ -232,9 +226,7 @@ export const useVerify2FA = () => {
         const { admin, tokens } = data?.data?.data;
         const { accessToken, refreshToken } = tokens;
         setUser(admin);
-        const accessExpires = new Date(Date.now() + 2 * 60 * 60 * 1000);
-        Cookies.set("access_token", accessToken, { expires: accessExpires });
-        Cookies.set("refresh_token", refreshToken, { expires: 20 });
+        tokenStorage.setTokens({ accessToken, refreshToken });
         navigate(redirectPath);
       },
     },

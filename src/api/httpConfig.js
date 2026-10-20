@@ -1,9 +1,9 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 
 // import BackendUrls from "@api/urls";
 // import config from "@utils/config";
 import config from "../utils/config";
+import tokenStorage from "../utils/tokenStorage";
 import { useRefreshToken } from "./authentication";
 import BACKEND_URLS from "./urls";
 import toast from "react-hot-toast";
@@ -13,9 +13,7 @@ import toast from "react-hot-toast";
 export const configOptions = () => {
   if (typeof window === "undefined") return {};
 
-  if (!Cookies.get(config.key.token)) return {};
-
-  const accessToken = Cookies.get("access_token");
+  const accessToken = tokenStorage.getAccessToken();
 
   if (!!accessToken) {
     return {
@@ -38,7 +36,7 @@ export const instance = axios.create({
 //Request interceptors for APIs calls
 instance.interceptors.request.use(
   async (config) => {
-    const access_token = Cookies.get("access_token");
+    const access_token = tokenStorage.getAccessToken();
 
     // Skip Authorization header for auth endpoints
     if (config?.url?.includes("/auth/login") || config?.url?.includes("/auth/refresh")) {
@@ -84,7 +82,11 @@ instance.interceptors.response.use(
     }
 
     // Skip refresh logic for auth endpoints
-    const authExcludedRoutes = [BACKEND_URLS.auth.login, BACKEND_URLS.auth.refreshToken];
+    const authExcludedRoutes = [
+      BACKEND_URLS.auth.login,
+      BACKEND_URLS.auth.refreshToken,
+      BACKEND_URLS.auth.logout,
+    ];
 
     if (authExcludedRoutes.some((route) => originalRequest?.url?.includes(route))) {
       return Promise.reject(error);
@@ -118,8 +120,7 @@ instance.interceptors.response.use(
         return instance(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        Cookies.remove("refresh_token");
-        Cookies.remove("access_token");
+        tokenStorage.clear();
         window.location.replace("/auth-login");
 
         return Promise.reject(refreshError);

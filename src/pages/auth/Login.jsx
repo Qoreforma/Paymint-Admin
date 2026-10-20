@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Cookies from "js-cookie";
+import tokenStorage from "../../utils/tokenStorage";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { Alert, Form, Spinner } from "reactstrap";
@@ -39,7 +39,7 @@ const Login = () => {
     formState: { errors },
   } = useForm();
 
-  const refreshToken = Cookies.get("refresh_token");
+  const refreshToken = tokenStorage.getRefreshToken();
   const location = useLocation();
 
   if (refreshToken) {

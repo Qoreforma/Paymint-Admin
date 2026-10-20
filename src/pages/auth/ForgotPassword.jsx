@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Cookies from "js-cookie";
+import tokenStorage from "../../utils/tokenStorage";
 import Head from "../../layout/head/Head";
 import AuthFooter from "./AuthFooter";
 import { Block, BlockContent, BlockDes, BlockHead, BlockTitle, Button, PreviewCard } from "../../components/Component";
@@ -28,7 +28,7 @@ const ForgotPassword = () => {
     // console.log(formData);
   };
 
-  const refreshToken = Cookies.get("refresh_token");
+  const refreshToken = tokenStorage.getRefreshToken();
   const location = useLocation();
 
   if (refreshToken) {

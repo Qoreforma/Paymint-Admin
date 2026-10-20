@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Cookies from "js-cookie";
+import tokenStorage from "../../utils/tokenStorage";
 import Head from "../../layout/head/Head";
 import AuthFooter from "./AuthFooter";
 import {
@@ -46,7 +46,7 @@ const ChangePassword = () => {
   };
   const pwd = watch("passcode");
 
-  const refreshToken = Cookies.get("refresh_token");
+  const refreshToken = tokenStorage.getRefreshToken();
   const location = useLocation();
 
   if (refreshToken) {

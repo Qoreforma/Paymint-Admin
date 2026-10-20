@@ -1,11 +1,11 @@
-import Cookies from "js-cookie";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useGetUser } from "../api/authentication";
 import AutoLogout from "../layout/autologout/AutoLogout";
 import LoadingSpinner from "../pages/components/spinner";
+import tokenStorage from "../utils/tokenStorage";
 
 const ProtectedRoute = ({ redirectPath = "/auth-login" }) => {
-  const refreshToken = Cookies.get("refresh_token");
+  const refreshToken = tokenStorage.getRefreshToken();
   const location = useLocation();
   const { isLoading } = useGetUser();
 
