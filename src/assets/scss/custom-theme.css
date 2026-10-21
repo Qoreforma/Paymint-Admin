@@ -639,6 +639,7 @@
 }
 
 /* ── BASE HEIGHT AUTO RESETS ─────────────────────────────── */
+/* These run AFTER dashlite.scss so same-specificity rules here win */
 div,
 button,
 .btn,
@@ -649,4 +650,13 @@ button span,
   height: auto;
 }
 
+/* ── GAP SPACER FIX ──────────────────────────────────────── */
+/* NioBoard theme generates .gap-* as legacy spacer divs with       */
+/* height: .Xrem. This overrides that with class-level specificity  */
+/* (0,1,0) loading after dashlite so no !important needed.         */
+.gap-1 { height: auto; }
+.gap-2 { height: auto; }
+.gap-3 { height: auto; }
+.gap-4 { height: auto; }
+.gap-5 { height: auto; }
 
