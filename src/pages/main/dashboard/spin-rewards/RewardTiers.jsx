@@ -22,6 +22,7 @@ import {
   useGetWheelConfigs,
   useSeedReferrals,
   useCleanupDummyData,
+  useGrantManualSpin,
 } from "../../../../api/spinRewards";
 import { usePermission } from "../../../../utils/usePermission";
 import { formatDateWithTime } from "../../../../utils/Utils";
@@ -54,6 +55,7 @@ const RewardTiers = () => {
   const { mutate: createTier, isLoading: isCreating } = useCreateRewardTier();
   const { mutate: editTier, isLoading: isEditing } = useEditRewardTier();
   const { mutate: deleteTier } = useDeleteRewardTier();
+  const { mutate: grantSpin, isLoading: isGranting } = useGrantManualSpin();
 
   const { mutate: seedReferrals, isLoading: isSeeding } = useSeedReferrals();
   const { mutate: cleanupDummyData, isLoading: isCleaning } = useCleanupDummyData();
@@ -62,6 +64,14 @@ const RewardTiers = () => {
   const [editedId, setEditedId] = useState(null);
   const [wheelModal, setWheelModal] = useState({ open: false, tier: null });
   
+  const [grantModal, setGrantModal] = useState({
+    open: false,
+    tierId: "",
+    emails: "",
+    spinsCount: 1,
+    reason: "Goodwill compensation for balance adjustment",
+  });
+
   const [debugEmail, setDebugEmail] = useState("");
   const [debugCount, setDebugCount] = useState(5);
 
@@ -209,6 +219,61 @@ const RewardTiers = () => {
     }
   };
 
+  const tierOptionsWithWheels = tiers
+    .filter((t) => wheels.some((w) => w.tierId === t._id || w.tierId?._id === t._id))
+    .map((t) => ({
+      value: t._id,
+      label: `${t.name} (Threshold: ${t.referralThreshold} refs)`,
+    }));
+
+  const handleOpenGrantModal = (tier = null) => {
+    const defaultTierId =
+      tier?._id ||
+      tierOptionsWithWheels[0]?.value ||
+      tiers[0]?._id ||
+      "";
+
+    setGrantModal({
+      open: true,
+      tierId: defaultTierId,
+      emails: "",
+      spinsCount: 1,
+      reason: "Goodwill compensation for balance adjustment",
+    });
+  };
+
+  const handleGrantSubmit = (e) => {
+    e.preventDefault();
+    if (!grantModal.tierId) {
+      alert("Please select a target reward tier");
+      return;
+    }
+    if (!grantModal.emails.trim()) {
+      alert("Please enter at least one user email");
+      return;
+    }
+
+    grantSpin(
+      {
+        tierId: grantModal.tierId,
+        emails: grantModal.emails,
+        spinsCount: Number(grantModal.spinsCount) || 1,
+        reason: grantModal.reason.trim(),
+      },
+      {
+        onSuccess: () => {
+          setGrantModal({
+            open: false,
+            tierId: "",
+            emails: "",
+            spinsCount: 1,
+            reason: "Goodwill compensation for balance adjustment",
+          });
+        },
+      }
+    );
+  };
+
   return (
     <React.Fragment>
       <BlockHead size="sm">
@@ -221,10 +286,20 @@ const RewardTiers = () => {
           </BlockHeadContent>
           <BlockHeadContent>
             {hasPermission("spin_rewards.manage_tiers") && (
-              <Button color="primary" onClick={handleOpenAdd}>
-                <Icon name="plus"></Icon>
-                <span>Add Tier</span>
-              </Button>
+              <div className="d-flex align-items-center gap-2">
+                <Button
+                  color="success"
+                  className="btn-dim"
+                  onClick={() => handleOpenGrantModal()}
+                >
+                  <Icon name="gift"></Icon>
+                  <span>Grant Free Spin</span>
+                </Button>
+                <Button color="primary" onClick={handleOpenAdd}>
+                  <Icon name="plus"></Icon>
+                  <span>Add Tier</span>
+                </Button>
+              </div>
             )}
           </BlockHeadContent>
         </BlockBetween>
@@ -360,6 +435,19 @@ const RewardTiers = () => {
                         <Icon name={hasWheel ? "setting-alt" : "curve-down-right"} />
                         <span>{hasWheel ? "Edit Wheel" : "Set Up Wheel"}</span>
                       </Button>
+
+                      {hasPermission("spin_rewards.manage_tiers") && hasWheel && (
+                        <Button
+                          size="sm"
+                          color="success"
+                          className="btn-dim"
+                          onClick={() => handleOpenGrantModal(tier)}
+                          title="Grant Free Bonus Spin for this Tier"
+                        >
+                          <Icon name="gift" />
+                          <span className="ms-1">Grant Spin</span>
+                        </Button>
+                      )}
 
                       {hasPermission("spin_rewards.manage_tiers") && (
                         <>
@@ -770,6 +858,176 @@ const RewardTiers = () => {
                 </Col>
               </Row>
             </form>
+          </div>
+        </ModalBody>
+      </Modal>
+
+      {/* Grant Free Spin Modal */}
+      <Modal
+        isOpen={grantModal.open}
+        toggle={() => setGrantModal({ ...grantModal, open: false })}
+        className="modal-dialog-centered"
+        size="lg"
+      >
+        <ModalBody>
+          <a
+            href="#close"
+            onClick={(e) => {
+              e.preventDefault();
+              setGrantModal({ ...grantModal, open: false });
+            }}
+            className="close"
+          >
+            <Icon name="cross-sm" />
+          </a>
+          <div className="p-2">
+            <h5 className="title mb-1 d-flex align-items-center">
+              <Icon name="gift" className="text-success me-2 fs-22px" />
+              Grant Free Bonus Spin
+            </h5>
+            <div className="text-muted fs-12px mb-3">
+              Directly award free spin tickets to specific users by email without requiring referrals.
+            </div>
+
+            {(() => {
+              const selectedTier = tiers.find((t) => t._id === grantModal.tierId);
+              const selectedWheel = wheels.find(
+                (w) => w.tierId === grantModal.tierId || w.tierId?._id === grantModal.tierId
+              );
+              const isPoolExhausted =
+                selectedTier?.autoRegeneratePool === false &&
+                selectedWheel &&
+                (selectedWheel.totalSpinsUsed >= selectedWheel.poolSize || selectedWheel.isPoolExhausted);
+
+              return (
+                <>
+                  {isPoolExhausted ? (
+                    <div className="alert alert-danger d-flex align-items-center mb-3 p-2">
+                      <Icon name="alert-circle" className="fs-20px me-2 text-danger flex-shrink-0" />
+                      <div className="fs-12px">
+                        <strong>Prize Pool Exhausted!</strong> The prize pool for{" "}
+                        <strong>{selectedTier?.name}</strong> is currently exhausted (
+                        {selectedWheel?.poolSize} tickets drawn) and Auto-Reload is disabled.
+                        The system will reject granting spins until the pool is reloaded.
+                      </div>
+                    </div>
+                  ) : selectedWheel ? (
+                    <div className="alert alert-info d-flex align-items-center mb-3 p-2">
+                      <Icon name="info" className="fs-18px me-2 text-info flex-shrink-0" />
+                      <div className="fs-12px">
+                        Tier: <strong>{selectedTier?.name}</strong> • Pool Size:{" "}
+                        <strong>{selectedWheel?.poolSize || "Unlimited"}</strong> • Status:{" "}
+                        <span className="text-success fw-bold">Pool Ready</span>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <form onSubmit={handleGrantSubmit}>
+                    <Row className="g-3">
+                      <Col xs="12">
+                        <div className="form-group">
+                          <label className="form-label">
+                            Target Reward Tier / Wheel <span className="text-danger">*</span>
+                          </label>
+                          <RSelect
+                            options={tierOptionsWithWheels}
+                            value={tierOptionsWithWheels.find(
+                              (opt) => opt.value === grantModal.tierId
+                            )}
+                            onChange={(selected) =>
+                              setGrantModal({ ...grantModal, tierId: selected?.value || "" })
+                            }
+                          />
+                        </div>
+                      </Col>
+
+                      <Col xs="12">
+                        <div className="form-group">
+                          <label className="form-label">
+                            User Email(s) <span className="text-danger">*</span>
+                          </label>
+                          <textarea
+                            className="form-control"
+                            rows={3}
+                            required
+                            placeholder="Enter user email addresses (e.g. user1@email.com, user2@email.com or one per line)..."
+                            value={grantModal.emails}
+                            onChange={(e) =>
+                              setGrantModal({ ...grantModal, emails: e.target.value })
+                            }
+                          />
+                          <div className="text-muted fs-11px mt-1">
+                            You can enter a single email, or multiple emails separated by commas or new lines.
+                          </div>
+                        </div>
+                      </Col>
+
+                      <Col xs="12" md="6">
+                        <div className="form-group">
+                          <label className="form-label">
+                            Spins per User <span className="text-danger">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            className="form-control"
+                            value={grantModal.spinsCount}
+                            onChange={(e) =>
+                              setGrantModal({
+                                ...grantModal,
+                                spinsCount: Math.max(1, parseInt(e.target.value, 10) || 1),
+                              })
+                            }
+                          />
+                        </div>
+                      </Col>
+
+                      <Col xs="12" md="6">
+                        <div className="form-group">
+                          <label className="form-label">Reason / Audit Note</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="e.g. Goodwill compensation for balance adjustment"
+                            value={grantModal.reason}
+                            onChange={(e) =>
+                              setGrantModal({ ...grantModal, reason: e.target.value })
+                            }
+                          />
+                        </div>
+                      </Col>
+
+                      <Col xs="12">
+                        <div className="d-flex gap-2 mt-2">
+                          <Button
+                            color="success"
+                            type="submit"
+                            disabled={isGranting || isPoolExhausted || !grantModal.emails.trim()}
+                          >
+                            {isGranting ? (
+                              "Granting..."
+                            ) : (
+                              <>
+                                <Icon name="gift" className="me-1" />
+                                Grant Free Spin(s)
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            color="light"
+                            type="button"
+                            onClick={() => setGrantModal({ ...grantModal, open: false })}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </Col>
+                    </Row>
+                  </form>
+                </>
+              );
+            })()}
           </div>
         </ModalBody>
       </Modal>

@@ -765,4 +765,63 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* ── SPOTLIGHT INTERACTIVE CARDS ────────────────────────── */
+.spin-interactive-card {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.spin-interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+}
+
+.spin-interactive-card:active {
+  transform: translateY(0);
+}
+
+.spin-card-click-hint {
+  font-size: 10px;
+  color: #10b981;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+/* ── CAMPAIGN DRILLDOWN MODAL ───────────────────────────── */
+.spin-drilldown-modal .modal-header {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.25rem 1.5rem;
+}
+
+.spin-referrer-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.spin-referrer-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.spin-progress-container {
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  height: 7px;
+  overflow: hidden;
+}
+
+.spin-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+
 

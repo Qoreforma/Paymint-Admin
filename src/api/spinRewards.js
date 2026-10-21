@@ -27,12 +27,14 @@ export const useToggleRewardSystem = () => {
       toast.promise(
         instance
           .patch(`${BACKEND_URLS.appSettings}/toggle`, { isRewardSystem })
-          .then((res) => res.data),
+          .then((res) => res?.data),
         {
           loading: "Updating reward system status...",
           success: (data) => data?.message || "Reward system status updated",
           error: (err) =>
-            err?.response?.data?.message || "Failed to update reward system status",
+            err?.response?.data?.message ||
+            err?.message ||
+            "Failed to update reward system status",
         }
       ),
     {
@@ -210,6 +212,32 @@ export const useDeleteRewardTier = () => {
   );
 };
 
+export const useGrantManualSpin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (data) =>
+      toast.promise(
+        instance
+          .post(`${BACKEND_URLS.rewardTiers}/grant-spin`, data)
+          .then((res) => res.data),
+        {
+          loading: "Granting free spin(s)...",
+          success: (res) => res?.message || "Spin(s) granted successfully!",
+          error: (err) =>
+            err?.response?.data?.message || "Failed to grant spin(s)",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["RewardTiers"]);
+        queryClient.invalidateQueries(["SpinWheels"]);
+        queryClient.invalidateQueries(["RewardAnalytics"]);
+      },
+    }
+  );
+};
+
 // ─── Spin Wheels ───────────────────────────────────────────────────────────
 
 export const useGetWheelConfigs = () => {
@@ -316,6 +344,24 @@ export const useGetRewardAnalytics = () => {
     {
       refetchInterval: 30000,
       retry: 1,
+    }
+  );
+};
+
+export const useGetCampaignReferralsDrilldown = (tierId) => {
+  return useQuery(
+    ["CampaignReferralsDrilldown", tierId],
+    async () => {
+      const url = tierId
+        ? `${BACKEND_URLS.rewardAnalytics}/campaign-referrals?tierId=${tierId}`
+        : `${BACKEND_URLS.rewardAnalytics}/campaign-referrals`;
+      const res = await instance.get(url);
+      return res?.data?.data;
+    },
+    {
+      enabled: true,
+      retry: 1,
+      refetchOnWindowFocus: false,
     }
   );
 };
