@@ -44,6 +44,7 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
 
   const [poolSize, setPoolSize] = useState(20);
   const [airtimeRecipientMode, setAirtimeRecipientMode] = useState("user-choice");
+  const [autoRegeneratePool, setAutoRegeneratePool] = useState(true);
   const [segments, setSegments] = useState([
     { label: "₦100 Cash", rewardType: "balance", rewardValue: 100, displayColor: "#6366F1", ticketCount: 10 },
     { label: "₦200 Airtime", rewardType: "airtime", rewardValue: 200, displayColor: "#10B981", ticketCount: 5 },
@@ -66,6 +67,7 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
       const data = wheelData.data;
       setPoolSize(data.poolSize || 20);
       setAirtimeRecipientMode(data.airtimeRecipientMode || "user-choice");
+      setAutoRegeneratePool(data.autoRegeneratePool ?? tier?.autoRegeneratePool ?? true);
       if (data.segments && data.segments.length > 0) {
         setSegments(
           data.segments.map((seg) => ({
@@ -81,6 +83,7 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
       loadedTierIdRef.current = tier?._id;
       setPoolSize(20);
       setAirtimeRecipientMode("user-choice");
+      setAutoRegeneratePool(tier?.autoRegeneratePool ?? true);
       setSegments([
         { label: "₦100 Cash", rewardType: "balance", rewardValue: 100, displayColor: "#6366F1", ticketCount: 10 },
         { label: "₦200 Airtime", rewardType: "airtime", rewardValue: 200, displayColor: "#10B981", ticketCount: 5 },
@@ -255,6 +258,7 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
       tierId: tier._id,
       poolSize: Number(poolSize),
       airtimeRecipientMode,
+      autoRegeneratePool: Boolean(autoRegeneratePool),
       segments: segments.map((s) => ({
         label: s.label.trim(),
         rewardType: s.rewardType,
@@ -331,9 +335,23 @@ const WheelEditor = ({ isOpen, toggle, tier, rules = [] }) => {
                         onChange={handlePoolSizeChange}
                         onBlur={handlePoolSizeBlur}
                       />
+                      <div className="custom-control custom-switch mt-2">
+                        <input
+                          type="checkbox"
+                          className="custom-control-input"
+                          id="wheel-auto-regenerate"
+                          checked={autoRegeneratePool}
+                          onChange={(e) => setAutoRegeneratePool(e.target.checked)}
+                        />
+                        <label className="custom-control-label fs-12px fw-bold" htmlFor="wheel-auto-regenerate">
+                          Auto-Reload Pool
+                        </label>
+                      </div>
                     </div>
                     <span className="text-muted fs-11px mt-1">
-                      e.g. 200 means odds reset every 200 spins across all users.
+                      {autoRegeneratePool
+                        ? "Cycles repeat: fresh batch generated every " + (poolSize || 0) + " spins."
+                        : "Single round: stops and ends campaign once all " + (poolSize || 0) + " tickets are drawn (no reset)."}
                     </span>
                   </div>
                 </Col>

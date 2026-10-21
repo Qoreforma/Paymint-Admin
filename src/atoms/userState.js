@@ -12,7 +12,13 @@ const sessionStorageEffect =
     const savedValue = sessionStorage.getItem(key);
     if (savedValue != null) {
       try {
-        setSelf(JSON.parse(savedValue));
+        const parsed = JSON.parse(savedValue);
+        if (parsed && typeof parsed === "object") {
+          if (!Array.isArray(parsed.permissions)) {
+            parsed.permissions = [];
+          }
+          setSelf(parsed);
+        }
       } catch (e) {
         sessionStorage.removeItem(key);
       }
@@ -29,6 +35,8 @@ const sessionStorageEffect =
 
 export const userState = atom({
   key: "userState",
-  default: {},
+  default: {
+    permissions: [],
+  },
   effects: [sessionStorageEffect("payminttwo_admin")],
 });

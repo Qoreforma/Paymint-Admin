@@ -36,8 +36,9 @@ const NetworkDetails = ({ match }) => {
 
   const [user] = useRecoilState(userState);
   const hasPermission =
-    user.permissions.some((perm) => perm === "admin.manage_crypto_admins") ||
-    user.permissions.some((perm) => perm === "*");
+    Array.isArray(user?.permissions) &&
+    (user.permissions.includes("admin.manage_crypto_admins") ||
+      user.permissions.includes("*"));
 
   return (
     <React.Fragment>

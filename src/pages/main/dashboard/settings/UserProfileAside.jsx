@@ -11,7 +11,8 @@ const UserProfileAside = ({ updateSm, sm }) => {
   const user = useRecoilValue(userState);
 
   const hasPermission = (permission) => {
-    return user.permissions.some((perm) => perm === permission) || user.permissions.some((perm) => perm === "*");
+    if (!user || !Array.isArray(user?.permissions)) return false;
+    return user.permissions.includes(permission) || user.permissions.includes("*");
   };
 
   useEffect(() => {
@@ -23,13 +24,13 @@ const UserProfileAside = ({ updateSm, sm }) => {
       <div className="card-inner">
         <div className="user-card">
           <UserAvatar
-            text={findUpper(user?.firstname ? `${user?.firstName} ${user?.lastName}` : "")}
+            text={findUpper(user?.firstName ? `${user?.firstName} ${user?.lastName || ""}` : (user?.email || "Admin"))}
             image={user?.profilePicture}
             theme="primary"
           />
           <div className="user-info">
-            <span className="lead-text">{`${user?.firstName} ${user?.lastName}`}</span>
-            <span className="sub-text">{user?.email}</span>
+            <span className="lead-text">{user?.firstName ? `${user?.firstName} ${user?.lastName || ""}` : (user?.email || "Admin")}</span>
+            <span className="sub-text">{user?.email || ""}</span>
           </div>
           <div className="user-action">
             <UncontrolledDropdown>
@@ -71,7 +72,7 @@ const UserProfileAside = ({ updateSm, sm }) => {
       <div className="card-inner">
         <div className="user-account-info py-0">
           <h6 className="overline-title-alt">Role</h6>
-          <div className="user-balance">{user?.adminLevel.replace("_", " ").toUpperCase()}</div>
+          <div className="user-balance">{user?.adminLevel ? user.adminLevel.replace("_", " ").toUpperCase() : "ADMIN"}</div>
         </div>
       </div>
       <div className="card-inner p-0">

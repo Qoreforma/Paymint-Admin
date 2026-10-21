@@ -26,8 +26,9 @@ const CategoryDetails = () => {
 
   const [user] = useRecoilState(userState);
   const hasPermission =
-    user.permissions.some((perm) => perm === "admin.manage_giftcard_admins") ||
-    user.permissions.some((perm) => perm === "*");
+    Array.isArray(user?.permissions) &&
+    (user.permissions.includes("admin.manage_giftcard_admins") ||
+      user.permissions.includes("*"));
 
   const { data: details, isLoading: fetchingDetails } = useGetCategoryDetails(categoryId);
 

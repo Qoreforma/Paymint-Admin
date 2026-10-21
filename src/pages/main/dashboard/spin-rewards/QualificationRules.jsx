@@ -97,7 +97,7 @@ const QualificationRules = () => {
   return (
     <React.Fragment>
       <BlockHead size="sm">
-        <BlockBetween>
+        <BlockBetween className="h-auto">
           <BlockHeadContent>
             <BlockTitle tag="h5">Qualification Rules</BlockTitle>
             <BlockDes>
@@ -118,7 +118,7 @@ const QualificationRules = () => {
       <Block>
         <div className="nk-data data-list">
           <div className="data-head">
-            <BlockBetween>
+            <BlockBetween className="h-auto">
               <h6 className="overline-title mb-0">Configured Rules ({rules.length})</h6>
             </BlockBetween>
           </div>
@@ -137,12 +137,12 @@ const QualificationRules = () => {
                 return (
                   <div
                     key={rule._id}
-                    className="spin-tier-item"
+                    className="spin-tier-item h-auto"
                     style={{ cursor: "pointer" }}
                     onClick={() => handleOpenEdit(rule)}
                   >
-                    <div className="spin-tier-info">
-                      <div className="spin-tier-header">
+                    <div className="spin-tier-info h-auto">
+                      <div className="spin-tier-header h-auto">
                         <span className="spin-tier-title">{rule.name}</span>
                         {!rule.isActive ? (
                           <span className="badge bg-danger-dim text-danger" style={{ fontSize: "10px" }}>
@@ -166,7 +166,7 @@ const QualificationRules = () => {
                         <div className="spin-tier-desc">{rule.description}</div>
                       )}
                     </div>
-                    <div className="spin-tier-actions">
+                    <div className="spin-tier-actions h-auto">
                       <Button
                         size="sm"
                         color="light"

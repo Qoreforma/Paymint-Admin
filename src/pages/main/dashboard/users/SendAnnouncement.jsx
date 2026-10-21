@@ -83,13 +83,13 @@ const SendAnnouncementModal = ({ selectedUsers, modal, closeModal, createFunctio
   const body = watch("body") || "";
 
   // Check if SMS is selected
-  const hasSMS = channels.some((channel) => channel.value === "sms");
-  const hasEmail = channels.some((channel) => channel.value === "email");
-  const hasPush = channels.some((channel) => channel.value === "push");
+  const hasSMS = Array.isArray(channels) && channels.some((channel) => channel?.value === "sms");
+  const hasEmail = Array.isArray(channels) && channels.some((channel) => channel?.value === "email");
+  const hasPush = Array.isArray(channels) && channels.some((channel) => channel?.value === "push");
 
   // Handle channel change to enforce Email alone rule
   const handleChannelChange = (selectedOptions) => {
-    const hasEmailSelected = selectedOptions.some((option) => option.value === "email");
+    const hasEmailSelected = Array.isArray(selectedOptions) && selectedOptions.some((option) => option?.value === "email");
 
     if (hasEmailSelected) {
       // If Email is selected, only keep Email

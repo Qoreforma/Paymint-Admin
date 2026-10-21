@@ -77,6 +77,9 @@ const RewardTiers = () => {
     timeWindowCapHours: "",
     validFrom: "",
     validUntil: "",
+    displayCountdown: false,
+    displaySpinsLeft: false,
+    autoRegeneratePool: true,
     isActive: true,
   });
 
@@ -102,6 +105,9 @@ const RewardTiers = () => {
       timeWindowCapHours: "",
       validFrom: "",
       validUntil: "",
+      displayCountdown: false,
+      displaySpinsLeft: false,
+      autoRegeneratePool: true,
       isActive: true,
     });
     setModal({ add: true, edit: false });
@@ -124,6 +130,9 @@ const RewardTiers = () => {
       timeWindowCapHours: tier.timeWindowCapHours || "",
       validFrom: formatForDateTimeLocal(tier.validFrom),
       validUntil: formatForDateTimeLocal(tier.validUntil),
+      displayCountdown: Boolean(tier.displayCountdown),
+      displaySpinsLeft: Boolean(tier.displaySpinsLeft),
+      autoRegeneratePool: tier.autoRegeneratePool ?? true,
       isActive: tier.isActive ?? true,
     });
     setModal({ add: false, edit: true });
@@ -143,12 +152,26 @@ const RewardTiers = () => {
       }
     }
 
+    if (formData.displayCountdown) {
+      if (!formData.validUntil) {
+        alert("Campaign End date is required to enable Countdown Display");
+        return;
+      }
+      if (new Date(formData.validUntil) <= new Date()) {
+        alert("Campaign End date must be in the future to enable Countdown Display");
+        return;
+      }
+    }
+
     const payload = {
       name: formData.name.trim(),
       description: formData.description.trim(),
       referralThreshold: Number(formData.referralThreshold),
       qualificationRuleId: formData.qualificationRuleId,
       repeatMode: formData.repeatMode,
+      displayCountdown: Boolean(formData.displayCountdown),
+      displaySpinsLeft: Boolean(formData.displaySpinsLeft),
+      autoRegeneratePool: Boolean(formData.autoRegeneratePool),
       ...(formData.repeatMode === "max-N" && formData.maxRepeatCount
         ? { maxRepeatCount: Number(formData.maxRepeatCount) }
         : {}),
@@ -189,7 +212,7 @@ const RewardTiers = () => {
   return (
     <React.Fragment>
       <BlockHead size="sm">
-        <BlockBetween>
+        <BlockBetween className="h-auto">
           <BlockHeadContent>
             <BlockTitle tag="h5">Reward Tiers & Wheels</BlockTitle>
             <BlockDes>
@@ -210,7 +233,7 @@ const RewardTiers = () => {
       <Block>
         <div className="nk-data data-list">
           <div className="data-head">
-            <BlockBetween>
+            <BlockBetween className="h-auto">
               <h6 className="overline-title mb-0">Active & Configured Tiers ({tiers.length})</h6>
             </BlockBetween>
           </div>
@@ -223,7 +246,7 @@ const RewardTiers = () => {
             </div>
           ) : (
               tiers.map((tier) => {
-                const hasWheel = wheels.some(
+                const hasWheel = Array.isArray(wheels) && wheels.some(
                   (w) =>
                     w.tierId === tier._id ||
                     (typeof w.tierId === "object" && w.tierId?._id === tier._id)
@@ -240,9 +263,9 @@ const RewardTiers = () => {
                     : "Milestone Rule");
 
                 return (
-                  <div key={tier._id} className="spin-tier-item">
-                    <div className="spin-tier-info">
-                      <div className="spin-tier-header">
+                  <div key={tier._id} className="spin-tier-item h-auto">
+                    <div className="spin-tier-info h-auto">
+                      <div className="spin-tier-header h-auto">
                         <span className="spin-tier-title">{tier.name}</span>
                         {!tier.isActive ? (
                           <span className="badge bg-danger-dim text-danger" style={{ fontSize: "10px" }}>
@@ -280,6 +303,24 @@ const RewardTiers = () => {
                             No Wheel
                           </span>
                         )}
+                        {tier.displayCountdown && (
+                          <span className="badge bg-purple-dim text-purple" style={{ fontSize: "10px" }}>
+                            <Icon name="clock" className="me-1" />
+                            Countdown ON
+                          </span>
+                        )}
+                        {tier.displaySpinsLeft && (
+                          <span className="badge bg-info-dim text-info" style={{ fontSize: "10px" }}>
+                            <Icon name="spark" className="me-1" />
+                            Spins Left ON
+                          </span>
+                        )}
+                        {tier.autoRegeneratePool === false && (
+                          <span className="badge bg-warning-dim text-warning" style={{ fontSize: "10px" }}>
+                            <Icon name="shield-check" className="me-1" />
+                            Single Round (No Reset)
+                          </span>
+                        )}
                       </div>
                       <div className="spin-tier-meta">
                         Threshold: <strong className="text-dark">{tier.referralThreshold} qualifying referrals</strong>
@@ -308,7 +349,7 @@ const RewardTiers = () => {
                       )}
                     </div>
 
-                    <div className="spin-tier-actions">
+                    <div className="spin-tier-actions h-auto">
                       <Button
                         size="sm"
                         color={hasWheel ? "primary" : "warning"}
@@ -632,6 +673,64 @@ const RewardTiers = () => {
                   </div>
                 </Col>
 
+                <Col xs="12" md="4">
+                  <div className="custom-control custom-switch mt-2">
+                    <input
+                      type="checkbox"
+                      className="custom-control-input"
+                      id="tier-display-countdown"
+                      checked={formData.displayCountdown}
+                      onChange={(e) => {
+                        if (e.target.checked && (!formData.validUntil || new Date(formData.validUntil) <= new Date())) {
+                          alert("Please set a valid future Campaign End date before enabling the countdown timer.");
+                          return;
+                        }
+                        setFormData({ ...formData, displayCountdown: e.target.checked });
+                      }}
+                    />
+                    <label className="custom-control-label fw-bold" htmlFor="tier-display-countdown">
+                      Display Countdown Timer
+                    </label>
+                    <div className="text-muted fs-11px">Shows live countdown in app. Requires Campaign End.</div>
+                  </div>
+                </Col>
+
+                <Col xs="12" md="4">
+                  <div className="custom-control custom-switch mt-2">
+                    <input
+                      type="checkbox"
+                      className="custom-control-input"
+                      id="tier-display-spins-left"
+                      checked={formData.displaySpinsLeft}
+                      onChange={(e) =>
+                        setFormData({ ...formData, displaySpinsLeft: e.target.checked })
+                      }
+                    />
+                    <label className="custom-control-label fw-bold" htmlFor="tier-display-spins-left">
+                      Display Spins Left
+                    </label>
+                    <div className="text-muted fs-11px">Shows remaining spins to drive user urgency.</div>
+                  </div>
+                </Col>
+
+                <Col xs="12" md="4">
+                  <div className="custom-control custom-switch mt-2">
+                    <input
+                      type="checkbox"
+                      className="custom-control-input"
+                      id="tier-auto-regenerate"
+                      checked={formData.autoRegeneratePool}
+                      onChange={(e) =>
+                        setFormData({ ...formData, autoRegeneratePool: e.target.checked })
+                      }
+                    />
+                    <label className="custom-control-label fw-bold" htmlFor="tier-auto-regenerate">
+                      Auto-Reload Pool
+                    </label>
+                    <div className="text-muted fs-11px">Turn OFF to stop round when tickets finish (no reset).</div>
+                  </div>
+                </Col>
+
                 {modal.edit && (
                   <Col xs="12" md="6">
                     <div className="custom-control custom-switch mt-2">
@@ -644,7 +743,7 @@ const RewardTiers = () => {
                           setFormData({ ...formData, isActive: e.target.checked })
                         }
                       />
-                      <label className="custom-control-label" htmlFor="tier-active">
+                      <label className="custom-control-label fw-bold" htmlFor="tier-active">
                         Tier Active
                       </label>
                     </div>
