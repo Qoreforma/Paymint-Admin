@@ -1,8 +1,9 @@
-div {
-    height: auto
-}
-
+div,
 button,
-span {
-    height: auto
-}
+.btn,
+span,
+div button,
+button span,
+.btn span {
+    height: auto;
+}

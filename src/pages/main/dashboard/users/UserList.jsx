@@ -41,6 +41,8 @@ import {
   truncateText,
   tableNumbers,
   formatDateWithHyphen,
+  formatDateOnly,
+  formatTimeOnly,
   exportToCSV,
 } from "../../../../utils/Utils";
 import LoadingSpinner from "../../../components/spinner";
@@ -786,9 +788,14 @@ const UserList = () => {
                           <span>{formatter("NGN").format(item?.wallet?.balance ?? 0)}</span>
                         </DataTableRow>
                         <DataTableRow size="sm">
-                          <span className="" style={{ whiteSpace: "nowrap" }}>
-                            {formatDateWithHyphen(item.createdAt)}
-                          </span>
+                          <div style={{ lineHeight: 1.4 }}>
+                            <span style={{ whiteSpace: "nowrap", display: "block" }}>
+                              {formatDateOnly(item.createdAt)}
+                            </span>
+                            <span style={{ whiteSpace: "nowrap", display: "block", fontSize: "11px", color: "#8094ae" }}>
+                              {formatTimeOnly(item.createdAt)}
+                            </span>
+                          </div>
                         </DataTableRow>
                         <DataTableRow size="sm">
                           {(() => {
@@ -825,15 +832,22 @@ const UserList = () => {
                           })()}
                         </DataTableRow>
                         <DataTableRow size="sm">
-                          {item?.appVersion ? (
-                            <Badge className="badge-sm badge-dim" color="info">
-                              v{item.appVersion}
-                            </Badge>
-                          ) : (
-                            <span className="text-muted" style={{ fontSize: "12px" }}>
-                              No Version
-                            </span>
-                          )}
+                          <div style={{ lineHeight: 1.5 }}>
+                            {item?.appVersion ? (
+                              <Badge className="badge-sm badge-dim" color="info">
+                                v{item.appVersion}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted" style={{ fontSize: "12px" }}>
+                                No Version
+                              </span>
+                            )}
+                            {item?.channel && (
+                              <span style={{ display: "block", fontSize: "11px", color: "#8094ae", textTransform: "capitalize", marginTop: "2px" }}>
+                                {item.channel}
+                              </span>
+                            )}
+                          </div>
                         </DataTableRow>
                         <DataTableRow size={"md"}>
                           <span className={`dot bg-${statusColor(item.status)} d-sm-none`}></span>

@@ -638,3 +638,15 @@
   padding-right: 2.25rem !important;
 }
 
+/* ── BASE HEIGHT AUTO RESETS ─────────────────────────────── */
+div,
+button,
+.btn,
+span,
+div button,
+button span,
+.btn span {
+  height: auto;
+}
+
+
