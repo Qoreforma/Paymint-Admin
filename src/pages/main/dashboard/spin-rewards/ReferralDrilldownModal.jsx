@@ -45,12 +45,14 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
     // Filter by type
     if (activeFilter === "needsClose") {
       result = result.filter(
-        (r) => r.neededForNextSpin > 0 && r.neededForNextSpin <= 2
+        (r) => !r.isMaxReached && r.neededForNextSpin > 0 && r.neededForNextSpin <= 2
       );
     } else if (activeFilter === "unlocked") {
-      result = result.filter((r) => r.spinsEarned > 0);
+      result = result.filter((r) => r.spinsEarned > 0 || r.isMaxReached);
     } else if (activeFilter === "inProgress") {
-      result = result.filter((r) => r.spinsEarned === 0 && r.totalReferrals > 0);
+      result = result.filter(
+        (r) => !r.isMaxReached && r.spinsEarned === 0 && r.totalReferrals > 0
+      );
     }
 
     // Filter by search term
@@ -85,7 +87,11 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
       result.sort((a, b) => a.totalReferrals - b.totalReferrals);
     } else if (sortBy === "closest") {
       // Prioritize who needs fewest referrals to next spin
-      result.sort((a, b) => a.neededForNextSpin - b.neededForNextSpin || b.totalReferrals - a.totalReferrals);
+      result.sort((a, b) => {
+        if (a.isMaxReached && !b.isMaxReached) return 1;
+        if (!a.isMaxReached && b.isMaxReached) return -1;
+        return a.neededForNextSpin - b.neededForNextSpin || b.totalReferrals - a.totalReferrals;
+      });
     } else if (sortBy === "mostSpins") {
       result.sort((a, b) => b.spinsEarned - a.spinsEarned || b.totalReferrals - a.totalReferrals);
     }
@@ -97,14 +103,21 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
   const totalReferralsCount = tier?.totalCampaignReferrals ?? referrers.reduce((acc, curr) => acc + curr.totalReferrals, 0);
   const totalReferrersCount = referrers.length;
   const needsCloseCount = referrers.filter(
-    (r) => r.neededForNextSpin > 0 && r.neededForNextSpin <= 2
+    (r) => !r.isMaxReached && r.neededForNextSpin > 0 && r.neededForNextSpin <= 2
   ).length;
-  const unlockedCount = referrers.filter((r) => r.spinsEarned > 0).length;
+  const unlockedCount = referrers.filter((r) => r.spinsEarned > 0 || r.isMaxReached).length;
   const inProgressCount = referrers.filter(
-    (r) => r.spinsEarned === 0 && r.totalReferrals > 0
+    (r) => !r.isMaxReached && r.spinsEarned === 0 && r.totalReferrals > 0
   ).length;
 
   const allFilteredIds = filteredReferrers.map((r) => r.referrer?._id || r.referrer?.id);
+
+  const repeatModeLabel =
+    tier?.repeatMode === "one-time"
+      ? "One-Time (1 Spin Max)"
+      : tier?.repeatMode === "max-N"
+      ? `Max ${tier?.maxRepeatCount || 1} Spins`
+      : "Repeatable";
 
   return (
     <Modal
@@ -118,7 +131,7 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
         {/* Header */}
         <div className="p-4 border-bottom bg-white d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div>
-            <div className="d-flex align-items-center gap-2 mb-1">
+            <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
               <span className="badge bg-success-dim text-success px-2 py-1 fs-11px fw-bold">
                 <Icon name="users" className="me-1" />
                 CAMPAIGN DRILLDOWN
@@ -129,6 +142,14 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
               <span className="badge bg-light text-dark border fs-11px">
                 Threshold: {threshold} referrals / spin
               </span>
+              <span className="badge bg-white text-dark border fs-11px">
+                Repeat Mode: <strong className="text-primary ms-1">{repeatModeLabel}</strong>
+              </span>
+              {tier?.perUserCap && (
+                <span className="badge bg-light text-muted border fs-11px">
+                  Per-User Cap: {tier.perUserCap} spins
+                </span>
+              )}
             </div>
             <p className="text-muted fs-12px mb-0">
               Inspect all referrers, their invited referees, and exact distance to next spin unlock.
@@ -191,7 +212,7 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
                     <h4 className="text-warning fw-bold my-1">
                       {needsCloseCount.toLocaleString()}
                     </h4>
-                    <span className="text-muted fs-11px">Close to next spin</span>
+                    <span className="text-muted fs-11px">Close to spin milestone</span>
                   </div>
                 </Col>
                 <Col xs="6" sm="3">
@@ -205,12 +226,12 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
                     }
                   >
                     <span className="text-muted fs-11px text-uppercase fw-bold d-block">
-                      Spins Unlocked 🏆
+                      Spins Unlocked / Completed 🏆
                     </span>
                     <h4 className="text-success fw-bold my-1">
                       {unlockedCount.toLocaleString()}
                     </h4>
-                    <span className="text-muted fs-11px">Earned ≥ 1 spin</span>
+                    <span className="text-muted fs-11px">Milestone achieved</span>
                   </div>
                 </Col>
               </Row>
@@ -245,7 +266,7 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
                       }`}
                       onClick={() => setActiveFilter("unlocked")}
                     >
-                      🏆 Spins Unlocked ({unlockedCount})
+                      🏆 Unlocked / Completed ({unlockedCount})
                     </button>
                     <button
                       type="button"
@@ -349,10 +370,10 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
                     const refId = refUser._id || refUser.id;
                     const isExpanded = expandedIds.has(refId);
                     const fullName = `${refUser.firstname || ""} ${refUser.lastname || ""}`.trim() || "Anonymous User";
-                    const progressPercent = Math.min(
-                      100,
-                      Math.round((item.currentProgress / threshold) * 100)
-                    );
+                    const isCompleted = item.isMaxReached;
+                    const progressPercent = isCompleted
+                      ? 100
+                      : Math.min(100, Math.round((item.currentProgress / threshold) * 100));
 
                     return (
                       <div
@@ -404,13 +425,20 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
                               {item.spinsEarned} Spin{item.spinsEarned !== 1 ? "s" : ""} Earned
                             </span>
 
-                            {item.neededForNextSpin > 0 ? (
-                              <span className="badge bg-warning text-dark fw-bold fs-12px px-2 py-1">
+                            {isCompleted ? (
+                              <span className="badge bg-success text-white fw-bold fs-12px px-2 py-1 shadow-xs">
+                                <Icon name="check-circle" className="me-1" />
+                                {tier?.repeatMode === "one-time"
+                                  ? "Milestone Completed (1/1 Max Spin Awarded) 🏆"
+                                  : `Tier Limit Reached (${item.spinsEarned}/${item.maxAllowedSpins} Spins) 🏆`}
+                              </span>
+                            ) : item.neededForNextSpin > 0 ? (
+                              <span className="badge bg-warning text-dark fw-bold fs-12px px-2 py-1 shadow-xs">
                                 <Icon name="target" className="me-1" />
                                 Needs <strong>{item.neededForNextSpin}</strong> more for next spin!
                               </span>
                             ) : item.totalReferrals > 0 ? (
-                              <span className="badge bg-success text-white fw-bold fs-12px px-2 py-1">
+                              <span className="badge bg-success text-white fw-bold fs-12px px-2 py-1 shadow-xs">
                                 <Icon name="check-circle" className="me-1" />
                                 Milestone Ready! 🎉
                               </span>
@@ -437,11 +465,26 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
                         <div className="mt-2 pt-1">
                           <div className="d-flex justify-content-between align-items-center fs-11px text-muted mb-1">
                             <span>
-                              Cycle Progress: <strong>{item.currentProgress}</strong> of{" "}
-                              <strong>{threshold}</strong> referrals
+                              {isCompleted ? (
+                                <strong className="text-success">
+                                  Goal Achieved: {item.totalReferrals} referrals recorded • Maximum {item.maxAllowedSpins || 1} spin awarded
+                                </strong>
+                              ) : tier?.repeatMode === "one-time" ? (
+                                <>
+                                  Progress: <strong>{item.currentProgress}</strong> of{" "}
+                                  <strong>{threshold}</strong> referrals
+                                </>
+                              ) : (
+                                <>
+                                  Cycle Progress: <strong>{item.currentProgress}</strong> of{" "}
+                                  <strong>{threshold}</strong> referrals
+                                </>
+                              )}
                             </span>
                             <span>
-                              {item.neededForNextSpin > 0
+                              {isCompleted
+                                ? "Tier milestone complete"
+                                : item.neededForNextSpin > 0
                                 ? `${item.neededForNextSpin} remaining until spin reward`
                                 : "Spin milestone reached"}
                             </span>
@@ -449,7 +492,7 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
                           <div className="spin-progress-container">
                             <div
                               className={`spin-progress-bar ${
-                                progressPercent === 100 || item.currentProgress === 0
+                                isCompleted || progressPercent === 100 || item.currentProgress === 0
                                   ? "bg-success"
                                   : progressPercent >= 60
                                   ? "bg-primary"
@@ -480,7 +523,7 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
                                       <th>Referee</th>
                                       <th>Contact</th>
                                       <th>Joined Date</th>
-                                      <th>Status</th>
+                                      <th>Verification Status</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -525,15 +568,22 @@ const ReferralDrilldownModal = ({ isOpen, toggle, tierId, initialFilter = "all" 
                                             </span>
                                           </td>
                                           <td>
-                                            <span
-                                              className={`badge ${
-                                                referee.status === "active"
-                                                  ? "bg-success-dim text-success"
-                                                  : "bg-light text-muted border"
-                                              } fs-11px`}
-                                            >
-                                              {referee.status || "Active"}
-                                            </span>
+                                            {referee.isFlaggedFraud ? (
+                                              <span className="badge bg-danger-dim text-danger fs-11px">
+                                                <Icon name="alert-circle" className="me-1" />
+                                                {referee.flagReason || "Disqualified"}
+                                              </span>
+                                            ) : (
+                                              <span
+                                                className={`badge ${
+                                                  referee.status === "active"
+                                                    ? "bg-success-dim text-success"
+                                                    : "bg-light text-muted border"
+                                                } fs-11px`}
+                                              >
+                                                {referee.status || "Active"}
+                                              </span>
+                                            )}
                                           </td>
                                         </tr>
                                       );

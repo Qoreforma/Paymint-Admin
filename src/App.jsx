@@ -1,5 +1,6 @@
 import Router from "./route/Index";
 import React from "react";
+import "./App.css"
 
 import ThemeProvider from "./layout/provider/Theme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
