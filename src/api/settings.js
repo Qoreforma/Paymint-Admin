@@ -466,6 +466,56 @@ export const useCreateReferralBonus = () => {
   );
 };
 
+// ***********************REFERRAL BONUS RULE (todo/reward)*****************************
+export const useGetReferralBonusRule = () => {
+  return useQuery(
+    ["ReferralBonusRule"],
+    async () => {
+      const request = await instance
+        .get("/referral-bonus-rule")
+        .then((res) => res?.data)
+        .catch((err) => {
+          throw err;
+        });
+      return request;
+    },
+    {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      retryDelay: 3000,
+    }
+  );
+};
+
+export const useUpsertReferralBonusRule = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (data) =>
+      toast.promise(
+        instance
+          .put("/referral-bonus-rule", data)
+          .then((res) => res.data)
+          .catch((err) => {
+            throw err;
+          }),
+        {
+          success: "Bonus rule saved successfully",
+          loading: "Saving...",
+          error: (error) =>
+            error?.response?.data?.message
+              ? error?.response?.data?.message
+              : "Something went wrong",
+        }
+      ),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["ReferralBonusRule"]);
+      },
+    }
+  );
+};
+
 // ***********************TRADE BONUS*****************************
 export const useGetTradeBonus = () => {
   return useQuery(
