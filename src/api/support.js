@@ -22,8 +22,9 @@ export const useGetSupportQueue = (filters = {}, page = 1, limit = 20) => {
     },
     {
       keepPreviousData: true,
-      refetchInterval: 6000, // Poll every 6s for live queue updates
+      // Socket handles real-time updates — only re-sync on window focus
       refetchOnWindowFocus: true,
+      staleTime: 30000,
     }
   );
 };
@@ -69,8 +70,9 @@ export const useGetTicketMessages = (ticketId, limit = 50) => {
     },
     {
       enabled: !!ticketId,
-      refetchInterval: 3000, // Real-time chat polling
+      // Socket handles real-time message delivery — no polling needed
       refetchOnWindowFocus: true,
+      staleTime: 30000,
     }
   );
 };

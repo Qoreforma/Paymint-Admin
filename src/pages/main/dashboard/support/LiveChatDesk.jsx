@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Input, Badge, Spinner } from "reactstrap";
 import { Button, Icon, UserAvatar } from "../../../../components/Component";
 import {
@@ -9,11 +9,18 @@ import {
   useSendTicketMessage,
   useClaimTicket,
 } from "../../../../api/support";
+import { useQueryClient } from "@tanstack/react-query";
 import ReassignModal from "./ReassignModal";
 import ResolveModal from "./ResolveModal";
 import CloseModal from "./CloseModal";
+import useSupportSocket from "../../../../hooks/useSupportSocket";
 import dayjs from "dayjs";
+import isToday from "dayjs/plugin/isToday";
+import isYesterday from "dayjs/plugin/isYesterday";
 import "./support.css";
+
+dayjs.extend(isToday);
+dayjs.extend(isYesterday);
 
 const CANNED_RESPONSES = [
   "👋 Hello! I am looking into your request right now.",
@@ -23,21 +30,128 @@ const CANNED_RESPONSES = [
   "✅ This issue has been fully resolved. Please let me know if you need anything else!",
 ];
 
+/**
+ * Smart timestamp — shows time only if today, "Yesterday HH:MM" if yesterday,
+ * full date otherwise. Used in ticket cards.
+ */
+const formatTicketTime = (ts) => {
+  if (!ts) return "";
+  const d = dayjs(ts);
+  if (!d.isValid()) return "";
+  if (d.isToday()) return d.format("hh:mm A");
+  if (d.isYesterday()) return `Yesterday ${d.format("hh:mm A")}`;
+  return d.format("MMM D, YYYY");
+};
+
+/**
+ * Smart timestamp for chat messages.
+ */
+const formatMsgTime = (ts) => {
+  if (!ts) return "";
+  const d = dayjs(ts);
+  if (!d.isValid()) return "";
+  if (d.isToday()) return d.format("hh:mm A");
+  if (d.isYesterday()) return `Yesterday ${d.format("hh:mm A")}`;
+  return d.format("MMM D, YYYY hh:mm A");
+};
+
+/**
+ * Returns the date label used for chat date dividers.
+ */
+const getMsgDateLabel = (ts) => {
+  if (!ts) return "";
+  const d = dayjs(ts);
+  if (!d.isValid()) return "";
+  if (d.isToday()) return "Today";
+  if (d.isYesterday()) return "Yesterday";
+  return d.format("MMMM D, YYYY");
+};
+
+/**
+ * Robust user display name supporting both firstname/lastname and firstName/lastName
+ */
+const getUserDisplayName = (user) => {
+  if (!user) return "Customer";
+  if (typeof user === "string") return "Customer";
+  const first = user.firstname || user.firstName || "";
+  const last = user.lastname || user.lastName || "";
+  const full = `${first} ${last}`.trim();
+  return full || user.email || "Customer";
+};
+
+/**
+ * Extract initial for avatar
+ */
+const getUserInitial = (user) => {
+  const name = getUserDisplayName(user);
+  return name && name !== "Customer" ? name[0].toUpperCase() : "C";
+};
+
+/**
+ * Extract profile user ID safely
+ */
+const getUserProfileId = (ticket) => {
+  if (!ticket) return null;
+  if (ticket.userId && typeof ticket.userId === "object" && ticket.userId._id) {
+    return ticket.userId._id;
+  }
+  if (typeof ticket.userId === "string") return ticket.userId;
+  return null;
+};
+
+/**
+ * Priority → sort weight (lower = higher in list).
+ */
+const PRIORITY_WEIGHT = { urgent: 0, high: 1, medium: 2, low: 3 };
+
+/**
+ * Sort tickets: unread first (by priority), then active (by priority), then rest.
+ */
+const sortTickets = (tickets, unreadCounts) => {
+  return [...tickets].sort((a, b) => {
+    const aId = a._id || a.id;
+    const bId = b._id || b.id;
+    const aUnread = (unreadCounts[aId] || 0) > 0;
+    const bUnread = (unreadCounts[bId] || 0) > 0;
+    const aPrio = PRIORITY_WEIGHT[a.priority] ?? 2;
+    const bPrio = PRIORITY_WEIGHT[b.priority] ?? 2;
+
+    // 1. Unread tickets first
+    if (aUnread !== bUnread) return aUnread ? -1 : 1;
+    // 2. By priority weight within same unread group
+    if (aPrio !== bPrio) return aPrio - bPrio;
+    // 3. Most recently updated
+    return dayjs(b.updatedAt || b.createdAt).unix() - dayjs(a.updatedAt || a.createdAt).unix();
+  });
+};
+
 const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
-  const [filterTab, setFilterTab] = useState("all"); // "all", "active", "queued"
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient();
+
+  const [filterTab, setFilterTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTicketId, setSelectedTicketId] = useState(preselectedTicketId || null);
   const [inputMessage, setInputMessage] = useState("");
   const [mobileAsideVisible, setMobileAsideVisible] = useState(!preselectedTicketId);
 
-  // Modals state
+  // Unread count per ticket (tracked locally via socket events)
+  const [unreadCounts, setUnreadCounts] = useState({});
+
+  // Modals
   const [reassignOpen, setReassignOpen] = useState(false);
   const [resolveOpen, setResolveOpen] = useState(false);
   const [closeOpen, setCloseOpen] = useState(false);
 
   const messagesEndRef = useRef(null);
+  const selectedTicketIdRef = useRef(selectedTicketId);
+  useEffect(() => { selectedTicketIdRef.current = selectedTicketId; }, [selectedTicketId]);
 
-  // Queries
+  // ── Socket ──────────────────────────────────────────────────────────────
+  const { getSocket, connected } = useSupportSocket(true);
+
+  // ── Queries ──────────────────────────────────────────────────────────────
   const { data: queueData, isLoading: loadingQueue } = useGetSupportQueue({
     status: filterTab === "all" ? undefined : filterTab,
     search: searchQuery,
@@ -46,26 +160,85 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
   });
 
   const tickets = queueData?.data || [];
+  const sortedTickets = sortTickets(tickets, unreadCounts);
 
-  // Direct fetch for selected ticket to ensure details are populated even if not in current page
   const { data: directTicketRes } = useGetSupportTicket(selectedTicketId);
   const selectedTicket =
     directTicketRes?.data ||
     tickets.find((t) => (t._id || t.id) === selectedTicketId) ||
     null;
 
-  // Messages Query for selected ticket
   const { data: messagesData, isLoading: loadingMessages } = useGetTicketMessages(
     selectedTicketId,
     100
   );
   const messages = messagesData?.data?.messages || [];
 
-  // Mutations
+  // ── Mutations ─────────────────────────────────────────────────────────────
   const { mutate: sendMessage, isLoading: isSending } = useSendTicketMessage();
   const { mutate: claimTicket, isLoading: isClaiming } = useClaimTicket();
 
-  // If preselectedTicketId changes, select it
+  // ── Socket event wiring ──────────────────────────────────────────────────
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleNewTicket = (data) => {
+      // Refresh queue so the new ticket appears
+      queryClient.invalidateQueries(["support-queue"]);
+      queryClient.invalidateQueries(["support-stats"]);
+    };
+
+    const handleMessage = (data) => {
+      const { ticketId } = data;
+      if (!ticketId) return;
+
+      // Refresh messages for the active ticket
+      queryClient.invalidateQueries(["support-ticket-messages", ticketId]);
+      // Refresh queue to update lastMessageSnippet / updatedAt
+      queryClient.invalidateQueries(["support-queue"]);
+
+      // If this is NOT the currently visible ticket, increment unread badge
+      if (ticketId !== selectedTicketIdRef.current) {
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [ticketId]: (prev[ticketId] || 0) + 1,
+        }));
+      }
+    };
+
+    const handleQueueChange = () => {
+      queryClient.invalidateQueries(["support-queue"]);
+      queryClient.invalidateQueries(["support-stats"]);
+    };
+
+    socket.on("support:new_ticket", handleNewTicket);
+    socket.on("support:message", handleMessage);
+    socket.on("support:ticket_claimed", handleQueueChange);
+    socket.on("support:ticket_closed", handleQueueChange);
+    socket.on("support:ticket_resolved", handleQueueChange);
+    socket.on("support:ticket_escalated", handleQueueChange);
+    socket.on("support:ticket_reassigned", handleQueueChange);
+
+    return () => {
+      socket.off("support:new_ticket", handleNewTicket);
+      socket.off("support:message", handleMessage);
+      socket.off("support:ticket_claimed", handleQueueChange);
+      socket.off("support:ticket_closed", handleQueueChange);
+      socket.off("support:ticket_resolved", handleQueueChange);
+      socket.off("support:ticket_escalated", handleQueueChange);
+      socket.off("support:ticket_reassigned", handleQueueChange);
+    };
+  }, [connected, queryClient, getSocket]);
+
+  // When a ticket is selected, join its admin room via socket
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !selectedTicketId) return;
+    socket.emit("support:join_ticket", { ticketId: selectedTicketId });
+  }, [selectedTicketId, connected, getSocket]);
+
+  // Preselected ticket from parent / URL param
   useEffect(() => {
     if (preselectedTicketId) {
       setSelectedTicketId(preselectedTicketId);
@@ -75,25 +248,19 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
     }
   }, [preselectedTicketId, tickets]);
 
-  // Auto-scroll chat to bottom
+  // Auto-scroll chat to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const handleSendMessage = (e) => {
     e?.preventDefault();
     if (!inputMessage.trim() || !selectedTicketId || isSending) return;
 
     sendMessage(
-      {
-        ticketId: selectedTicketId,
-        text: inputMessage.trim(),
-      },
-      {
-        onSuccess: () => {
-          setInputMessage("");
-        },
-      }
+      { ticketId: selectedTicketId, text: inputMessage.trim() },
+      { onSuccess: () => setInputMessage("") }
     );
   };
 
@@ -113,12 +280,79 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
     setSelectedTicketId(id);
     setMobileAsideVisible(false);
     onSelectTicket?.(id);
+    // Clear unread count for this ticket
+    setUnreadCounts((prev) => ({ ...prev, [id]: 0 }));
   };
 
   const handleQuickReply = (text) => {
     setInputMessage((prev) => (prev ? `${prev} ${text}` : text));
   };
 
+  const handleGoToProfile = (userId) => {
+    navigate(`/user-details/${userId}`, {
+      state: { from: location.pathname },
+    });
+  };
+
+  // ── Chat date divider logic ───────────────────────────────────────────────
+  const renderMessages = () => {
+    let lastDateLabel = null;
+    return messages.map((msg, idx) => {
+      const isUser = msg.sender === "user";
+      const isAgent = msg.sender === "agent";
+      const isBot = msg.sender === "bot";
+      const isSystem = msg.sender === "system";
+
+      let containerType = "user";
+      if (isAgent) containerType = "agent";
+      else if (isBot) containerType = "bot";
+      else if (isSystem) containerType = "system";
+
+      const dateLabel = msg.createdAt ? getMsgDateLabel(msg.createdAt) : null;
+      const showDivider = dateLabel && dateLabel !== lastDateLabel;
+      if (showDivider) lastDateLabel = dateLabel;
+
+      return (
+        <React.Fragment key={msg._id || idx}>
+          {showDivider && (
+            <div className="chat-date-divider">
+              <span>{dateLabel}</span>
+            </div>
+          )}
+          <div className={`chat-bubble-container ${containerType}`}>
+            {isBot && (
+              <div className="d-flex align-items-center gap-1 mb-1" style={{ fontSize: "0.72rem", color: "#64748b" }}>
+                <span>🤖 Minty AI Bot (Automated Advice)</span>
+              </div>
+            )}
+            {isAgent && (
+              <div className="bubble-meta mb-1 font-weight-bold text-primary" style={{ fontSize: "0.7rem" }}>
+                {msg.senderName || "Support Agent"}
+              </div>
+            )}
+            <div
+              className={
+                isAgent
+                  ? "bubble-agent"
+                  : isBot
+                  ? "bubble-bot"
+                  : isSystem
+                  ? "bubble-system"
+                  : "bubble-user"
+              }
+            >
+              {msg.text}
+            </div>
+            <div className="bubble-meta">
+              {msg.createdAt ? formatMsgTime(msg.createdAt) : ""}
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    });
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="support-chat-container">
       {/* ── Left Column: Ticket Queue List ── */}
@@ -128,9 +362,24 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
             <h6 className="mb-0 font-weight-bold" style={{ fontSize: "0.95rem" }}>
               Active Queue
             </h6>
-            <Badge color="light" pill className="text-primary font-weight-bold">
-              {tickets.length} Tickets
-            </Badge>
+            <div className="d-flex align-items-center gap-2">
+              {/* Socket connection dot */}
+              <span
+                title={connected ? "Live — socket connected" : "Reconnecting…"}
+                style={{
+                  display: "inline-block",
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: connected ? "#22c55e" : "#f59e0b",
+                  boxShadow: connected ? "0 0 0 2px #bbf7d0" : "0 0 0 2px #fde68a",
+                  flexShrink: 0,
+                }}
+              />
+              <Badge color="light" pill className="text-primary font-weight-bold">
+                {tickets.length} Tickets
+              </Badge>
+            </div>
           </div>
 
           <div className="support-aside-search">
@@ -181,7 +430,7 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
                 Loading tickets...
               </div>
             </div>
-          ) : tickets.length === 0 ? (
+          ) : sortedTickets.length === 0 ? (
             <div className="text-center py-5 px-3">
               <Icon name="inbox" className="fs-1 text-soft mb-2" />
               <div className="font-weight-bold text-dark" style={{ fontSize: "0.88rem" }}>
@@ -192,29 +441,35 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
               </p>
             </div>
           ) : (
-            tickets.map((t) => {
+            sortedTickets.map((t) => {
               const ticketId = t._id || t.id;
               const isSelected = ticketId === selectedTicketId;
-              const user = t.userId || {};
-              const userName = user.firstName
-                ? `${user.firstName} ${user.lastName || ""}`
-                : "Customer";
+              const userName = getUserDisplayName(t.userId);
               const priorityClass = `priority-${t.priority || "medium"}`;
               const statusClass = `status-badge-${t.status || "queued"}`;
+              const unread = unreadCounts[ticketId] || 0;
 
               return (
                 <div
                   key={ticketId}
-                  className={`support-ticket-card ${isSelected ? "selected" : ""}`}
+                  className={`support-ticket-card ${isSelected ? "selected" : ""} ${unread > 0 ? "has-unread" : ""}`}
                   onClick={() => handleSelectTicket(ticketId)}
                 >
                   <div className="d-flex align-items-center justify-content-between mb-1">
-                    <span className="font-weight-bold text-dark text-truncate" style={{ fontSize: "0.86rem", maxWidth: "180px" }}>
+                    <span
+                      className="font-weight-bold text-dark text-truncate"
+                      style={{ fontSize: "0.86rem", maxWidth: "160px" }}
+                    >
                       {userName}
                     </span>
-                    <span className={`support-badge-priority ${priorityClass}`}>
-                      {t.priority || "medium"}
-                    </span>
+                    <div className="d-flex align-items-center gap-1">
+                      {unread > 0 && (
+                        <span className="support-unread-badge">{unread}</span>
+                      )}
+                      <span className={`support-badge-priority ${priorityClass}`}>
+                        {t.priority || "medium"}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="d-flex align-items-center justify-content-between">
@@ -227,7 +482,7 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
                   </div>
 
                   <div
-                    className="text-muted text-truncate mt-1"
+                    className={`text-truncate mt-1 ${unread > 0 ? "fw-semibold text-dark" : "text-muted"}`}
                     style={{ fontSize: "0.78rem", maxWidth: "100%" }}
                   >
                     {t.lastMessageSnippet || t.subject || "No message preview"}
@@ -235,7 +490,7 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
 
                   <div className="d-flex align-items-center justify-content-between mt-2 pt-1 border-top border-light">
                     <span className="text-soft" style={{ fontSize: "0.7rem" }}>
-                      {dayjs(t.updatedAt || t.createdAt).format("hh:mm A")}
+                      {formatTicketTime(t.updatedAt || t.createdAt)}
                     </span>
                     {t.assignedAdminId ? (
                       <span className="text-primary font-weight-bold" style={{ fontSize: "0.7rem" }}>
@@ -271,24 +526,44 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
                   <Icon name="arrow-left" />
                 </button>
 
-                <UserAvatar
-                  text={
-                    selectedTicket.userId?.firstName
-                      ? selectedTicket.userId.firstName[0]
-                      : "C"
-                  }
-                  theme="primary"
-                />
-                <div className="d-flex flex-column justify-content-center" style={{ gap: "4px", minWidth: 0 }}>
-                  <div className="d-flex align-items-center gap-2 flex-wrap" style={{ lineHeight: 1.3 }}>
-                    <span
-                      className="fw-bold text-dark text-truncate"
+                {/* Clickable Avatar → profile */}
+                <button
+                  type="button"
+                  className="btn p-0 border-0 bg-transparent shrink-0"
+                  title="View customer profile"
+                  onClick={() => {
+                    const profileId = getUserProfileId(selectedTicket);
+                    if (profileId) handleGoToProfile(profileId);
+                  }}
+                  style={{ cursor: getUserProfileId(selectedTicket) ? "pointer" : "default" }}
+                >
+                  <UserAvatar
+                    text={getUserInitial(selectedTicket.userId)}
+                    theme="primary"
+                  />
+                </button>
+
+                <div
+                  className="d-flex flex-column justify-content-center"
+                  style={{ gap: "4px", minWidth: 0 }}
+                >
+                  <div
+                    className="d-flex align-items-center gap-2 flex-wrap"
+                    style={{ lineHeight: 1.3 }}
+                  >
+                    {/* Clickable name → profile */}
+                    <button
+                      type="button"
+                      className="btn p-0 border-0 bg-transparent fw-bold text-dark text-truncate"
                       style={{ fontSize: "0.95rem", lineHeight: 1.3, maxWidth: "220px" }}
+                      onClick={() => {
+                        const profileId = getUserProfileId(selectedTicket);
+                        if (profileId) handleGoToProfile(profileId);
+                      }}
+                      title="View customer profile"
                     >
-                      {selectedTicket.userId?.firstName
-                        ? `${selectedTicket.userId.firstName} ${selectedTicket.userId.lastName || ""}`
-                        : "Customer"}
-                    </span>
+                      {getUserDisplayName(selectedTicket.userId)}
+                    </button>
                     <span
                       style={{
                         fontSize: "0.72rem",
@@ -313,20 +588,22 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
                     </span>
                   </div>
                   <div
-                    className="text-soft d-flex align-items-center gap-2 text-truncate"
+                    className="text-soft d-flex align-items-center gap-2 flex-wrap"
                     style={{ fontSize: "0.8rem", lineHeight: 1.3, color: "#64748b" }}
                   >
                     <span className="text-truncate">{selectedTicket.userId?.email || "No email"}</span>
                     <span>•</span>
                     <span>{selectedTicket.userId?.phone || "No phone"}</span>
-                    {selectedTicket.userId?._id && (
-                      <Link
-                        to={`/user-details/${selectedTicket.userId._id}`}
-                        className="text-primary ms-1 fw-medium"
-                        target="_blank"
+                    {getUserProfileId(selectedTicket) && (
+                      <button
+                        type="button"
+                        className="btn p-0 border-0 bg-transparent text-primary ms-1 fw-medium"
+                        style={{ fontSize: "0.8rem" }}
+                        onClick={() => handleGoToProfile(getUserProfileId(selectedTicket))}
+                        title="View full profile"
                       >
                         [Profile]
-                      </Link>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -410,50 +687,7 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
                   No messages yet in this ticket. Send a greeting to start helping the customer.
                 </div>
               ) : (
-                messages.map((msg, idx) => {
-                  const isUser = msg.sender === "user";
-                  const isAgent = msg.sender === "agent";
-                  const isBot = msg.sender === "bot";
-                  const isSystem = msg.sender === "system";
-
-                  let containerType = "user";
-                  if (isAgent) containerType = "agent";
-                  else if (isBot) containerType = "bot";
-                  else if (isSystem) containerType = "system";
-
-                  return (
-                    <div key={msg._id || idx} className={`chat-bubble-container ${containerType}`}>
-                      {isBot && (
-                        <div className="d-flex align-items-center gap-1 mb-1" style={{ fontSize: "0.72rem", color: "#64748b" }}>
-                          <span>🤖 Minty AI Bot (Automated Advice)</span>
-                        </div>
-                      )}
-                      {isAgent && (
-                        <div className="bubble-meta mb-1 font-weight-bold text-primary" style={{ fontSize: "0.7rem" }}>
-                          {msg.senderName || "Support Agent"}
-                        </div>
-                      )}
-
-                      <div
-                        className={
-                          isAgent
-                            ? "bubble-agent"
-                            : isBot
-                            ? "bubble-bot"
-                            : isSystem
-                            ? "bubble-system"
-                            : "bubble-user"
-                        }
-                      >
-                        {msg.text}
-                      </div>
-
-                      <div className="bubble-meta">
-                        {dayjs(msg.createdAt).format("hh:mm A")}
-                      </div>
-                    </div>
-                  );
-                })
+                renderMessages()
               )}
               <div ref={messagesEndRef} />
             </div>

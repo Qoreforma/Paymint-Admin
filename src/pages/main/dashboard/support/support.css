@@ -497,3 +497,66 @@
     max-width: 88%;
   }
 }
+
+/* ── Unread badge on ticket cards (WhatsApp-style) ── */
+.support-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  animation: badge-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badge-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Ticket card with unread messages — subtle green left accent */
+.support-ticket-card.has-unread {
+  border-left: 3px solid #22c55e;
+  background: #f0fdf4;
+}
+
+.support-ticket-card.has-unread:hover {
+  background: #dcfce7;
+}
+
+/* ── Chat date divider ── */
+.chat-date-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0 0.75rem;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.chat-date-divider::before,
+.chat-date-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.chat-date-divider span {
+  background: #f8fafc;
+  padding: 2px 10px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
