@@ -7,6 +7,7 @@ import User from "./dropdown/user/User";
 
 import { useTheme, useThemeUpdate } from "../provider/Theme";
 import RequestDropdown from "./dropdown/requests/request";
+import SupportDropdown from "./dropdown/support/SupportDropdown";
 
 const Header = ({ fixed, className, ...props }) => {
   const theme = useTheme();
@@ -38,6 +39,9 @@ const Header = ({ fixed, className, ...props }) => {
           </div>
           <div className="nk-header-tools">
             <ul className="nk-quick-nav">
+              <li className="chats-dropdown hide-mb-xs" onClick={themeUpdate.sidebarHide}>
+                <SupportDropdown />
+              </li>
               <li className="chats-dropdown hide-mb-xs" onClick={themeUpdate.sidebarHide}>
                 <RequestDropdown />
               </li>

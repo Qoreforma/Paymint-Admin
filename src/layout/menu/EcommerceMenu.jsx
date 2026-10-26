@@ -5,6 +5,7 @@ import classNames from "classnames";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { userState } from "../../atoms/userState";
 import { useRecoilValue } from "recoil";
+import { useGetSupportStats } from "../../api/support";
 
 const MenuHeading = ({ heading }) => {
   return (
@@ -25,6 +26,8 @@ const MenuItem = ({
   newTab,
   mobileView,
   permission,
+  badge,
+  badgeColor,
   ...props
 }) => {
   const { pathname } = useLocation();
@@ -199,6 +202,11 @@ const MenuItem = ({
             </span>
           ) : null}
           <span className="nk-menu-text">{text}</span>
+          {badge != null && badge !== "" && badge !== 0 ? (
+            <span className={`nk-menu-badge badge ${badgeColor || "bg-danger text-white rounded-pill ms-auto px-2"}`}>
+              {badge}
+            </span>
+          ) : null}
         </Link>
       ) : (
         <NavLink
@@ -212,6 +220,11 @@ const MenuItem = ({
             </span>
           ) : null}
           <span className="nk-menu-text">{text}</span>
+          {badge != null && badge !== "" && badge !== 0 ? (
+            <span className={`nk-menu-badge badge ${badgeColor || "bg-danger text-white rounded-pill ms-auto px-2"}`}>
+              {badge}
+            </span>
+          ) : null}
         </NavLink>
       )}
       {sub ? (
@@ -291,6 +304,8 @@ const MenuSub = ({ icon, link, text, sub, sidebarToggle, mobileView, ...props })
           sidebarToggle={sidebarToggle}
           mobileView={mobileView}
           permission={item.permission}
+          badge={item.badge}
+          badgeColor={item.badgeColor}
         />
       ))}
     </ul>
@@ -299,6 +314,10 @@ const MenuSub = ({ icon, link, text, sub, sidebarToggle, mobileView, ...props })
 
 const Menu = ({ sidebarToggle, mobileView }) => {
   const [data, setMenuData] = useState(menu);
+  const { data: supportStats } = useGetSupportStats();
+
+  const queuedCount = supportStats?.data?.queued || 0;
+  const activeCount = supportStats?.data?.active || 0;
 
   useEffect(() => {
     data.forEach((item, index) => {
@@ -311,9 +330,39 @@ const Menu = ({ sidebarToggle, mobileView }) => {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const enrichedData = useMemo(() => {
+    return data.map((item) => {
+      if (item.text === "Customer Support") {
+        return {
+          ...item,
+          badge: queuedCount > 0 ? queuedCount : undefined,
+          badgeColor: "bg-danger text-white rounded-pill ms-auto px-2",
+          subMenu: item.subMenu?.map((subItem) => {
+            if (subItem.text === "Ticket Queue") {
+              return {
+                ...subItem,
+                badge: queuedCount > 0 ? queuedCount : undefined,
+                badgeColor: "bg-danger text-white rounded-pill ms-auto px-2",
+              };
+            }
+            if (subItem.text === "Live Chat Desk") {
+              return {
+                ...subItem,
+                badge: activeCount > 0 ? activeCount : undefined,
+                badgeColor: "bg-primary text-white rounded-pill ms-auto px-2",
+              };
+            }
+            return subItem;
+          }),
+        };
+      }
+      return item;
+    });
+  }, [data, queuedCount, activeCount]);
+
   return (
     <ul className="nk-menu">
-      {data.map((item, index) =>
+      {enrichedData.map((item, index) =>
         item.heading ? (
           <MenuHeading heading={item.heading} key={item.heading} />
         ) : item.panel ? (
@@ -342,6 +391,8 @@ const Menu = ({ sidebarToggle, mobileView }) => {
             sidebarToggle={sidebarToggle}
             mobileView={mobileView}
             permission={item.permission}
+            badge={item.badge}
+            badgeColor={item.badgeColor}
           />
         ),
       )}

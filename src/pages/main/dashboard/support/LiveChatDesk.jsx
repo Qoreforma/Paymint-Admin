@@ -231,11 +231,15 @@ const LiveChatDesk = ({ preselectedTicketId, onSelectTicket }) => {
     };
   }, [connected, queryClient, getSocket]);
 
-  // When a ticket is selected, join its admin room via socket
+  // When a ticket is selected, join its admin room via socket; leave on switch/unmount
   useEffect(() => {
     const socket = getSocket();
     if (!socket || !selectedTicketId) return;
     socket.emit("support:join_ticket", { ticketId: selectedTicketId });
+
+    return () => {
+      socket.emit("support:leave_ticket", { ticketId: selectedTicketId });
+    };
   }, [selectedTicketId, connected, getSocket]);
 
   // Preselected ticket from parent / URL param
