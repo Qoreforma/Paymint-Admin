@@ -228,6 +228,11 @@ export const ServiceTransactionTable = ({
   const [filters, setfilters] = useState({});
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [selectedProductRef, setSelectedProductRef] = useState(null);
+
+  const handleCloseProductModal = useCallback(() => {
+    setIsProductModalOpen(false);
+    setSelectedProductRef(null);
+  }, []);
   const { mutate: requeryTransaction, isLoading: isRequerying } = useRequeryTransaction();
   const {
     register,
@@ -1429,10 +1434,7 @@ export const ServiceTransactionTable = ({
       />
       <TransactionProductModal
         isOpen={isProductModalOpen}
-        toggle={() => {
-          setIsProductModalOpen(false);
-          setSelectedProductRef(null);
-        }}
+        toggle={handleCloseProductModal}
         productRef={selectedProductRef}
       />
     </>

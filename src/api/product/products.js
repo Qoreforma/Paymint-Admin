@@ -19,7 +19,7 @@ const buildQuery = (params = {}) => {
 };
 
 // ─── GET: All Products (admin management list with full filters) ──────────
-export const useGetAllProducts = (page = 1, limit = 100, filters = {}) => {
+export const useGetAllProducts = (page = 1, limit = 100, filters = {}, options = {}) => {
   const query = buildQuery({ page, limit, ...filters });
   return useQuery(
     ["getAllProducts", page, limit, filters],
@@ -32,6 +32,7 @@ export const useGetAllProducts = (page = 1, limit = 100, filters = {}) => {
       refetchOnWindowFocus: false,
       retryDelay: 3000,
       keepPreviousData: true,
+      ...options,
     }
   );
 };

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   useGetProductInfo,
   useGetAllProducts,
@@ -53,19 +54,21 @@ const VALIDITY_OPTIONS = [
 ];
 
 const TransactionProductModal = ({ isOpen, toggle, productRef }) => {
-  if (!isOpen || !productRef) return null;
+  const rawProductId = productRef?.productId;
+  const productNameHint = productRef?.productName || "";
 
-  const rawProductId = productRef.productId;
-  const productNameHint = productRef.productName || "";
-
-  // 1. Fetch by direct product ID if available
+  // 1. Fetch by direct product ID if available (only if modal is open and has ID)
   const { data: directProductData, isLoading: loadingDirect } =
-    useGetProductInfo(rawProductId);
+    useGetProductInfo(isOpen && rawProductId ? rawProductId : null);
 
   // 2. Fallback search by product name if ID is missing or invalid
-  const shouldSearchByName = !rawProductId && !!productNameHint;
+  const shouldSearchByName = Boolean(isOpen && !rawProductId && productNameHint);
+  const searchFilters = useMemo(
+    () => ({ search: productNameHint }),
+    [productNameHint]
+  );
   const { data: searchProductData, isLoading: loadingSearch } =
-    useGetAllProducts(1, 10, { search: productNameHint }, {
+    useGetAllProducts(1, 10, searchFilters, {
       enabled: shouldSearchByName,
     });
 
@@ -77,7 +80,7 @@ const TransactionProductModal = ({ isOpen, toggle, productRef }) => {
       ? searchProductData.data[0]
       : null);
 
-  const resolvedId = product?._id || product?.id || rawProductId;
+  const resolvedId = product?._id || product?.id || (isOpen ? rawProductId : null);
   const isLoading = rawProductId ? loadingDirect : loadingSearch;
 
   const { mutate: updateProduct, isLoading: isSaving } =
@@ -123,18 +126,22 @@ const TransactionProductModal = ({ isOpen, toggle, productRef }) => {
     }
   }, [product]);
 
-  // Clean unmount (prevent scroll trap)
+  // Clean unmount (prevent scroll trap without breaking background modal overflow)
   useEffect(() => {
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.removeProperty("overflow");
+      document.body.style.overflow = prevOverflow;
     };
-  }, []);
+  }, [isOpen]);
 
   // Escape key handler
   useEffect(() => {
+    if (!isOpen) return;
     const handleKeyDown = (e) => {
-      if (e.key === "Escape" && isOpen) {
-        toggle();
+      if (e.key === "Escape") {
+        toggle?.();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -191,7 +198,9 @@ const TransactionProductModal = ({ isOpen, toggle, productRef }) => {
   const service = product?.serviceId;
   const provider = product?.providerId;
 
-  return (
+  if (!isOpen || !productRef) return null;
+
+  return createPortal(
     <div className="tpm-overlay" onClick={toggle}>
       <div className="tpm-card" onClick={(e) => e.stopPropagation()}>
         {/* Fixed Header */}
@@ -706,7 +715,8 @@ const TransactionProductModal = ({ isOpen, toggle, productRef }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
