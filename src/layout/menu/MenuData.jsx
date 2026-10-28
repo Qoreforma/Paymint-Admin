@@ -292,6 +292,12 @@ const menu = [
     permission: "alerts.view",
   },
   {
+    icon: "bell-fill",
+    text: "In-App Notifications",
+    link: "/in-app-notifications",
+    permission: "alerts.view",
+  },
+  {
     icon: "view-x7",
     text: "Banners",
     link: "/banners",

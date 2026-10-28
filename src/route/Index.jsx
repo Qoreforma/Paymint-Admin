@@ -49,6 +49,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import { RouterProvider, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
 import ChangePassword from "../pages/auth/ChangePassword";
 import AnnouncementPage from "../pages/main/dashboard/announcement/announcement";
+import InAppNotificationPage from "../pages/main/dashboard/in-app-notifications/InAppNotificationList";
 import CampaignsPage from "../pages/main/dashboard/campaigns/CampaignsPage";
 import AssetListPage from "../pages/main/dashboard/assets/assetsPage";
 import BannersPage from "../pages/main/dashboard/banners/banners";
@@ -188,6 +189,7 @@ const routes = (
           {/* <Route path="transactions/giftcards" element={<TransactionsPage />} /> */}
           <Route path="email-campaigns" element={<CampaignsPage />} />
           <Route path="announcement" element={<AnnouncementPage />} />
+          <Route path="in-app-notifications" element={<InAppNotificationPage />} />
           <Route path="faqs" element={<FAQsPage />} />
           <Route path="faq-categories" element={<FaqCategoriesPage />}></Route>
           <Route path="banners" element={<BannersPage />} />

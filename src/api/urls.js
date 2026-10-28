@@ -23,6 +23,7 @@ const BACKEND_URLS = {
   transaction: "/transactions/services",
   wallet: "/transactions/wallet",
   annoucement: "/alerts",
+  inAppNotifications: "/in-app-notifications",
   banners: "/banners",
   referralTerms: "/referral-terms",
   systemAccount: "/bank-accounts",

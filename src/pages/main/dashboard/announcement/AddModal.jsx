@@ -66,6 +66,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedChannels, setSelectedChannels] = useState([]);
   const [isPersonalised, setIsPersonalised] = useState(false);
+  const [inAppDuration, setInAppDuration] = useState({ value: 2, label: "Stay for 2 Days (48 Hours)" });
 
   const userOptions = async (value) => {
     const searchTerm = value ? `&search=${value}` : "";
@@ -104,6 +105,8 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
     const hasPushSelected = channels.includes("push");
     const pushType =
       hasPushSelected && data.type ? (data.type?.value ? data.type.value : data.type) : undefined;
+    const hasInAppSelected = channels.includes("in_app");
+    const inAppExpiryDays = hasInAppSelected && inAppDuration?.value > 0 ? inAppDuration.value : undefined;
 
     const target = data.target?.value ? data.target.value : data.target;
     if (!target) {
@@ -125,6 +128,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
         target,
         channels,
         ...(pushType && { type: pushType }),
+        ...(inAppExpiryDays && { expiryDays: inAppExpiryDays }),
         ...(data.schedule && {
           dispatchTime: data.dispatchDate instanceof Date ? formatDateToISO(data.dispatchDate) : data.dispatchDate,
         }),
@@ -139,6 +143,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
         target,
         channels,
         ...(pushType && { type: pushType }),
+        ...(inAppExpiryDays && { expiryDays: inAppExpiryDays }),
         ...(data.schedule && {
           dispatchTime: data.dispatchDate instanceof Date ? formatDateToISO(data.dispatchDate) : data.dispatchDate,
         }),
@@ -175,6 +180,7 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
   const hasSMS = Array.isArray(channels) && channels.some((channel) => channel?.value === "sms");
   const hasEmail = Array.isArray(channels) && channels.some((channel) => channel?.value === "email");
   const hasPush = Array.isArray(channels) && channels.some((channel) => channel?.value === "push");
+  const hasInApp = Array.isArray(channels) && channels.some((channel) => channel?.value === "in_app");
 
   // Handle channel change to enforce Email alone rule
   const handleChannelChange = (selectedOptions) => {
@@ -402,6 +408,28 @@ const AddModal = ({ modal, closeModal, formData, isEdit, createFunction, editFun
                       />
                     </div>
                     <small className="text-muted">Transaction type included in push data payload</small>
+                  </div>
+                </Col>
+              )}
+              {hasInApp && (
+                <Col md="6">
+                  <div className="form-group">
+                    <label className="form-label">In-App Notification Duration</label>
+                    <div className="form-control-wrap">
+                      <RSelect
+                        options={[
+                          { value: 2, label: "Stay for 2 Days (48 Hours)" },
+                          { value: 3, label: "Stay for 3 Days" },
+                          { value: 7, label: "Stay for 7 Days (1 Week)" },
+                          { value: 30, label: "Stay for 30 Days (1 Month)" },
+                          { value: 0, label: "No Expiry (Keep Indefinitely)" },
+                        ]}
+                        value={inAppDuration}
+                        onChange={(val) => setInAppDuration(val)}
+                        isSearchable={false}
+                      />
+                    </div>
+                    <small className="text-muted">Auto-expires and disappears from user app inboxes</small>
                   </div>
                 </Col>
               )}
